@@ -83,13 +83,18 @@ func init() {
 
 	//操作
 	beego.Router("/operation/disaster_switch/manage", &disaster_oper.ManageDisasterSwitchController{})
-	beego.Router("/operation/disaster_switch/view/:id", &disaster_oper.ViewDisasterSwitchController{})
+	//beego.Router("/operation/disaster_switch/view/:id", &disaster_oper.ViewDisasterSwitchController{})
+	beego.Router("/operation/disaster_switch/screen/:id", &disaster_oper.ScreenDisasterSwitchController{})
 	beego.Router("/operation/disaster_switch/switchover", &disaster_oper.AjaxDisasterSwitchoverController{})
 	beego.Router("/operation/disaster_switch/failover", &disaster_oper.AjaxDisasterFailoverController{})
 	beego.Router("/operation/disaster_switch/process", &disaster_oper.AjaxDisasterProcessController{})
 	beego.Router("/operation/disaster_active/manage", &disaster_oper.ManageDisasterActiveController{})
+	beego.Router("/operation/disaster_active/startread", &disaster_oper.AjaxDisasterStartReadController{})
+	beego.Router("/operation/disaster_active/stopread", &disaster_oper.AjaxDisasterStopReadController{})
 	beego.Router("/operation/disaster_snapshot/manage", &disaster_oper.ManageDisasterSnapshotController{})
-	beego.Router("/operation/disaster_snyc/manage", &disaster_oper.ManageDisasterSyncController{})
+	beego.Router("/operation/disaster_sync/manage", &disaster_oper.ManageDisasterSyncController{})
+	beego.Router("/operation/disaster_sync/startsync", &disaster_oper.AjaxDisasterStartSyncController{})
+	beego.Router("/operation/disaster_sync/stopsync", &disaster_oper.AjaxDisasterStopSyncController{})
 
 	//UI demo
 	beego.Router("/demo/index", &demo.DemoController{})

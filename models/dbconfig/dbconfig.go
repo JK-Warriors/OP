@@ -63,21 +63,22 @@ func AddDBconfig(upd Dbconfigs) error {
 func UpdateDBconfig(id int, upd Dbconfigs) error {
 	var dbconf Dbconfigs
 	o := orm.NewOrm()
-	dbconf = Dbconfigs{Id: id}
+	dbconf, err := GetDBconfig(id)
+	if err == nil {
+		dbconf.Dbtype = upd.Dbtype
+		dbconf.Host = upd.Host
+		dbconf.Port = upd.Port
+		dbconf.Alias = upd.Alias
+		dbconf.InstanceName = upd.InstanceName
+		dbconf.Dbname = upd.Dbname
+		dbconf.Username = upd.Username
+		dbconf.Password = upd.Password
+		dbconf.Bs_Id = upd.Bs_Id
+		dbconf.Role = upd.Role
+		dbconf.Updated = time.Now().Unix()
 
-	dbconf.Dbtype = upd.Dbtype
-	dbconf.Host = upd.Host
-	dbconf.Port = upd.Port
-	dbconf.Alias = upd.Alias
-	dbconf.InstanceName = upd.InstanceName
-	dbconf.Dbname = upd.Dbname
-	dbconf.Username = upd.Username
-	dbconf.Password = upd.Password
-	dbconf.Bs_Id = upd.Bs_Id
-	dbconf.Role = upd.Role
-	dbconf.Updated = time.Now().Unix()
-
-	_, err := o.Update(&dbconf)
+		_, err = o.Update(&dbconf)
+	}
 	return err
 }
 

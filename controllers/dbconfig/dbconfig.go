@@ -367,16 +367,18 @@ func CheckOracleConnect(host string, port string, inst_name string, username str
 	//err_str := fmt.Sprintf("%s", err)
 
 	//ORA-28009: connection as SYS should be as SYSDBA or SYSOPER
-	if strings.Contains(err.Error(), "ORA-28009") || strings.Contains(err.Error(), "driver: bad connection") {
-		con_str = username + "/" + password + "@" + host + ":" + port + "/" + inst_name + "?as=sysdba&timeout=5s&readTimeout=6s"
-		db, err = sql.Open("oci8", con_str)
-		defer db.Close()
-
-		_, err = db.Query("select 1 from dual")
-	}
-
 	if err != nil {
-		utils.LogDebug("Open Connection failed: " + err.Error())
+		if strings.Contains(err.Error(), "ORA-28009") || strings.Contains(err.Error(), "driver: bad connection") {
+			con_str = username + "/" + password + "@" + host + ":" + port + "/" + inst_name + "?as=sysdba&timeout=5s&readTimeout=6s"
+			db, err = sql.Open("oci8", con_str)
+			defer db.Close()
+
+			_, err = db.Query("select 1 from dual")
+
+			if err != nil {
+				utils.LogDebug("Open Connection failed: " + err.Error())
+			}
+		}
 	}
 
 	return err

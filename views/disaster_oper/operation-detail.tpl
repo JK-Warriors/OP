@@ -81,87 +81,99 @@ var fb_status = "<?php echo $standby_db[0]['flashback_on'] ?>" ;
 
 var mylay = null;
 var oTimer = null; 
-var last_time = null;
-var current_time = null;
 
-var last_switchover = null;
-var on_process="<?php echo $dg_group[0]['on_process'] ?>" ;
-var on_switchover="<?php echo $dg_group[0]['on_switchover'] ?>" ;
-var on_failover="<?php echo $dg_group[0]['on_failover'] ?>" ;
-var on_startmrp="<?php echo $dg_group[0]['on_startmrp'] ?>" ;
-var on_stopmrp="<?php echo $dg_group[0]['on_stopmrp'] ?>" ;
     
 var user_pwd = {{.user.Password}} ;
 var div_layer = document.getElementById("div_layer");
 var query_url="/operation/disaster_switch/process";
 var bs_id = 1;
 
+
 function checkUser(e){
 		if(e.value == "Switchover"){
 			_message = "确认要开始维护切换吗？";
-      target_url = "/operation/disaster_switch/switchover";
+      		target_url = "/operation/disaster_switch/switchover";
+			op_type = "SWITCHOVER";
 		}
 		else if(e.value == "Failover"){
 			_message = "确认要开始灾难切换吗？";
-      target_url = "/operation/disaster_switch/failover";
+      		target_url = "/operation/disaster_switch/failover";
+			op_type = "FAILOVER";
 		}
 		else{
-			_message = "test";
+			return;
 		}	
     
 
 		bootbox.prompt({
-		    title: "请确认密码!",
+		    title: "请确认密码",
 		    inputType: 'password',
+			buttons: {confirm: {label: "确认"}, cancel: {label: "取消"} },
 		    callback: function (result) {
 		    	if(result)
 		    	{ 
 		        if (md5(result) == user_pwd)
 		        {
-							bootbox.dialog({
-							    message: _message,
-							    buttons: {
-							        ok: {
-							            label: '确定',
-							            className: 'btn-danger',
-													callback: function(){
-																
-		                            $.ajax({
-											                    url: target_url,
-											                    type: "POST",
-											                    success: function (data) {
-											              			//回调函数，判断提交返回的数据执行相应逻辑
-											                        if (data.Success) {
-											                        }
-											                        else {
-											                        }
-											                    }
-		                										});
-		            
-																	
-																	$('#div_layer').html("");			//初始化div
-																	mylay = layer.open({
-																	  type: 1,
-																	  skin: 'layui-layer-demo layblack', //样式类名
-																	  closeBtn: 0, //不显示关闭按钮
-																	  anim: 1,
-																	  title: '详细切换过程',
-																	  area: ['450px', '240px'],
-																	  shadeClose: false, //开启遮罩关闭
-																	  content: $('#div_layer')
-																	});
-																	
-																	oTimer = setInterval("queryHandle(query_url)",2000);
-		                        }
-							        },
-							        cancel: {
-							            label: '取消',
-							            className: 'btn-default',
-							            callback: function () {
-		                      }
-							        }
-							    }
-							});
+					bootbox.dialog({
+						message: _message,
+						buttons: {
+							cancel: {
+								label: '取消',
+								className: 'btn-default',
+								callback: function () {
+								}
+							},
+							ok: {
+								label: '确定',
+								className: 'btn-danger',
+								callback: function(){
+									$.ajax({url: target_url,
+											type: "POST",
+											data: {"bs_id":1,"db_type":1,"op_type":op_type,"process_type":op_type},
+											success: function (json) {
+												//回调函数，判断提交返回的数据执行相应逻辑
+												if (json.code == 0) {
+													bootbox.alert({
+													message: json.message,
+													buttons: {
+															ok: {
+															label: '确定',
+															className: 'btn-success'
+															}
+														},
+														callback: function () {
+														window.location.reload();
+													}
+													});
+															
+													if(mylay!=null){
+													layer.close(mylay);
+													}
+													clearInterval(oTimer);
+												}
+												else {
+												}
+											}
+											});
+
+												
+											$('#div_layer').html("");			//初始化div
+											mylay = layer.open({
+												type: 1,
+												skin: 'layui-layer-demo layblack', //样式类名
+												closeBtn: 0, //不显示关闭按钮
+												anim: 1,
+												title: '详细过程',
+												area: ['450px', '240px'],
+												shadeClose: false, //开启遮罩关闭
+												content: $('#div_layer')
+											});
+											
+											oTimer = setInterval("queryHandle(query_url,op_type)",2000);
+								}
+							}
+						}
+					});
 		        }
 		        else
 		        {
@@ -197,77 +209,103 @@ $(function(){
 });  
   
 function queryHandle(url){
-    $.post(url, {bs_id:bs_id}, function(json){
-        if(json.on_process == '0'){
+    $.post(url, {"bs_id":bs_id, "op_type":op_type}, function(json){
+        if(json.on_process == 0){
         		if(json.op_type != ""){
-		        		var l_reason = JSON.stringify(json.op_reason)
-		        		//alert(l_reason);
+		        		//alert(json.op_result);
 		        		
 		        		if(json.op_type == "SWITCHOVER"){
-		    						if(l_reason == 'null'){
-		    								error_message = "主备切换失败，详细原因请查看相关日志";
-		    						}else{
-		    								error_message = "主备切换失败，原因是：" + json.op_reason;
-		    						}
-		    						
-		    						ok_message = "主备切换成功";
+							if(json.op_reason == 'null'){
+								error_message = "主备切换失败，详细原因请查看相关日志";
+							}else{
+								error_message = "主备切换失败，原因是：" + json.op_reason;
+							}
+							
+							ok_message = "主备切换成功";
 		        		}else if(json.op_type == "FAILOVER"){
-		    						if(l_reason == 'null'){
-		    								error_message = "灾难切换失败，详细原因请查看相关日志";
-		    						}else{
-		    								error_message = "灾难切换失败，原因是：" + json.op_reason;
-		    						}
-		    						
-		    						ok_message = "灾难切换成功";
+							if(json.op_reason == 'null'){
+								error_message = "灾难切换失败，详细原因请查看相关日志";
+							}else{
+								error_message = "灾难切换失败，原因是：" + json.op_reason;
+							}
+							
+							ok_message = "灾难切换成功";
 		        		}
         		
         				if(json.op_result == '-1'){
-				        		bootbox.alert({
-						        		message: error_message,
-						        		buttons: {
-											        ok: {
-											            label: '确定',
-											            className: 'btn-success'
-											        }
-											    },
-										    callback: function () {
-										        window.location.reload();
-										    }
-						        	});
+							bootbox.alert({
+								message: error_message,
+								buttons: {
+											ok: {
+												label: '确定',
+												className: 'btn-success'
+											}
+										},
+									callback: function () {
+										window.location.reload();
+								}
+							});
 						        	
-				        		if(mylay!=null){
-				        			layer.close(mylay);
-				        		}
-		        				clearInterval(oTimer); 
+							if(mylay!=null){
+								layer.close(mylay);
+							}
+							clearInterval(oTimer);
 						        	
-        				}else if(json.op_result == '0'){
-				        		bootbox.alert({
-						        		message: ok_message,
-						        		buttons: {
-											        ok: {
-											            label: '确定',
-											            className: 'btn-success'
-											        }
-											    },
-										    callback: function () {
-										        window.location.reload();
-										    }
-						        	});
+        				}else if(json.op_result == '1'){
+							bootbox.alert({
+									message: ok_message,
+									buttons: {
+												ok: {
+													label: '确定',
+													className: 'btn-success'
+												}
+											},
+										callback: function () {
+											window.location.reload();
+									}
+							});
 						        	
-				        		if(mylay!=null){
-				        			layer.close(mylay);
-				        		}
-		        				clearInterval(oTimer); 
-        				}
+							if(mylay!=null){
+								layer.close(mylay);
+							}
+							clearInterval(oTimer); 
+        				}else{
+							if(mylay!=null){
+								layer.close(mylay);
+							}
+							clearInterval(oTimer); 
+						}
         		}
-        }else{
-        	current_time = json.process_time;
-        	if(current_time != last_time){
-        			$("#div_layer").append("<p>" + json.process_time + ": " + json.process_desc + "</p>");
-        			$(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
+        }else if(json.on_process == -1){
+            bootbox.alert({
+                message: "该系统没有配置容灾库",
+                buttons: {
+                      ok: {
+                        label: '确定',
+                        className: 'btn-success'
+                      }
+                    },
+                  callback: function () {
+                    window.location.reload();
+                }
+            });
+                    
+            if(mylay!=null){
+              layer.close(mylay);
+            }
+            clearInterval(oTimer); 
+        }
 
-        	}
-        	last_time = current_time;
+		if(mylay!=null){
+			localJson = $.parseJSON(json.json_process);
+			//alert(localJson);
+			$("#div_layer").empty();
+			$.each(localJson,function(idx,item){   
+				//alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
+        		$("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
+			});  
+
+        	$(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
         }  
     },'json');  
 }

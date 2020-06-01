@@ -339,8 +339,10 @@ CREATE TABLE `pms_disaster_config` (
   `on_process` tinyint(1) DEFAULT 0,
   `on_switchover` tinyint(1) DEFAULT 0,
   `on_failover` tinyint(1) DEFAULT 0,
-  `on_startmrp` tinyint(1) DEFAULT 0,
-  `on_stopmrp` tinyint(1) DEFAULT 0,
+  `on_startsync` tinyint(1) DEFAULT 0,
+  `on_stopsync` tinyint(1) DEFAULT 0,
+  `on_startread` tinyint(1) DEFAULT 0,
+  `on_stopread` tinyint(1) DEFAULT 0,
   `on_startsnapshot` tinyint(1) DEFAULT 0,
   `on_stopsnapshot` tinyint(1) DEFAULT 0,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
@@ -351,8 +353,10 @@ CREATE TABLE `pms_disaster_config` (
 alter table pms_disaster_config modify column on_process tinyint(1) DEFAULT 0 comment '值为1时，表明正在进行Switchover，或者Failover，或者开启停止MRP进程'; 
 alter table pms_disaster_config modify column on_switchover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Switchover切换'; 
 alter table pms_disaster_config modify column on_failover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Failover切换'; 
-alter table pms_disaster_config modify column on_startmrp tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启MRP进程'; 
-alter table pms_disaster_config modify column on_stopmrp tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止MRP进程'; 
+alter table pms_disaster_config modify column on_startsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启同步进程'; 
+alter table pms_disaster_config modify column on_stopsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止同步进程'; 
+alter table pms_disaster_config modify column on_startread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启可读'; 
+alter table pms_disaster_config modify column on_stopread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止可读'; 
 alter table pms_disaster_config modify column on_startsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在激活数据库快照'; 
 alter table pms_disaster_config modify column on_stopsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从快照恢复到物理备库'; 
 
@@ -422,6 +426,39 @@ CREATE TABLE `pms_db_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+-- ----------------------------
+-- Table structure for pms_opration
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_opration`;
+CREATE TABLE `pms_opration` (
+  `id` bigint(20) NOT NULL,
+  `bs_id` int(10) NOT NULL,
+  `db_type` varchar(50) NOT NULL,
+  `op_type` varchar(20),
+  `result` varchar(2),
+  `reason` varchar(1000),
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_op_type` (`bs_id`,`db_type`,`op_type`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_opration_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_opration_his`;
+CREATE TABLE `pms_opration_his` (
+  `id` bigint(20) NOT NULL,
+  `bs_id` int(10) NOT NULL,
+  `db_type` varchar(50) NOT NULL,
+  `op_type` varchar(20),
+  `result` varchar(2),
+  `reason` varchar(1000),
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_op_type` (`bs_id`, `db_type`, `op_type`,`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 
 -- ----------------------------
 -- Table structure for pms_op_process
@@ -429,11 +466,11 @@ CREATE TABLE `pms_db_status` (
 DROP TABLE IF EXISTS `pms_op_process`;
 CREATE TABLE `pms_op_process` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
-  `db_type` varchar(50) NOT NULL,
+  `op_id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
+  `db_type` varchar(50) NOT NULL,
   `process_type` varchar(20) COMMENT '2个类型：SWITCHOVER;FAILOVER;',
   `process_desc` varchar(1000),
-  `rate` tinyint(1) DEFAULT 0,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`) USING BTREE
@@ -445,80 +482,13 @@ CREATE TABLE `pms_op_process` (
 DROP TABLE IF EXISTS `pms_op_process_his`;
 CREATE TABLE `pms_op_process_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
-  `db_type` varchar(50) NOT NULL,
+  `op_id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
+  `db_type` varchar(50) NOT NULL,
   `process_type` varchar(20) COMMENT '2个类型：SWITCHOVER;FAILOVER;',
   `process_desc` varchar(1000),
-  `rate` tinyint(1) DEFAULT 0,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`,`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
-
--- ----------------------------
--- Table structure for pms_opration
--- ----------------------------
-DROP TABLE IF EXISTS `pms_opration`;
-CREATE TABLE `pms_opration` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `db_type` varchar(50) NOT NULL,
-  `bs_id` int(10) NOT NULL,
-  `op_type` varchar(20),
-  `result` varchar(2),
-  `reason` varchar(1000),
-  `created` int(10) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`db_type`,`bs_id`,`op_type`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for pms_opration_his
--- ----------------------------
-DROP TABLE IF EXISTS `pms_opration_his`;
-CREATE TABLE `pms_opration_his` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `db_type` varchar(50) NOT NULL,
-  `bs_id` int(10) NOT NULL,
-  `op_type` varchar(20),
-  `result` varchar(2),
-  `reason` varchar(1000),
-  `created` int(10) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`db_type`, `bs_id`, `op_type`,`created`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
-
-/*
-CREATE TABLE `history_uint` (
-	`itemid`                 bigint unsigned                           NOT NULL,
-	`time`                  integer         DEFAULT '0'               NOT NULL,
-	`value`                  bigint unsigned DEFAULT '0'               NOT NULL,
-	`ns`                     integer         DEFAULT '0'               NOT NULL
-) ENGINE=InnoDB;
-CREATE INDEX `history_uint_1` ON `history_uint` (`itemid`,`clock`);
-CREATE TABLE `history_str` (
-	`itemid`                 bigint unsigned                           NOT NULL,
-	`time`                  integer         DEFAULT '0'               NOT NULL,
-	`value`                  varchar(255)    DEFAULT ''                NOT NULL,
-	`ns`                     integer         DEFAULT '0'               NOT NULL
-) ENGINE=InnoDB;
-CREATE INDEX `history_str_1` ON `history_str` (`itemid`,`clock`);
-CREATE TABLE `history_log` (
-	`itemid`                 bigint unsigned                           NOT NULL,
-	`time`                   integer         DEFAULT '0'               NOT NULL,
-	`timestamp`              integer         DEFAULT '0'               NOT NULL,
-	`source`                 varchar(64)     DEFAULT ''                NOT NULL,
-	`severity`               integer         DEFAULT '0'               NOT NULL,
-	`value`                  text                                      NOT NULL,
-	`logeventid`             integer         DEFAULT '0'               NOT NULL,
-	`ns`                     integer         DEFAULT '0'               NOT NULL
-) ENGINE=InnoDB;
-CREATE INDEX `history_log_1` ON `history_log` (`itemid`,`clock`);
-CREATE TABLE `history_text` (
-	`itemid`                 bigint unsigned                           NOT NULL,
-	`clock`                  integer         DEFAULT '0'               NOT NULL,
-	`value`                  text                                      NOT NULL,
-	`ns`                     integer         DEFAULT '0'               NOT NULL
-) ENGINE=InnoDB;
-CREATE INDEX `history_text_1` ON `history_text` (`itemid`,`clock`);
-*/

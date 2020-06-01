@@ -22,8 +22,8 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/disaster_switch/manage">操作</a></li>
-        <li class="active">容灾切换</li>
+        <li><a href="/operation/disaster_active/manage">操作</a></li>
+        <li class="active">容灾激活</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -67,9 +67,8 @@
                         <tr>
                           <td>{{$v.BsName}}</td>
                           <td>
-                            <a name="screen" class="btn btn-primary" href="/operation/disaster_switch/screen/{{$v.Id}}"> <i class="fa fa-reset"></i> 灾备大屏 </a>
-                            <button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>
-                            <button name="failover" class="btn btn-danger" type="button" value="Failover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 灾难切换 </button>
+                            <button name="startread" class="btn btn-primary" type="button" value="StartRead" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 开启可读 </button>
+                            <button name="stopread" class="btn btn-danger" type="button" value="StopRead" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 停止可读 </button>
                           </td>
                         </tr>
                       {{end}}
@@ -95,7 +94,6 @@
 
 {{template "inc/foot.tpl" .}}    
 <script>
-
 var mylay = null;
 var oTimer = null; 
 
@@ -104,20 +102,18 @@ var user_pwd = {{.user.Password}} ;
 var div_layer = document.getElementById("div_layer");
 var query_url="/operation/disaster_switch/process";
 var bs_id = -1;
-
-
 function checkUser(e){
     bs_id = $(e).attr('data-id');
-
-		if(e.value == "Switchover"){
-			_message = "确认要开始维护切换吗？";
-      		target_url = "/operation/disaster_switch/switchover";
-			op_type = "SWITCHOVER";
+    
+		if(e.value == "StartRead"){
+			_message = "确认要开始开启可读吗？";
+      target_url = "/operation/disaster_active/startread";
+			op_type = "STARTREAD";
 		}
-		else if(e.value == "Failover"){
-			_message = "确认要开始灾难切换吗？";
-      		target_url = "/operation/disaster_switch/failover";
-			op_type = "FAILOVER";
+		else if(e.value == "StopRead"){
+			_message = "确认要开始停止可读吗？";
+      target_url = "/operation/disaster_active/stopread";
+			op_type = "STOPREAD";
 		}
 		else{
 			return;
@@ -148,27 +144,27 @@ function checkUser(e){
 								callback: function(){
 									$.ajax({url: target_url,
 											type: "POST",
-											data: {"bs_id":bs_id,"db_type":1},
+											data: {"bs_id":bs_id,"db_type":1,"op_type":op_type,"process_type":op_type},
 											success: function (json) {
 												//回调函数，判断提交返回的数据执行相应逻辑
 												if (json.code == 0) {
-													bootbox.alert({
-													message: json.message,
-													buttons: {
-															ok: {
-															label: '确定',
-															className: 'btn-success'
-															}
-														},
-														callback: function () {
-														window.location.reload();
-													}
-													});
-															
-													if(mylay!=null){
-													layer.close(mylay);
-													}
-													clearInterval(oTimer);
+                            bootbox.alert({
+                              message: json.message,
+                              buttons: {
+                                    ok: {
+                                      label: '确定',
+                                      className: 'btn-success'
+                                    }
+                                  },
+                                callback: function () {
+                                  window.location.reload();
+                              }
+                            });
+                                    
+                            if(mylay!=null){
+                              layer.close(mylay);
+                            }
+                            clearInterval(oTimer);
 												}
 												else {
 												}
@@ -213,10 +209,6 @@ function checkUser(e){
 
 }
 
-// 初始化内容
-$(function(){
-		
-});  
   
 function queryHandle(url, bs_id, op_type){
     $.post(url, {"bs_id":bs_id, "op_type":op_type}, function(json){
@@ -224,67 +216,67 @@ function queryHandle(url, bs_id, op_type){
         		if(json.op_type != ""){
 		        		//alert(json.op_result);
 		        		
-		        		if(json.op_type == "SWITCHOVER"){
-							if(json.op_reason == 'null'){
-								error_message = "主备切换失败，详细原因请查看相关日志";
-							}else{
-								error_message = "主备切换失败，原因是：" + json.op_reason;
-							}
+		        		if(json.op_type == "STARTREAD"){
+                    if(json.op_reason == 'null'){
+                      error_message = "开启可读失败，详细原因请查看相关日志";
+                    }else{
+                      error_message = "开启可读失败，原因是：" + json.op_reason;
+                    }
 							
-							ok_message = "主备切换成功";
-		        		}else if(json.op_type == "FAILOVER"){
-							if(json.op_reason == 'null'){
-								error_message = "灾难切换失败，详细原因请查看相关日志";
-							}else{
-								error_message = "灾难切换失败，原因是：" + json.op_reason;
-							}
-							
-							ok_message = "灾难切换成功";
+							      ok_message = "开启可读成功";
+		        		}else if(json.op_type == "STOPREAD"){
+                    if(json.op_reason == 'null'){
+                      error_message = "停止可读失败，详细原因请查看相关日志";
+                    }else{
+                      error_message = "停止可读失败，原因是：" + json.op_reason;
+                    }
+                    
+                    ok_message = "停止可读成功";
 		        		}
         		
         				if(json.op_result == '-1'){
-							bootbox.alert({
-								message: error_message,
-								buttons: {
-											ok: {
-												label: '确定',
-												className: 'btn-success'
-											}
-										},
-									callback: function () {
-										window.location.reload();
-								}
-							});
-						        	
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer);
+                    bootbox.alert({
+                      message: error_message,
+                      buttons: {
+                            ok: {
+                              label: '确定',
+                              className: 'btn-success'
+                            }
+                          },
+                        callback: function () {
+                          window.location.reload();
+                      }
+                    });
+                            
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer);
 						        	
         				}else if(json.op_result == '1'){
-							bootbox.alert({
-									message: ok_message,
-									buttons: {
-												ok: {
-													label: '确定',
-													className: 'btn-success'
-												}
-											},
-										callback: function () {
-											window.location.reload();
-									}
-							});
-						        	
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer); 
+                    bootbox.alert({
+                        message: ok_message,
+                        buttons: {
+                              ok: {
+                                label: '确定',
+                                className: 'btn-success'
+                              }
+                            },
+                          callback: function () {
+                            window.location.reload();
+                        }
+                    });
+                            
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer); 
         				}else{
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer); 
-						}
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer); 
+                  }
         		}
         }else if(json.on_process == -1){
             bootbox.alert({
@@ -307,18 +299,22 @@ function queryHandle(url, bs_id, op_type){
         }
 
 		if(mylay!=null){
-			localJson = $.parseJSON(json.json_process);
-			//alert(localJson);
-			$("#div_layer").empty();
-			$.each(localJson,function(idx,item){   
-				//alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
-        		$("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
-			});  
+      if(json.json_process == "null"){
+        		$("#div_layer").append("<p>" + json.json_process + "</p>");
+      }else{
+        localJson = $.parseJSON(json.json_process);
+        //alert(localJson);
+        $("#div_layer").empty();
+        $.each(localJson,function(idx,item){   
+          //alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
+              $("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
+        });  
+      }
 
-        	$(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
-        }  
+      $(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
+    }
     },'json');  
-}
+}    
 
 </script>
 </body>
