@@ -2,7 +2,6 @@ package disaster_oper
 
 import (
 	"database/sql"
-	"log"
 	"opms/lib/oracle"
 	"opms/utils"
 	"time"
@@ -17,7 +16,7 @@ func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 
@@ -29,14 +28,16 @@ func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	// get sync_status
 	sync_status, _ := oracle.GetSyncStatus(db)
+	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库同步进程状态成功")
 	utils.LogDebug("获取数据库同步进程状态成功")
 
 	//get database open mode
 	open_mode, _ := oracle.GetOpenMode(db)
+	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库打开模式成功")
 
 	// get standby redo count
 	sta_redo_count, _ := oracle.GetstandbyRedoLog(db)
-	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库备份在线日志个数")
+	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库备用在线日志个数")
 	if sta_redo_count > 0 {
 		exec_command = "alter database recover managed standby database using current logfile disconnect from session"
 	} else {
@@ -75,7 +76,7 @@ func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 			Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "启动数据库同步进程成功")
 
 			// 再次获取数据库读写状态
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 			open_mode, _ := oracle.GetOpenMode(db)
 			if open_mode == "READ ONLY WITH APPLY" {
 				Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "备库开启可读状态成功")
@@ -106,7 +107,7 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 
@@ -118,10 +119,11 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	//get database open mode
 	open_mode, _ := oracle.GetOpenMode(db)
+	Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "获取数据库打开模式成功")
 
 	// get standby redo count
 	sta_redo_count, _ := oracle.GetstandbyRedoLog(db)
-	Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "获取数据库备份在线日志个数")
+	Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "获取数据库备用在线日志个数")
 	if sta_redo_count > 0 {
 		exec_command = "alter database recover managed standby database using current logfile disconnect from session"
 	} else {
@@ -156,7 +158,7 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 			Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "启动数据库同步进程成功")
 
 			// 再次获取数据库读写状态
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 			open_mode, _ := oracle.GetOpenMode(db2)
 			if open_mode == "MOUNTED" {
 				Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "备库停止可读状态成功")

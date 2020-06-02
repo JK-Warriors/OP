@@ -22,8 +22,8 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/disaster_sync/manage">操作</a></li>
-        <li class="active">容灾同步</li>
+        <li><a href="/operation/disaster_snapshot/manage">操作</a></li>
+        <li class="active">容灾快照</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -39,7 +39,7 @@
                     <form method="get">
                     <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/operation/disaster_sync/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/operation/disaster_snapshot/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -67,8 +67,8 @@
                         <tr>
                           <td>{{$v.BsName}}</td>
                           <td>
-                            <button name="startsync" class="btn btn-primary" type="button" value="StartSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 启动同步 </button>
-                            <button name="stopsync" class="btn btn-danger" type="button" value="StopSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 停止同步 </button>
+                            <button name="startsnapshot" class="btn btn-primary" type="button" value="StartSnapshot" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 进入快照 </button>
+                            <button name="stopsnapshot" class="btn btn-danger" type="button" value="StopSnapshot" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 退出快照 </button>
                           </td>
                         </tr>
                       {{end}}
@@ -106,15 +106,15 @@ var bs_id = -1;
 function checkUser(e){
     bs_id = $(e).attr('data-id');
     
-		if(e.value == "StartSync"){
-			_message = "确认要开始启动同步吗？";
-      target_url = "/operation/disaster_sync/startsync";
-			op_type = "STARTSYNC";
+		if(e.value == "StartSnapshot"){
+			_message = "确认要开始进入快照吗？";
+      target_url = "/operation/disaster_snapshot/startsnapshot";
+			op_type = "STARTSNAPSHOT";
 		}
-		else if(e.value == "StopSync"){
-			_message = "确认要开始停止同步吗？";
-      target_url = "/operation/disaster_sync/stopsync";
-			op_type = "STOPSYNC";
+		else if(e.value == "StopSnapshot"){
+			_message = "确认要开始退出快照吗？";
+      target_url = "/operation/disaster_snapshot/stopsnapshot";
+			op_type = "STOPSNAPSHOT";
 		}
 		else{
 			return;
@@ -217,22 +217,22 @@ function queryHandle(url, bs_id, op_type){
         		if(json.op_type != ""){
 		        		//alert(json.op_result);
 		        		
-		        		if(json.op_type == "STARTSYNC"){
+		        		if(json.op_type == "STARTSNAPSHOT"){
                     if(json.op_reason == 'null'){
-                      error_message = "启动同步失败，详细原因请查看相关日志";
+                      error_message = "进入快照失败，详细原因请查看相关日志";
                     }else{
-                      error_message = "启动同步失败，原因是：" + json.op_reason;
+                      error_message = "进入快照失败，原因是：" + json.op_reason;
                     }
 							
-							      ok_message = "启动同步成功";
-		        		}else if(json.op_type == "STOPSYNC"){
+							      ok_message = "进入快照成功";
+		        		}else if(json.op_type == "STOPSNAPSHOT"){
                     if(json.op_reason == 'null'){
-                      error_message = "停止同步失败，详细原因请查看相关日志";
+                      error_message = "退出快照失败，详细原因请查看相关日志";
                     }else{
-                      error_message = "停止同步失败，原因是：" + json.op_reason;
+                      error_message = "退出快照失败，原因是：" + json.op_reason;
                     }
                     
-                    ok_message = "停止同步成功";
+                    ok_message = "退出快照成功";
 		        		}
         		
         				if(json.op_result == '-1'){

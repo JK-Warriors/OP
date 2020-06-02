@@ -80,6 +80,10 @@ func OperationLock(bs_id int, op_type string) error {
 		sql = `update pms_disaster_config set on_process = 1, on_startread = 1 where bs_id= ?`
 	} else if op_type == "STOPREAD" {
 		sql = `update pms_disaster_config set on_process = 1, on_stopread = 1 where bs_id= ?`
+	} else if op_type == "STARTSNAPSHOT" {
+		sql = `update pms_disaster_config set on_process = 1, on_startsnapshot = 1 where bs_id= ?`
+	} else if op_type == "STOPSNAPSHOT" {
+		sql = `update pms_disaster_config set on_process = 1, on_stopsnapshot = 1 where bs_id= ?`
 	}
 
 	_, err := o.Raw(sql, bs_id).Exec()
@@ -107,6 +111,10 @@ func OperationUnlock(bs_id int, op_type string) error {
 		sql = `update pms_disaster_config set on_process = 0, on_startread = 1 where bs_id= ?`
 	} else if op_type == "STOPREAD" {
 		sql = `update pms_disaster_config set on_process = 0, on_stopread = 1 where bs_id= ?`
+	} else if op_type == "STARTSNAPSHOT" {
+		sql = `update pms_disaster_config set on_process = 0, on_startsnapshot = 0 where bs_id= ?`
+	} else if op_type == "STOPSNAPSHOT" {
+		sql = `update pms_disaster_config set on_process = 0, on_stopsnapshot = 0 where bs_id= ?`
 	}
 
 	_, err := o.Raw(sql, bs_id).Exec()

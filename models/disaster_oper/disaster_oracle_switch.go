@@ -3,7 +3,6 @@ package disaster_oper
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"opms/lib/oracle"
 	"opms/utils"
 	"time"
@@ -16,30 +15,33 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 	result := -1
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 	//get database role
 	role, _ := oracle.GetDatabaseRole(db)
-	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取数据库角色成功")
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库角色成功")
 	utils.LogDebug("The current database role is: " + role)
 
 	// get switchover status
 	switch_status, _ := oracle.GetSwitchoverStatus(db)
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库切换状态成功")
 	utils.LogDebug("The current database switchover status is: " + switch_status)
 
 	// get database version
 	version, _ := oracle.GetDatabaseVersion(db)
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库版本成功")
 	msg := fmt.Sprintf("The current database version is: %d", version)
 	utils.LogDebug(msg)
 
 	// get gap count
 	gap_count, _ := oracle.GetGapCount(db)
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库gap数量成功")
 	msg = fmt.Sprintf("The current gap count is: %d", gap_count)
 	utils.LogDebug(msg)
 
 	if role == "PRIMARY" {
-		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证数据库角色成功")
+		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证主库角色成功")
 		utils.LogDebug("Now we are going to switch database %d to physical standby.")
 
 		if switch_status == "TO STANDBY" || switch_status == "SESSIONS ACTIVE" || switch_status == "FAILED DESTINATION" || (switch_status == "RESOLVABLE GAP" && gap_count == 0) {
@@ -56,13 +58,13 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 			// 获取oracle连接
 			db2, err := sql.Open("godror", P.StringWithPassword())
 			if err != nil {
-				log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+				utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 			}
 			defer db2.Close()
 
 			if version > 10 {
 				utils.LogDebug("Alter standby database to open read only in progress...")
-				Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "正在将备库启动到只读状态...")
+				Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "正在将当前数据库启动到只读状态...")
 
 				if _, err = db2.Exec("alter database open"); err != nil {
 					utils.LogDebug("alter database open failed: " + err.Error())
@@ -73,10 +75,10 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 
 				open_mode, _ := oracle.GetOpenMode(db2)
 				if open_mode == "READ ONLY" || open_mode == "READ ONLY WITH APPLY" {
-					Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "备库已经成功启动到只读状态")
+					Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "当前数据库已经成功启动到只读状态")
 					utils.LogDebug("Alter standby database to open successfully.")
 				} else {
-					Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "备库已经成功启动到只读状态")
+					Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "当前数据库已经成功启动到只读状态")
 					utils.LogDebug("Start MRP process failed!")
 				}
 			} else {
@@ -115,22 +117,23 @@ func OraStandbyToPrimary(op_id int64, bs_id int, P godror.ConnectionParams) int 
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 
 	utils.LogDebug("Switchover database to primary in progress...")
 	//get database role
 	role, _ := oracle.GetDatabaseRole(db)
-	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取数据库角色成功")
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取备库角色成功")
 	utils.LogDebug("The current database role is: " + role)
 
 	// get switchover status
 	switch_status, _ := oracle.GetSwitchoverStatus(db)
+	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取备库切换状态成功")
 	utils.LogDebug("The current database switchover status is: " + switch_status)
 
 	if role == "PHYSICAL STANDBY" {
-		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证数据库角色成功")
+		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证备库角色成功")
 		utils.LogDebug("Now we are going to switch database to primary.")
 		if switch_status == "NOT ALLOWED" {
 			utils.LogDebug("The standby database not allowed to switchover.")

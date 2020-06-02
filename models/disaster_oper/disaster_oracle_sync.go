@@ -2,7 +2,6 @@ package disaster_oper
 
 import (
 	"database/sql"
-	"log"
 	"opms/lib/oracle"
 	"opms/utils"
 	"time"
@@ -17,7 +16,7 @@ func OraStartSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 
@@ -29,11 +28,12 @@ func OraStartSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	// get sync_status
 	sync_status, _ := oracle.GetSyncStatus(db)
+	Log_OP_Process(op_id, bs_id, 1, "STARTSYNC", "获取数据库同步进程状态成功")
 	utils.LogDebug("获取数据库同步进程状态成功")
 
 	// get standby redo count
 	sta_redo_count, _ := oracle.GetstandbyRedoLog(db)
-	Log_OP_Process(op_id, bs_id, 1, "STARTSYNC", "获取数据库备份在线日志个数")
+	Log_OP_Process(op_id, bs_id, 1, "STARTSYNC", "获取数据库备用在线日志个数")
 	if sta_redo_count > 0 {
 		exec_command = "alter database recover managed standby database using current logfile disconnect from session"
 	} else {
@@ -56,7 +56,7 @@ func OraStartSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 		}
 
 		// 再次获取数据库同步进程
-		time.Sleep(5 * time.Second)
+		time.Sleep(3 * time.Second)
 		sync_status, _ := oracle.GetSyncStatus(db)
 		if sync_status > 0 {
 			Log_OP_Process(op_id, bs_id, 1, "STARTSYNC", "备库已经处于同步状态")
@@ -79,7 +79,7 @@ func OraStopSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
 	}
 	defer db.Close()
 
@@ -91,6 +91,7 @@ func OraStopSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	// get sync_status
 	sync_status, _ := oracle.GetSyncStatus(db)
+	Log_OP_Process(op_id, bs_id, 1, "STOPSYNC", "获取数据库同步进程状态成功")
 	utils.LogDebug("获取数据库同步进程状态成功")
 
 	if role == "PHYSICAL STANDBY" {
@@ -110,7 +111,7 @@ func OraStopSync(op_id int64, bs_id int, P godror.ConnectionParams) int {
 		}
 
 		// 再次获取数据库同步进程
-		time.Sleep(5 * time.Second)
+		time.Sleep(3 * time.Second)
 		sync_status, _ := oracle.GetSyncStatus(db)
 		if sync_status > 0 {
 			Log_OP_Process(op_id, bs_id, 1, "STOPSYNC", "备库停止同步失败")

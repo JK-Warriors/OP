@@ -179,6 +179,19 @@ func GetOpenMode(db *sql.DB) (string, error) {
 	return open_mode, nil
 }
 
+//Get instance status
+func GetInstanceStatus(db *sql.DB) (string, error) {
+	var inst_status string
+	var err error
+	selectQry := "select status from v$instance"
+	inst_status, err = GetSingleValue(db, selectQry)
+	if err != nil {
+		utils.LogDebug("Get instance status failed: " + err.Error())
+		return "", err
+	}
+	return inst_status, nil
+}
+
 func GetDatabaseRole(db *sql.DB) (string, error) {
 	var db_role string
 	var err error
@@ -201,6 +214,18 @@ func GetSwitchoverStatus(db *sql.DB) (string, error) {
 		return "", err
 	}
 	return switch_status, nil
+}
+
+func GetFlashbackStatus(db *sql.DB) (string, error) {
+	var fb_status string
+	var err error
+	selectQry := "select flashback_on from v$database"
+	fb_status, err = GetSingleValue(db, selectQry)
+	if err != nil {
+		utils.LogDebug("Get flashback status failed: " + err.Error())
+		return "", err
+	}
+	return fb_status, nil
 }
 
 func GetDatabaseVersion(db *sql.DB) (int, error) {
@@ -284,6 +309,10 @@ func GetSingleValue(db *sql.DB, sql string) (string, error) {
 	defer cancel()
 
 	rows, err := db.QueryContext(ctx, sql)
+	if err != nil {
+		utils.LogDebug("Get single value failed: " + err.Error())
+		return "", err
+	}
 
 	for rows.Next() {
 		if err = rows.Scan(&single_value); err != nil {

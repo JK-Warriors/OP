@@ -92,6 +92,8 @@ func init() {
 	beego.Router("/operation/disaster_active/startread", &disaster_oper.AjaxDisasterStartReadController{})
 	beego.Router("/operation/disaster_active/stopread", &disaster_oper.AjaxDisasterStopReadController{})
 	beego.Router("/operation/disaster_snapshot/manage", &disaster_oper.ManageDisasterSnapshotController{})
+	beego.Router("/operation/disaster_snapshot/startsnapshot", &disaster_oper.AjaxDisasterStartSnapshotController{})
+	beego.Router("/operation/disaster_snapshot/stopsnapshot", &disaster_oper.AjaxDisasterStopSnapshotController{})
 	beego.Router("/operation/disaster_sync/manage", &disaster_oper.ManageDisasterSyncController{})
 	beego.Router("/operation/disaster_sync/startsync", &disaster_oper.AjaxDisasterStartSyncController{})
 	beego.Router("/operation/disaster_sync/stopsync", &disaster_oper.AjaxDisasterStopSyncController{})
