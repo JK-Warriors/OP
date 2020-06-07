@@ -15,7 +15,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/utils/pagination"
 	"github.com/godror/godror"
-	errors "golang.org/x/xerrors"
 )
 
 //业务切换管理
@@ -53,7 +52,8 @@ func (this *ManageDisasterSwitchController) Get() {
 	this.Data["bsconf"] = bsconf
 	this.Data["countBs"] = countBs
 
-	user, _ := GetUser(1)
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
 	this.TplName = "disaster_oper/operation-index.tpl"
@@ -70,7 +70,8 @@ func (this *ManageDisasterSwitchController) Get() {
 // 		this.Abort("401")
 // 	}
 
-// 	user, _ := GetUser(1)
+// 	userid, _ := this.GetSession("userId").(int64)
+// 	user, _ := GetUser(userid)
 // 	this.Data["user"] = user
 
 // 	this.TplName = "disaster_oper/operation-detail.tpl"
@@ -87,7 +88,8 @@ func (this *ScreenDisasterSwitchController) Get() {
 		this.Abort("401")
 	}
 
-	user, _ := GetUser(1)
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
 	this.TplName = "disaster_oper/screen-oracle.tpl"
@@ -169,12 +171,12 @@ func (this *AjaxDisasterSwitchoverController) Post() {
 			if db_type == 1 { //oracle
 				p_pri, err := godror.ParseConnString(dsn_p)
 				if err != nil {
-					utils.LogDebug(errors.Errorf("%s: %w", dsn_p, err))
+					utils.LogDebugf("%s: %w", dsn_p, err)
 				}
 
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
-					utils.LogDebug(errors.Errorf("%s: %w", dsn_s, err))
+					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
 
 				utils.LogDebug("主库开始切换成备库...")
@@ -234,7 +236,8 @@ func (this *AjaxDisasterFailoverController) Post() {
 	// 	this.Abort("401")
 	// }
 
-	user, _ := GetUser(1)
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
 }

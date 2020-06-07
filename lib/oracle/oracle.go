@@ -3,13 +3,11 @@ package oracle
 import (
 	"context"
 	"database/sql"
-	"log"
 	"opms/utils"
 	"strconv"
 	"time"
 
 	"github.com/godror/godror"
-	errors "golang.org/x/xerrors"
 )
 
 // Startup database mount.
@@ -26,7 +24,7 @@ func StartupMount(P godror.ConnectionParams) error {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		log.Fatal(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -69,7 +67,7 @@ func StartupOpen(P godror.ConnectionParams) error {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -111,7 +109,7 @@ func ShutdownMode(P godror.ConnectionParams, shutdownMode godror.ShutdownMode) {
 	//dsn := "oracle://?sysdba=1" // equivalent to "/ as sysdba"
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -124,7 +122,7 @@ func ShutdownImmediate(P godror.ConnectionParams) {
 	//dsn := "oracle://?sysdba=1" // equivalent to "/ as sysdba"
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -137,7 +135,7 @@ func Shutdown(db *sql.DB, shutdownMode godror.ShutdownMode) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	err := godror.Raw(ctx, db, func(oraDB godror.Conn) error {
-		utils.LogDebug(errors.Errorf("Beginning shutdown %v", shutdownMode))
+		utils.LogDebugf("Beginning shutdown %v", shutdownMode)
 		return oraDB.Shutdown(shutdownMode)
 	})
 	if err != nil {
@@ -283,7 +281,7 @@ func GetSyncStatus(db *sql.DB) (int, error) {
 	return sync_status, nil
 }
 
-func GetstandbyRedoLog(db *sql.DB) (int, error) {
+func GetStandbyRedoLog(db *sql.DB) (int, error) {
 	var count string
 	var err error
 	selectQry := "select count(1) from v$standby_log "
@@ -300,6 +298,28 @@ func GetstandbyRedoLog(db *sql.DB) (int, error) {
 		return -1, err
 	}
 	return sta_redo_count, nil
+}
+
+func GetRestorePointName(db *sql.DB) ([]string, error) {
+	var restore_name []string
+	var err error
+
+	rows, err := db.Query("select name from v$restore_point order by time")
+	if err != nil {
+		utils.LogDebug("Get restore point failed: " + err.Error())
+		return restore_name, err
+	}
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			utils.LogDebug("Get restore point failed: " + err.Error())
+			return restore_name, err
+		}
+		restore_name = append(restore_name, name)
+	}
+
+	return restore_name, nil
 }
 
 func GetSingleValue(db *sql.DB, sql string) (string, error) {

@@ -22,8 +22,8 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/disaster_switch/manage">操作</a></li>
-        <li class="active">容灾切换</li>
+        <li><a href="/operation/disaster_recover/manage">操作</a></li>
+        <li class="active">误删除恢复</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -39,7 +39,7 @@
                     <form method="get">
                     <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/operation/disaster_switch/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/operation/disaster_recover/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -59,17 +59,20 @@
                       <thead>
                         <tr>
                           <th>业务系统名称</th>
+                          <th>主库</th>
+                          <th>备库</th>
                           <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {{range $k,$v := .bsconf}}
+                      {{range $k,$v := .disaster}}
                         <tr>
-                          <td>{{$v.BsName}}</td>
+                          <td>{{$v.Bs_Name}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
-                            <a name="screen" class="btn btn-primary" href="/operation/disaster_switch/screen/{{$v.Id}}"> <i class="fa fa-reset"></i> 灾备大屏 </a>
-                            <button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>
-                            <button name="failover" class="btn btn-danger" type="button" value="Failover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 灾难切换 </button>
+                            <a href="/operation/disaster_recover/oper/{{$v.Id}}" class="btn btn-primary"> <i class="fa fa-reset"></i> 进入恢复 </a>
+                            <button name="stopflashback" class="btn btn-primary" type="button" value="StopFlashback" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 重新同步 </button>
                           </td>
                         </tr>
                       {{end}}
@@ -95,7 +98,6 @@
 
 {{template "inc/foot.tpl" .}}    
 <script>
-
 var mylay = null;
 var oTimer = null; 
 
@@ -105,19 +107,13 @@ var div_layer = document.getElementById("div_layer");
 var query_url="/operation/disaster_switch/process";
 var bs_id = -1;
 
-
 function checkUser(e){
     bs_id = $(e).attr('data-id');
-
-		if(e.value == "Switchover"){
-			_message = "确认要开始维护切换吗？";
-      		target_url = "/operation/disaster_switch/switchover";
-			op_type = "SWITCHOVER";
-		}
-		else if(e.value == "Failover"){
-			_message = "确认要开始灾难切换吗？";
-      		target_url = "/operation/disaster_switch/failover";
-			op_type = "FAILOVER";
+    
+		if(e.value == "StopFlashback"){
+			_message = "确认要开始重新同步吗？";
+      target_url = "/operation/disaster_recover/recover";
+			op_type = "STOPFLASHBACK";
 		}
 		else{
 			return;
@@ -148,27 +144,27 @@ function checkUser(e){
 								callback: function(){
 									$.ajax({url: target_url,
 											type: "POST",
-											data: {"bs_id":bs_id,"db_type":1,"op_type":op_type},
+											data: {"bs_id":bs_id,"db_type":1},
 											success: function (json) {
 												//回调函数，判断提交返回的数据执行相应逻辑
 												if (json.code == 0) {
-													bootbox.alert({
-													message: json.message,
-													buttons: {
-															ok: {
-															label: '确定',
-															className: 'btn-success'
-															}
-														},
-														callback: function () {
-														window.location.reload();
-													}
-													});
-															
-													if(mylay!=null){
-													layer.close(mylay);
-													}
-													clearInterval(oTimer);
+                            bootbox.alert({
+                              message: json.message,
+                              buttons: {
+                                    ok: {
+                                      label: '确定',
+                                      className: 'btn-success'
+                                    }
+                                  },
+                                callback: function () {
+                                  window.location.reload();
+                              }
+                            });
+                                    
+                            if(mylay!=null){
+                              layer.close(mylay);
+                            }
+                            clearInterval(oTimer);
 												}
 												else {
 												}
@@ -213,10 +209,6 @@ function checkUser(e){
 
 }
 
-// 初始化内容
-$(function(){
-		
-});  
   
 function queryHandle(url, bs_id, op_type){
     $.post(url, {"bs_id":bs_id, "op_type":op_type}, function(json){
@@ -224,67 +216,59 @@ function queryHandle(url, bs_id, op_type){
         		if(json.op_type != ""){
 		        		//alert(json.op_result);
 		        		
-		        		if(json.op_type == "SWITCHOVER"){
-							if(json.op_reason == 'null'){
-								error_message = "主备切换失败，详细原因请查看相关日志";
-							}else{
-								error_message = "主备切换失败，原因是：" + json.op_reason;
-							}
-							
-							ok_message = "主备切换成功";
-		        		}else if(json.op_type == "FAILOVER"){
-							if(json.op_reason == 'null'){
-								error_message = "灾难切换失败，详细原因请查看相关日志";
-							}else{
-								error_message = "灾难切换失败，原因是：" + json.op_reason;
-							}
-							
-							ok_message = "灾难切换成功";
+		        		if(json.op_type == "STOPFLASHBACK"){
+                    if(json.op_reason == 'null'){
+                      error_message = "重新同步失败，详细原因请查看相关日志";
+                    }else{
+                      error_message = "重新同步失败，原因是：" + json.op_reason;
+                    }
+                    
+                    ok_message = "重新同步成功";
 		        		}
         		
         				if(json.op_result == '-1'){
-							bootbox.alert({
-								message: error_message,
-								buttons: {
-											ok: {
-												label: '确定',
-												className: 'btn-success'
-											}
-										},
-									callback: function () {
-										window.location.reload();
-								}
-							});
-						        	
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer);
+                    bootbox.alert({
+                      message: error_message,
+                      buttons: {
+                            ok: {
+                              label: '确定',
+                              className: 'btn-success'
+                            }
+                          },
+                        callback: function () {
+                          window.location.reload();
+                      }
+                    });
+                            
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer);
 						        	
         				}else if(json.op_result == '1'){
-							bootbox.alert({
-									message: ok_message,
-									buttons: {
-												ok: {
-													label: '确定',
-													className: 'btn-success'
-												}
-											},
-										callback: function () {
-											window.location.reload();
-									}
-							});
-						        	
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer); 
+                    bootbox.alert({
+                        message: ok_message,
+                        buttons: {
+                              ok: {
+                                label: '确定',
+                                className: 'btn-success'
+                              }
+                            },
+                          callback: function () {
+                            window.location.reload();
+                        }
+                    });
+                            
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer); 
         				}else{
-							if(mylay!=null){
-								layer.close(mylay);
-							}
-							clearInterval(oTimer); 
-						}
+                    if(mylay!=null){
+                      layer.close(mylay);
+                    }
+                    clearInterval(oTimer); 
+                  }
         		}
         }else if(json.on_process == -1){
             bootbox.alert({
@@ -307,18 +291,22 @@ function queryHandle(url, bs_id, op_type){
         }
 
 		if(mylay!=null){
-			localJson = $.parseJSON(json.json_process);
-			//alert(localJson);
-			$("#div_layer").empty();
-			$.each(localJson,function(idx,item){   
-				//alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
-        		$("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
-			});  
+      if(json.json_process == "null"){
+        		$("#div_layer").append("<p>" + json.json_process + "</p>");
+      }else{
+        localJson = $.parseJSON(json.json_process);
+        //alert(localJson);
+        $("#div_layer").empty();
+        $.each(localJson,function(idx,item){   
+          //alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
+              $("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
+        });  
+      }
 
-        	$(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
-        }  
+      $(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
+    }
     },'json');  
-}
+}    
 
 </script>
 </body>

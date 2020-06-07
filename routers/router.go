@@ -97,6 +97,10 @@ func init() {
 	beego.Router("/operation/disaster_sync/manage", &disaster_oper.ManageDisasterSyncController{})
 	beego.Router("/operation/disaster_sync/startsync", &disaster_oper.AjaxDisasterStartSyncController{})
 	beego.Router("/operation/disaster_sync/stopsync", &disaster_oper.AjaxDisasterStopSyncController{})
+	beego.Router("/operation/disaster_recover/manage", &disaster_oper.ManageDisasterRecoverController{})
+	beego.Router("/operation/disaster_recover/oper/:id", &disaster_oper.OperDisasterRecoverController{})
+	beego.Router("/operation/disaster_recover/flashback", &disaster_oper.AjaxDisasterFlashbackController{})
+	beego.Router("/operation/disaster_recover/recover", &disaster_oper.AjaxDisasterRecoverController{})
 
 	//UI demo
 	beego.Router("/demo/index", &demo.DemoController{})

@@ -13,7 +13,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/utils/pagination"
 	"github.com/godror/godror"
-	errors "golang.org/x/xerrors"
 )
 
 //业务系统管理
@@ -51,7 +50,8 @@ func (this *ManageDisasterActiveController) Get() {
 	this.Data["bsconf"] = bsconf
 	this.Data["countBs"] = countBs
 
-	user, _ := GetUser(1)
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
 	this.TplName = "disaster_oper/active-index.tpl"
@@ -113,7 +113,7 @@ func (this *AjaxDisasterStartReadController) Post() {
 			if db_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
-					utils.LogDebug(errors.Errorf("%s: %w", dsn_s, err))
+					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
 
 				utils.LogDebug("开始开启可读...")
@@ -209,7 +209,7 @@ func (this *AjaxDisasterStopReadController) Post() {
 			if db_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
-					utils.LogDebug(errors.Errorf("%s: %w", dsn_s, err))
+					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
 
 				utils.LogDebug("开始停止可读...")

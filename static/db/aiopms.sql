@@ -106,6 +106,7 @@ INSERT INTO `pms_permissions` VALUES ('1131', '3', '容灾切换', 'oper-switch-
 INSERT INTO `pms_permissions` VALUES ('1132', '3', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
 INSERT INTO `pms_permissions` VALUES ('1133', '3', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
 INSERT INTO `pms_permissions` VALUES ('1134', '3', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('1135', '3', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
 -- ----------------------------
 -- Table structure for pms_role_permission
 -- ----------------------------
@@ -161,6 +162,7 @@ INSERT INTO `pms_role_permission` VALUES ('35', '1', '1131');
 INSERT INTO `pms_role_permission` VALUES ('36', '1', '1132');
 INSERT INTO `pms_role_permission` VALUES ('37', '1', '1133');
 INSERT INTO `pms_role_permission` VALUES ('38', '1', '1134');
+INSERT INTO `pms_role_permission` VALUES ('39', '1', '1135');
 
 
 
@@ -345,6 +347,8 @@ CREATE TABLE `pms_disaster_config` (
   `on_stopread` tinyint(1) DEFAULT 0,
   `on_startsnapshot` tinyint(1) DEFAULT 0,
   `on_stopsnapshot` tinyint(1) DEFAULT 0,
+  `on_startflashback` tinyint(1) DEFAULT 0,
+  `on_stopflashback` tinyint(1) DEFAULT 0,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   `updated` int(10) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`bs_id`)
@@ -359,6 +363,8 @@ alter table pms_disaster_config modify column on_startread tinyint(1) DEFAULT 0 
 alter table pms_disaster_config modify column on_stopread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止可读'; 
 alter table pms_disaster_config modify column on_startsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在激活数据库快照'; 
 alter table pms_disaster_config modify column on_stopsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从快照恢复到物理备库'; 
+alter table pms_disaster_config modify column on_startflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行数据库闪回'; 
+alter table pms_disaster_config modify column on_stopflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从闪回恢复到同步状态'; 
 
 -- -----------------------------------------------------------------------------
 -- Table structure for pms_template

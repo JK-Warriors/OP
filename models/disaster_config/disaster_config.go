@@ -96,9 +96,6 @@ func GetDisasterConfig(id int) (DisasterConfig, error) {
 func ListDisasterConfig(condArr map[string]string, page int, offset int) (num int64, err error, disasterconf []DisasterConfig) {
 	o := orm.NewOrm()
 	o.Using("default")
-	qs := o.QueryTable(models.TableName("disaster_config"))
-	cond := orm.NewCondition()
-
 	sql := `select b.id as bs_id, d.db_id_p, d.db_dest_p, d.db_id_s, d.db_dest_s, d.fb_retention, d.is_shift, d.shift_vips, d.network_p, d.network_s
 			from pms_business b LEFT JOIN pms_disaster_config d on d.bs_id = b.id where 1=1`
 
@@ -106,7 +103,6 @@ func ListDisasterConfig(condArr map[string]string, page int, offset int) (num in
 		sql = sql + " and (d.db_id_p like '%" + condArr["host"] + "%' or d.db_id_s like '%" + condArr["host"] + "%')"
 	}
 
-	qs = qs.SetCond(cond)
 	if page < 1 {
 		page = 1
 	}
@@ -114,8 +110,6 @@ func ListDisasterConfig(condArr map[string]string, page int, offset int) (num in
 		offset, _ = beego.AppConfig.Int("pageoffset")
 	}
 	start := (page - 1) * offset
-	//qs = qs.OrderBy("bs_id")
-	//nums, errs := qs.Limit(offset, start).All(&disasterconf)
 
 	sql = sql + " order by bs_id"
 	sql = sql + " limit " + strconv.Itoa(offset) + " offset " + strconv.Itoa(start)

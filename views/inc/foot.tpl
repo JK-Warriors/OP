@@ -1,6 +1,7 @@
 <!--input type="hidden" id="permissionModel" value="{{.PermissionModel}}">
 <input type="hidden" id="permissionModelc" value="{{.PermissionModelc}}" -->
-<script src="/static/js/jquery.min.js"></script>
+<!--<script src="/static/js/jquery.min.js"></script>-->
+<script src="/static/js/jquery-3.4.1.min.js"></script>
 <!-- <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script> -->
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/jquery.nicescroll.js"></script>

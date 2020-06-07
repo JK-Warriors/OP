@@ -8,14 +8,13 @@ import (
 	"time"
 
 	"github.com/godror/godror"
-	errors "golang.org/x/xerrors"
 )
 
 func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int {
 	result := -1
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 	//get database role
@@ -31,14 +30,12 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 	// get database version
 	version, _ := oracle.GetDatabaseVersion(db)
 	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库版本成功")
-	msg := fmt.Sprintf("The current database version is: %d", version)
-	utils.LogDebug(msg)
+	utils.LogDebugf("The current database version is: %d", version)
 
 	// get gap count
 	gap_count, _ := oracle.GetGapCount(db)
 	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库gap数量成功")
-	msg = fmt.Sprintf("The current gap count is: %d", gap_count)
-	utils.LogDebug(msg)
+	utils.LogDebugf("The current gap count is: %d", gap_count)
 
 	if role == "PRIMARY" {
 		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证主库角色成功")
@@ -50,7 +47,7 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 			Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "正在将主库切换成备库，可能会花费几分钟时间，请耐心等待...")
 
 			if _, err = db.Exec("alter database commit to switchover to physical standby with session shutdown"); err != nil {
-				utils.LogDebug(errors.Errorf("Commit to switchover to physical standby failed: %w", err))
+				utils.LogDebugf("Commit to switchover to physical standby failed: %w", err)
 			}
 			oracle.ShutdownImmediate(P)
 			oracle.StartupMount(P)
@@ -58,7 +55,7 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 			// 获取oracle连接
 			db2, err := sql.Open("godror", P.StringWithPassword())
 			if err != nil {
-				utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+				utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 			}
 			defer db2.Close()
 
@@ -117,7 +114,7 @@ func OraStandbyToPrimary(op_id int64, bs_id int, P godror.ConnectionParams) int 
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -136,9 +133,8 @@ func OraStandbyToPrimary(op_id int64, bs_id int, P godror.ConnectionParams) int 
 		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证备库角色成功")
 		utils.LogDebug("Now we are going to switch database to primary.")
 		if switch_status == "NOT ALLOWED" {
-			utils.LogDebug("The standby database not allowed to switchover.")
-
 			msg = fmt.Sprintf("数据库状态为 %s，无法进行切换", switch_status)
+			utils.LogDebug(msg)
 			Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", msg)
 			Update_OP_Reason(op_id, msg)
 			return -1
@@ -155,7 +151,7 @@ func OraStandbyToPrimary(op_id int64, bs_id int, P godror.ConnectionParams) int 
 		// 重新切换后数据库角色
 		db2, err := sql.Open("godror", P.StringWithPassword())
 		if err != nil {
-			utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+			utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 		}
 		defer db2.Close()
 
@@ -182,7 +178,7 @@ func to_primary(op_id int64, bs_id int, P godror.ConnectionParams) {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -195,7 +191,7 @@ func to_primary(op_id int64, bs_id int, P godror.ConnectionParams) {
 
 	db2, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db2.Close()
 

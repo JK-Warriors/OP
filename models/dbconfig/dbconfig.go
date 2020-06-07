@@ -3,6 +3,8 @@ package dbconfig
 import (
 	//"fmt"
 	"opms/models"
+	"opms/utils"
+
 	//"opms/utils"
 	"time"
 
@@ -97,7 +99,23 @@ func GetDBconfig(id int) (Dbconfigs, error) {
 	return dbconf, err
 }
 
-//获取数据库类型
+//根据ID获取数据库类型
+func GetDBtypeByDBId(id int) int {
+	var db_type int
+
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select db_type from pms_db_config where id = ?`
+	err := o.Raw(sql, id).QueryRow(&db_type)
+	if err != nil {
+		utils.LogDebug("GetDBtypeByDBId failed: " + err.Error())
+		return -1
+	}
+	return db_type
+}
+
+//根据类型ID获取数据库类型
 func GetDBtype(id int) string {
 	var db_type string
 

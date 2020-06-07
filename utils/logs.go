@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/astaxie/beego"
@@ -19,11 +20,13 @@ var runmode string
 func init() {
 	consoleLogs = logs.NewLogger(1)
 	consoleLogs.EnableFuncCallDepth(true)
+	consoleLogs.SetLogFuncCallDepth(4)
 	consoleLogs.SetLogger(logs.AdapterConsole)
 	consoleLogs.Async() //异步
-	
+
 	fileLogs = logs.NewLogger(10000)
 	fileLogs.EnableFuncCallDepth(true)
+	fileLogs.SetLogFuncCallDepth(4)
 	level := beego.AppConfig.String("logs::level")
 	fileLogs.SetLogger(logs.AdapterMultiFile, `{"filename":"logs/main.log",
 		"separate":["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"],
@@ -37,76 +40,102 @@ func init() {
 	}
 }
 func LogEmergency(v interface{}) {
-	log("emergency", v)
+	log("emergency", "%s", v)
 }
 func LogAlert(v interface{}) {
-	log("alert", v)
+	log("alert", "%s", v)
 }
 func LogCritical(v interface{}) {
-	log("critical", v)
+	log("critical", "%s", v)
 }
 func LogError(v interface{}) {
-	log("error", v)
+	log("error", "%s", v)
 }
 func LogWarning(v interface{}) {
-	log("warning", v)
+	log("warning", "%s", v)
 }
 func LogNotice(v interface{}) {
-	log("notice", v)
+	log("notice", "%s", v)
 }
 func LogInfo(v interface{}) {
-	log("info", v)
+	log("info", "%s", v)
 }
 func LogDebug(v interface{}) {
-	log("debug", v)
+	log("debug", "%s", v)
+}
+
+func LogEmergencyf(format string, v ...interface{}) {
+	log("emergency", format, v...)
+}
+func LogAlertf(format string, v ...interface{}) {
+	log("alert", format, v...)
+}
+func LogCriticalf(format string, v ...interface{}) {
+	log("critical", format, v...)
+}
+func LogErrorf(format string, v ...interface{}) {
+	log("error", format, v...)
+}
+func LogWarningf(format string, v ...interface{}) {
+	log("warning", format, v...)
+}
+func LogNoticef(format string, v ...interface{}) {
+	log("notice", format, v...)
+}
+func LogInfof(format string, v ...interface{}) {
+	log("info", format, v...)
+}
+func LogDebugf(format string, v ...interface{}) {
+	log("debug", format, v...)
 }
 
 //Log 输出日志
-func log(level, v interface{}) {
-	format := "%s"
+func log(level, format string, v ...interface{}) {
+	//format := "%s"
+	output := fmt.Sprintf(format, v...)
 	if level == "" {
 		level = "debug"
 	}
-	if runmode == "dev" {
+	if runmode == "dev" || runmode == "pro" {
 		switch level {
 		case "emergency":
-			fileLogs.Emergency(format, v)
+			fileLogs.Emergency(output)
 		case "alert":
-			fileLogs.Alert(format, v)
+			fileLogs.Alert(output)
 		case "critical":
-			fileLogs.Critical(format, v)
+			fileLogs.Critical(output)
 		case "error":
-			fileLogs.Error(format, v)
+			fileLogs.Error(output)
 		case "warning":
-			fileLogs.Warning(format, v)
+			fileLogs.Warning(output)
 		case "notice":
-			fileLogs.Notice(format, v)
+			fileLogs.Notice(output)
 		case "info":
-			fileLogs.Info(format, v)
+			fileLogs.Info(output)
 		case "debug":
-			fileLogs.Debug(format, v)
+			fileLogs.Debug(output)
 		default:
-			fileLogs.Debug(format, v)
+			fileLogs.Debug(output)
 		}
 	}
 	switch level {
 	case "emergency":
-		consoleLogs.Emergency(format, v)
+		consoleLogs.Emergency(output)
 	case "alert":
-		consoleLogs.Alert(format, v)
+		consoleLogs.Alert(output)
 	case "critical":
-		consoleLogs.Critical(format, v)
+		consoleLogs.Critical(output)
 	case "error":
-		consoleLogs.Error(format, v)
+		consoleLogs.Error(output)
 	case "warning":
-		consoleLogs.Warning(format, v)
+		consoleLogs.Warning(output)
 	case "notice":
-		consoleLogs.Notice(format, v)
+		consoleLogs.Notice(output)
 	case "info":
-		consoleLogs.Info(format, v)
+		consoleLogs.Info(output)
 	case "debug":
-		consoleLogs.Debug(format, v)
+		consoleLogs.Debug(output)
 	default:
-		consoleLogs.Debug(format, v)
+		consoleLogs.Debug(output)
 	}
 }

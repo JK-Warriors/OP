@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/xormplus/xorm"
 )
 
 func InitSql() {
@@ -24,4 +25,11 @@ func InitSql() {
 	//orm.RegisterDataBase("default", "mysql", "root:@/blog?charset=utf8", 30)
 	orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, passwd, host, port, dbname))
 
+	//引入xorm引擎
+	//var xorm *xorm.Engine
+	xorm, err := xorm.NewEngine("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, passwd, host, port, dbname))
+	xorm.ShowSQL(true)
+	//xorm.Logger().SetLevel(core.LOG_DEBUG)
+	xorm.SetMaxIdleConns(1000)
+	xorm.SetMaxOpenConns(2000)
 }

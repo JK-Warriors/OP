@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/godror/godror"
-	errors "golang.org/x/xerrors"
 )
 
 func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
@@ -16,7 +15,7 @@ func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -36,7 +35,7 @@ func OraStartRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库打开模式成功")
 
 	// get standby redo count
-	sta_redo_count, _ := oracle.GetstandbyRedoLog(db)
+	sta_redo_count, _ := oracle.GetStandbyRedoLog(db)
 	Log_OP_Process(op_id, bs_id, 1, "STARTREAD", "获取数据库备用在线日志个数")
 	if sta_redo_count > 0 {
 		exec_command = "alter database recover managed standby database using current logfile disconnect from session"
@@ -107,7 +106,7 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
 
@@ -122,7 +121,7 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 	Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "获取数据库打开模式成功")
 
 	// get standby redo count
-	sta_redo_count, _ := oracle.GetstandbyRedoLog(db)
+	sta_redo_count, _ := oracle.GetStandbyRedoLog(db)
 	Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "获取数据库备用在线日志个数")
 	if sta_redo_count > 0 {
 		exec_command = "alter database recover managed standby database using current logfile disconnect from session"
@@ -143,7 +142,7 @@ func OraStopRead(op_id int64, bs_id int, P godror.ConnectionParams) int {
 
 			db2, err := sql.Open("godror", P.StringWithPassword())
 			if err != nil {
-				utils.LogDebug(errors.Errorf("%s: %w", P.StringWithPassword(), err))
+				utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 				Log_OP_Process(op_id, bs_id, 1, "STOPREAD", "重新获取数据库连接失败")
 				Update_OP_Reason(op_id, "重新获取数据库连接失败")
 				return -1

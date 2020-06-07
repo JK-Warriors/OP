@@ -1,13 +1,82 @@
 package disaster_oper
 
 import (
-	"fmt"
 	"opms/utils"
 	"strconv"
 	"time"
 
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
+
+type Disaster struct {
+	Id          int    `orm:"pk;column(id);"`
+	Bs_Name     string `orm:"column(bs_name);"`
+	Db_Id_P     int    `orm:"column(db_id_p);"`
+	Db_Type_P   int    `orm:"column(db_type_p);"`
+	Host_P      string `orm:"column(host_p);"`
+	Port_P      int    `orm:"column(port_p);"`
+	Alias_P     string `orm:"column(alias_p);"`
+	Inst_Name_P string `orm:"column(inst_name_p);"`
+	Db_Name_P   string `orm:"column(db_name_p);"`
+	Db_Id_S     int    `orm:"column(db_id_s);"`
+	Db_Type_S   int    `orm:"column(db_type_s);"`
+	Host_S      string `orm:"column(host_s);"`
+	Port_S      int    `orm:"column(port_s);"`
+	Alias_S     string `orm:"column(alias_s);"`
+	Inst_Name_S string `orm:"column(inst_name_s);"`
+	Db_Name_S   string `orm:"column(db_name_s);"`
+	Is_Shift    int    `orm:"column(is_shift);"`
+}
+
+//获取容灾列表
+func ListDisaster(condArr map[string]string, page int, offset int) (num int64, err error, disaster []Disaster) {
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select b.id, 
+					b.bs_name,
+					d.db_id_p, 
+					pp.db_type as db_type_p,
+					pp.host as host_p,
+					pp.port as port_p, 
+					pp.alias as alias_p, 
+					pp.instance_name as inst_name_p, 
+					pp.db_name as db_name_p, 
+					d.db_id_s, 
+					ps.db_type as db_type_s,
+					ps.host as host_s,
+					ps.port as port_s, 
+					ps.alias as alias_s, 
+					ps.instance_name as inst_name_s, 
+					ps.db_name as db_name_s, 
+					d.is_shift
+				from pms_business b 
+				left join pms_disaster_config d on d.bs_id = b.id 
+				left join pms_db_config pp on d.db_id_p = pp.id
+				left join pms_db_config ps on d.db_id_s = ps.id
+				where b.is_delete = 0`
+
+	if condArr["search_name"] != "" {
+		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if offset < 1 {
+		offset, _ = beego.AppConfig.Int("pageoffset")
+	}
+	start := (page - 1) * offset
+	sql = sql + " order by id"
+	sql = sql + " limit " + strconv.Itoa(offset) + " offset " + strconv.Itoa(start)
+	nums, err := o.Raw(sql).QueryRows(&disaster)
+	if err != nil {
+		utils.LogDebug("Get ListDisaster failed:" + err.Error())
+	}
+	//utils.LogDebugf("%+v", disaster)
+	return nums, err, disaster
+}
 
 func CheckDisasterConfig(bs_id int) (int, error) {
 	var cfg_count int
@@ -84,6 +153,10 @@ func OperationLock(bs_id int, op_type string) error {
 		sql = `update pms_disaster_config set on_process = 1, on_startsnapshot = 1 where bs_id= ?`
 	} else if op_type == "STOPSNAPSHOT" {
 		sql = `update pms_disaster_config set on_process = 1, on_stopsnapshot = 1 where bs_id= ?`
+	} else if op_type == "STARTFLASHBACK" {
+		sql = `update pms_disaster_config set on_process = 1, on_startflashback = 1 where bs_id= ?`
+	} else if op_type == "STOPFLASHBACK" {
+		sql = `update pms_disaster_config set on_process = 1, on_stopflashback = 1 where bs_id= ?`
 	}
 
 	_, err := o.Raw(sql, bs_id).Exec()
@@ -115,6 +188,10 @@ func OperationUnlock(bs_id int, op_type string) error {
 		sql = `update pms_disaster_config set on_process = 0, on_startsnapshot = 0 where bs_id= ?`
 	} else if op_type == "STOPSNAPSHOT" {
 		sql = `update pms_disaster_config set on_process = 0, on_stopsnapshot = 0 where bs_id= ?`
+	} else if op_type == "STARTFLASHBACK" {
+		sql = `update pms_disaster_config set on_process = 0, on_startflashback = 0 where bs_id= ?`
+	} else if op_type == "STOPFLASHBACK" {
+		sql = `update pms_disaster_config set on_process = 0, on_stopflashback = 0 where bs_id= ?`
 	}
 
 	_, err := o.Raw(sql, bs_id).Exec()
@@ -165,8 +242,7 @@ func Init_OP_Instance(op_id int64, bs_id int, db_type int, op_type string) error
 	MoveOpRecordToHis(bs_id, op_type)
 
 	//开始新的操作初始化
-	str := fmt.Sprintf("Initialize opration instance for business %d.", bs_id)
-	utils.LogDebug(str)
+	utils.LogDebugf("Initialize opration instance for business %d.", bs_id)
 
 	sql = `insert into pms_opration(id, bs_id, db_type, op_type, created) values(?, ?, ?, ?, ?)`
 	_, err := o.Raw(sql, op_id, bs_id, db_type, op_type, time.Now().Unix()).Exec()

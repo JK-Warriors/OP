@@ -4,8 +4,10 @@ import (
 	"log"
 	"opms/controllers"
 	"opms/lib/exception"
+	"strconv"
 
 	. "opms/models/business"
+	. "opms/models/dbconfig"
 	. "opms/models/disaster_oper"
 	. "opms/models/users"
 	"opms/utils"
@@ -17,11 +19,11 @@ import (
 )
 
 //业务系统管理
-type ManageDisasterSyncController struct {
+type ManageDisasterRecoverController struct {
 	controllers.BaseController
 }
 
-func (this *ManageDisasterSyncController) Get() {
+func (this *ManageDisasterRecoverController) Get() {
 	//权限检测
 	if !strings.Contains(this.GetSession("userPermission").(string), "oper-sync") {
 		this.Abort("401")
@@ -44,32 +46,91 @@ func (this *ManageDisasterSyncController) Get() {
 	countBs := CountBusiness(condArr)
 
 	paginator := pagination.SetPaginator(this.Ctx, offset, countBs)
-	_, _, bsconf := ListBusiness(condArr, page, offset)
+	_, _, disaster := ListDisaster(condArr, page, offset)
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
-	this.Data["bsconf"] = bsconf
+	this.Data["disaster"] = disaster
 	this.Data["countBs"] = countBs
 
 	userid, _ := this.GetSession("userId").(int64)
 	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
-	this.TplName = "disaster_oper/sync-index.tpl"
+	this.TplName = "disaster_oper/recover-index.tpl"
 }
 
-type AjaxDisasterStartSyncController struct {
+type OperDisasterRecoverController struct {
 	controllers.BaseController
 }
 
-func (this *AjaxDisasterStartSyncController) Post() {
+func (this *OperDisasterRecoverController) Get() {
+	//权限检测
+	if !strings.Contains(this.GetSession("userPermission").(string), "oper-sync") {
+		this.Abort("401")
+	}
+
+	idstr := this.Ctx.Input.Param(":id")
+	bs_id, _ := strconv.Atoi(idstr)
+
+	//灾备配置检查
+	cfg_count, err := CheckDisasterConfig(bs_id)
+	if cfg_count == 0 {
+		//没有配置容灾库
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "该系统没有配置容灾库"}
+		//this.ServeJSON()
+		//return
+	}
+
+	// 获取db id
+	db_id, err := GetStandbyDBId(bs_id)
+	if err != nil {
+		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
+	}
+	utils.LogDebug("GetStandbyDBID successfully.")
+
+	// 获取db type
+	db_type := GetDBtypeByDBId(db_id)
+
+	dsn, err := GetDsn(db_id, db_type)
+	if err != nil {
+		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
+	}
+	utils.LogDebug("GetStandbyDsn successfully.")
+
+	p_db, err := godror.ParseConnString(dsn)
+	if err != nil {
+		utils.LogDebugf("%s: %w", dsn, err)
+	}
+
+	restore_point, err := GetRestorePointName(p_db)
+	this.Data["restore_point"] = restore_point
+
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
+	this.Data["user"] = user
+
+	this.Data["bs_id"] = bs_id
+	this.Data["db_id"] = db_id
+
+	this.TplName = "disaster_oper/recover-oper.tpl"
+}
+
+type AjaxDisasterFlashbackController struct {
+	controllers.BaseController
+}
+
+func (this *AjaxDisasterFlashbackController) Post() {
 	//权限检测
 	// if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-view") {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
-	op_type := "STARTSYNC"
+	db_id, _ := this.GetInt("db_id")
+	fb_method, _ := this.GetInt("fb_method")
+	fb_point := this.GetString("fb_point")
+	fb_time := this.GetString("fb_time")
+	op_type := "STARTFLASHBACK"
 
 	//灾备配置检查
 	cfg_count, err := CheckDisasterConfig(bs_id)
@@ -80,18 +141,15 @@ func (this *AjaxDisasterStartSyncController) Post() {
 		return
 	}
 
-	sta_id, err := GetStandbyDBId(bs_id)
-	if err != nil {
-		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
-		return
-	}
-	utils.LogDebug("GetStandbyDBID successfully.")
+	// 获取db type
+	db_type := GetDBtypeByDBId(db_id)
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	// Get dsn
+	dsn_s, err := GetDsn(db_id, db_type)
 	if err != nil {
-		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
+		utils.LogDebug("GetDsn failed: " + err.Error())
 	}
-	utils.LogDebug("GetStandbyDsn successfully.")
+	utils.LogDebug("GetDsn successfully.")
 
 	on_process, err := GetOnProcess(bs_id)
 	if on_process == 1 {
@@ -110,22 +168,22 @@ func (this *AjaxDisasterStartSyncController) Post() {
 			op_id := utils.SnowFlakeId()
 			Init_OP_Instance(op_id, bs_id, db_type, op_type)
 			//db_type = 5
-			utils.LogDebug("正式开始启动同步任务")
+			utils.LogDebug("正式开始恢复快照任务")
 			if db_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
 
-				utils.LogDebug("开始启动同步...")
-				s_result := OraStartSync(op_id, bs_id, p_sta)
-				utils.LogDebug("启动同步结束")
+				utils.LogDebug("开始恢复快照...")
+				s_result := OraStartFlashback(op_id, bs_id, fb_method, fb_point, fb_time, p_sta)
+				utils.LogDebug("恢复快照结束")
 
 				if s_result == 1 {
-					utils.LogDebug("更新启动结果")
+					utils.LogDebug("更新恢复结果")
 					Update_OP_Result(op_id, 1)
 				} else {
-					utils.LogDebug("备库启动同步失败，更新启动结果")
+					utils.LogDebug("备库恢复快照失败，更新恢复结果")
 					Update_OP_Result(op_id, -1)
 				}
 
@@ -155,18 +213,18 @@ func (this *AjaxDisasterStartSyncController) Post() {
 	}
 }
 
-type AjaxDisasterStopSyncController struct {
+type AjaxDisasterRecoverController struct {
 	controllers.BaseController
 }
 
-func (this *AjaxDisasterStopSyncController) Post() {
+func (this *AjaxDisasterRecoverController) Post() {
 	//权限检测
 	// if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-view") {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
 	db_type, _ := this.GetInt("db_type")
-	op_type := "STOPSYNC"
+	op_type := "STOPFLASHBACK"
 
 	//灾备配置检查
 	cfg_count, err := CheckDisasterConfig(bs_id)
@@ -206,22 +264,22 @@ func (this *AjaxDisasterStopSyncController) Post() {
 			op_id := utils.SnowFlakeId()
 			Init_OP_Instance(op_id, bs_id, db_type, op_type)
 			//db_type = 5
-			utils.LogDebug("正式开始停止同步任务")
+			utils.LogDebug("正式开始恢复同步任务")
 			if db_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
 
-				utils.LogDebug("开始停止同步...")
-				s_result := OraStopSync(op_id, bs_id, p_sta)
-				utils.LogDebug("停止同步结束")
+				utils.LogDebug("正在恢复同步...")
+				s_result := OraRecover(op_id, bs_id, p_sta)
+				utils.LogDebug("恢复同步结束")
 
 				if s_result == 1 {
-					utils.LogDebug("更新停止结果")
+					utils.LogDebug("更新恢复结果")
 					Update_OP_Result(op_id, 1)
 				} else {
-					utils.LogDebug("备库停止同步失败，更新停止结果")
+					utils.LogDebug("备库恢复同步失败，更新恢复结果")
 					Update_OP_Result(op_id, -1)
 				}
 

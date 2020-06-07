@@ -6,9 +6,9 @@ import (
 	"image/jpeg"
 
 	"opms/controllers"
-	. "opms/models/users"
-	. "opms/models/roles"
 	. "opms/models/logs"
+	. "opms/models/roles"
+	. "opms/models/users"
 	"opms/utils"
 	"os"
 	"strconv"
@@ -62,10 +62,10 @@ func (this *LoginUserController) Post() {
 	if err == nil {
 		if 1 == users.Status {
 			this.SetSession("userLogin", fmt.Sprintf("%d", users.Id)+"||"+users.Username+"||"+users.Avatar)
-			//this.SetSession("userPermission", GetPermissions(users.Id))
-	
+			this.SetSession("userId", users.Id)
+
 			permission, _ := GetPermissionsAll(users.Id)
-	
+
 			this.SetSession("userPermission", permission.Permission)
 			this.SetSession("userRoleid", permission.Roleid)
 			//this.SetSession("userPermissionModel", permission.Model)
@@ -77,9 +77,9 @@ func (this *LoginUserController) Post() {
 			log.Title = "登录"
 			log.Content = ""
 			log.Ip = this.Ctx.Input.IP()
-			log.Useragent =this.Ctx.Input.UserAgent()
+			log.Useragent = this.Ctx.Input.UserAgent()
 			err = AddLogs(log)
-	
+
 			this.Data["json"] = map[string]interface{}{"code": 1, "message": "恭喜你，登录成功"}
 		} else {
 			this.Data["json"] = map[string]interface{}{"code": 0, "message": "登录失败，用户未激活"}
@@ -163,7 +163,6 @@ func (this *ShowUserController) Get() {
 	user, _ := GetUser(userId)
 	this.Data["user"] = user
 
-	
 	this.TplName = "users/profile.tpl"
 }
 
@@ -316,7 +315,7 @@ func (this *AddUserController) Get() {
 
 	_, _, roles := ListRoleAll()
 	this.Data["roles"] = roles
-	
+
 	var roleUser RolesUser
 	this.Data["userrole"] = roleUser
 
@@ -389,7 +388,6 @@ func (this *AddUserController) Post() {
 
 	id, err := AddUserProfile(user, pro)
 
-
 	if err == nil {
 		//新用户权限
 		var roleuser RolesUser
@@ -399,10 +397,10 @@ func (this *AddUserController) Post() {
 
 		if err == nil {
 			this.Data["json"] = map[string]interface{}{"code": 1, "message": "用户信息添加成功", "id": fmt.Sprintf("%d", id)}
-		}else{
+		} else {
 			this.Data["json"] = map[string]interface{}{"code": 0, "message": "用户权限添加失败"}
 		}
-		
+
 	} else {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "用户信息添加失败"}
 	}
@@ -432,13 +430,13 @@ func (this *EditUserController) Get() {
 
 	condArr := make(map[string]string)
 	condArr["status"] = "1"
-	
+
 	_, _, roles := ListRoleAll()
 	this.Data["roles"] = roles
 
 	_, userrole := GetRoleIdByUserId(int64(id))
 	this.Data["userrole"] = userrole
-	
+
 	this.TplName = "users/user-form.tpl"
 }
 
@@ -734,7 +732,6 @@ func (this *AjaxDeleteUserController) Post() {
 	}
 	this.ServeJSON()
 }
-
 
 type AjaxResetPasswordController struct {
 	controllers.BaseController
