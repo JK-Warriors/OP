@@ -59,13 +59,17 @@
                       <thead>
                         <tr>
                           <th>业务系统名称</th>
+                          <th>主库</th>
+                          <th>备库</th>
                           <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {{range $k,$v := .bsconf}}
+                      {{range $k,$v := .disaster}}
                         <tr>
-                          <td>{{$v.BsName}}</td>
+                          <td>{{$v.Bs_Name}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
                             <button name="startsnapshot" class="btn btn-primary" type="button" value="StartSnapshot" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 进入快照 </button>
                             <button name="stopsnapshot" class="btn btn-danger" type="button" value="StopSnapshot" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 退出快照 </button>

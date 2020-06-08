@@ -9,6 +9,7 @@ import (
 	"opms/controllers/logs"
 	"opms/controllers/messages"
 	"opms/controllers/roles"
+	"opms/controllers/screen"
 	"opms/controllers/users"
 
 	"github.com/astaxie/beego"
@@ -101,6 +102,9 @@ func init() {
 	beego.Router("/operation/disaster_recover/oper/:id", &disaster_oper.OperDisasterRecoverController{})
 	beego.Router("/operation/disaster_recover/flashback", &disaster_oper.AjaxDisasterFlashbackController{})
 	beego.Router("/operation/disaster_recover/recover", &disaster_oper.AjaxDisasterRecoverController{})
+
+	//大屏
+	beego.Router("/screen/manage", &screen.ManageScreenController{})
 
 	//UI demo
 	beego.Router("/demo/index", &demo.DemoController{})

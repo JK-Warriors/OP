@@ -59,13 +59,17 @@
                       <thead>
                         <tr>
                           <th>业务系统名称</th>
+                          <th>主库</th>
+                          <th>备库</th>
                           <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {{range $k,$v := .bsconf}}
+                      {{range $k,$v := .disaster}}
                         <tr>
-                          <td>{{$v.BsName}}</td>
+                          <td>{{$v.Bs_Name}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
                             <button name="startsync" class="btn btn-primary" type="button" value="StartSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 启动同步 </button>
                             <button name="stopsync" class="btn btn-danger" type="button" value="StopSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 停止同步 </button>

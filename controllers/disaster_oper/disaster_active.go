@@ -43,11 +43,11 @@ func (this *ManageDisasterActiveController) Get() {
 	countBs := CountBusiness(condArr)
 
 	paginator := pagination.SetPaginator(this.Ctx, offset, countBs)
-	_, _, bsconf := ListBusiness(condArr, page, offset)
+	_, _, disaster := ListDisaster(condArr, page, offset)
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
-	this.Data["bsconf"] = bsconf
+	this.Data["disaster"] = disaster
 	this.Data["countBs"] = countBs
 
 	userid, _ := this.GetSession("userId").(int64)

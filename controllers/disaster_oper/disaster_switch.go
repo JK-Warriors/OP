@@ -45,37 +45,19 @@ func (this *ManageDisasterSwitchController) Get() {
 	countBs := CountBusiness(condArr)
 
 	paginator := pagination.SetPaginator(this.Ctx, offset, countBs)
-	_, _, bsconf := ListBusiness(condArr, page, offset)
+	_, _, disaster := ListDisaster(condArr, page, offset)
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
-	this.Data["bsconf"] = bsconf
+	this.Data["disaster"] = disaster
 	this.Data["countBs"] = countBs
 
 	userid, _ := this.GetSession("userId").(int64)
 	user, _ := GetUser(userid)
 	this.Data["user"] = user
 
-	this.TplName = "disaster_oper/operation-index.tpl"
+	this.TplName = "disaster_oper/switch-index.tpl"
 }
-
-// //业务查看
-// type ViewDisasterSwitchController struct {
-// 	controllers.BaseController
-// }
-
-// func (this *ViewDisasterSwitchController) Get() {
-// 	//权限检测
-// 	if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-view") {
-// 		this.Abort("401")
-// 	}
-
-// 	userid, _ := this.GetSession("userId").(int64)
-// 	user, _ := GetUser(userid)
-// 	this.Data["user"] = user
-
-// 	this.TplName = "disaster_oper/operation-detail.tpl"
-// }
 
 //业务大屏
 type ScreenDisasterSwitchController struct {
@@ -236,9 +218,100 @@ func (this *AjaxDisasterFailoverController) Post() {
 	// 	this.Abort("401")
 	// }
 
-	userid, _ := this.GetSession("userId").(int64)
-	user, _ := GetUser(userid)
-	this.Data["user"] = user
+	bs_id, _ := this.GetInt("bs_id")
+	db_type, _ := this.GetInt("db_type")
+	op_type := this.GetString("op_type")
+
+	utils.LogDebug(bs_id)
+	utils.LogDebug(db_type)
+	utils.LogDebug(op_type)
+	utils.LogDebug(op_type)
+
+	//灾备配置检查
+	cfg_count, err := CheckDisasterConfig(bs_id)
+	if cfg_count == 0 {
+		//没有配置容灾库
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "该系统没有配置容灾库"}
+		this.ServeJSON()
+		return
+	}
+
+	sta_id, err := GetStandbyDBId(bs_id)
+	if err != nil {
+		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
+	}
+	utils.LogDebug("GetStandbyDBID successfully.")
+
+	// Get dsn
+	dsn_s, err := GetDsn(sta_id, db_type)
+	if err != nil {
+		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
+	}
+	utils.LogDebug("GetStandbyDsn successfully.")
+	//utils.LogDebug(dsn_s)
+
+	on_process, err := GetOnProcess(bs_id)
+	if on_process == 1 {
+		utils.LogDebug("There is another opration on process.")
+
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "有另外一个操作正在进行中"}
+		this.ServeJSON()
+		return
+	} else {
+		exception.Try(func() {
+
+			utils.LogDebug("操作加锁")
+			OperationLock(bs_id, op_type)
+
+			utils.LogDebug("初始化切换实例")
+			op_id := utils.SnowFlakeId()
+			Init_OP_Instance(op_id, bs_id, db_type, op_type)
+			//db_type = 5
+			utils.LogDebug("正式开始灾难切换")
+			if db_type == 1 { //oracle
+
+				p_sta, err := godror.ParseConnString(dsn_s)
+				if err != nil {
+					utils.LogDebugf("%s: %w", dsn_s, err)
+				}
+
+				utils.LogDebug("备库开始切换成主库...")
+				s_result := OraFailoverToPrimary(op_id, bs_id, p_sta)
+				utils.LogDebug("备库切换成主库结束")
+				if s_result == 1 {
+					utils.LogDebug("更新切换标识")
+					UpdateSwitchFlag(bs_id)
+					utils.LogDebug("更新切换结束")
+					Update_OP_Result(op_id, 1)
+				} else {
+					utils.LogDebug("备库切换主库失败，更新切换结果")
+					Update_OP_Result(op_id, -1)
+				}
+
+				OperationUnlock(bs_id, op_type)
+			} else if db_type == 2 { //mysql
+				//OraPrimaryToStandby
+				//OraStandbyToPrimary
+
+			} else if db_type == 3 { //sqlserver
+				//OraPrimaryToStandby
+				//OraStandbyToPrimary
+
+			}
+
+		}).Catch(1, func(e exception.Exception) {
+			log.Println(e.Id, e.Msg)
+		}).Catch(2, func(e exception.Exception) {
+			log.Println(e.Id, e.Msg)
+		}).Catch(-1, func(e exception.Exception) {
+			log.Println(e.Id, e.Msg)
+		}).Finally(func() {
+			OperationUnlock(bs_id, op_type)
+		})
+
+		this.Data["json"] = map[string]interface{}{"code": 1, "message": "操作完成"}
+		this.ServeJSON()
+	}
 
 }
 

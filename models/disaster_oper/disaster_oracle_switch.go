@@ -199,3 +199,60 @@ func to_primary(op_id int64, bs_id int, P godror.ConnectionParams) {
 		utils.LogDebug("Alter system archive log current failed: " + err.Error())
 	}
 }
+
+func OraFailoverToPrimary(op_id int64, bs_id int, P godror.ConnectionParams) int {
+	result := -1
+
+	db, err := sql.Open("godror", P.StringWithPassword())
+	if err != nil {
+		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
+	}
+	defer db.Close()
+
+	utils.LogDebug("Failover database to primary in progress...")
+	//get database role
+	role, _ := oracle.GetDatabaseRole(db)
+	Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "获取备库角色成功")
+	utils.LogDebug("The current database role is: " + role)
+
+	// get switchover status
+	//switch_status, _ := oracle.GetSwitchoverStatus(db)
+	//Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "获取备库切换状态成功")
+	//utils.LogDebug("The current database switchover status is: " + switch_status)
+
+	if role == "PHYSICAL STANDBY" {
+		Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "验证备库角色成功")
+		utils.LogDebug("Now we are going to failover database to primary.")
+
+		if _, err = db.Exec("alter database recover managed standby database finish"); err != nil {
+			utils.LogDebug("Finish recover managed standby database failed: " + err.Error())
+		}
+		if _, err = db.Exec("alter database activate standby database"); err != nil {
+			utils.LogDebug("Activate standby database failed: " + err.Error())
+		}
+		oracle.ShutdownImmediate(P)
+		oracle.StartupOpen(P)
+
+		// 重新切换后数据库角色
+		db2, err := sql.Open("godror", P.StringWithPassword())
+		if err != nil {
+			utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
+		}
+		defer db2.Close()
+
+		db_role, _ := oracle.GetDatabaseRole(db2)
+		if db_role == "PRIMARY" {
+			Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "备库已经成功切换成主库")
+			utils.LogDebug("Failover standby database to primary successfully.")
+			return 1
+		} else {
+			Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "备库切换主库失败")
+			utils.LogDebug("Failover standby database to primary failed.")
+			return -1
+		}
+	} else {
+		Update_OP_Reason(op_id, "验证数据库角色失败，当前数据库无法切换到主库")
+		utils.LogDebug("You can not failover primary database to primary!")
+	}
+	return result
+}
