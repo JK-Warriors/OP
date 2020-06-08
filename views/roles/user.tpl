@@ -22,11 +22,11 @@
     <div class="page-heading">
       <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>
       <ul class="breadcrumb pull-left">
-        <li> <a href="/user/show/{{.LoginUserid}}">OPMS</a> </li>
-        <li> <a href="/group/manage">组管理</a> </li>
+        <li> <a href="/system/user/show/{{.LoginUserid}}">OPMS</a> </li>
+        <li> <a href="/system/group/manage">组管理</a> </li>
         <li class="active"> {{.group.Name}} </li>
       </ul>
-      <div class="pull-right"><a href="/group/user/add/{{.group.Id}}" class="btn btn-success">+新成员</a></div>
+      <div class="pull-right"><a href="/system/group/user/add/{{.group.Id}}" class="btn btn-success">+新成员</a></div>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
@@ -51,7 +51,7 @@
                     
                     {{range $k,$v := .users}}
                     <tr>
-                      <td><a href="/user/show/{{$v.Userid}}">{{$v.Realname}}</a></td>
+                      <td><a href="/system/user/show/{{$v.Userid}}">{{$v.Realname}}</a></td>
                       <td><a href="javascript:;" class="js-group-user-single" data-id="{{$v.Id}}">删除</a></td>
                     </tr>
                     {{end}}

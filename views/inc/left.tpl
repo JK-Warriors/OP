@@ -8,12 +8,12 @@
     <!-- <div class="visible-xs hidden-sm hidden-md hidden-lg">
       <div class="media logged-user"> <img alt="{{.LoginUsername}}" src="{{getAvatar .LoginAvatar}}" class="media-object">
         <div class="media-body">
-          <h4><a href="/user/show/{{.LoginUserid}}">{{.LoginUsername}}</a></h4>
+          <h4><a href="/system/user/show/{{.LoginUserid}}">{{.LoginUsername}}</a></h4>
           <span>OPMS系统</span> </div>
       </div>
       <h5 class="left-nav-title">控制台</h5>
       <ul class="nav nav-pills nav-stacked custom-nav">
-        <li><a href="/user/profile"><i class="fa fa-user"></i> <span>个人设置</span></a></li>
+        <li><a href="/system/user/profile"><i class="fa fa-user"></i> <span>个人设置</span></a></li>
         <li><a href="/logout"><i class="fa fa-sign-out"></i> <span>退出</span></a></li>
       </ul>
     </div> -->

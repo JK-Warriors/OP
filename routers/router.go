@@ -20,48 +20,48 @@ func init() {
 	//用户
 	beego.Router("/login", &users.LoginUserController{})
 	beego.Router("/logout", &users.LogoutUserController{})
-	beego.Router("/user/manage", &users.ManageUserController{})
-	beego.Router("/user/ajax/status", &users.AjaxStatusUserController{})
-	beego.Router("/user/add", &users.AddUserController{})
-	beego.Router("/user/edit/:id", &users.EditUserController{})
-	beego.Router("/user/ajax/delete", &users.AjaxDeleteUserController{})
-	beego.Router("/user/avatar", &users.AvatarUserController{})
-	beego.Router("/user/ajax/search", &users.AjaxSearchUserController{}) //搜索用户名匹配
-	beego.Router("/user/show/:id", &users.ShowUserController{})
-	beego.Router("/user/profile", &users.EditUserProfileController{})
-	beego.Router("/user/password", &users.EditUserPasswordController{})
-	beego.Router("/user/ajax/reset_passwd", &users.AjaxResetPasswordController{})
+	beego.Router("/system/user/manage", &users.ManageUserController{})
+	beego.Router("/system/user/ajax/status", &users.AjaxStatusUserController{})
+	beego.Router("/system/user/add", &users.AddUserController{})
+	beego.Router("/system/user/edit/:id", &users.EditUserController{})
+	beego.Router("/system/user/ajax/delete", &users.AjaxDeleteUserController{})
+	beego.Router("/system/user/avatar", &users.AvatarUserController{})
+	beego.Router("/system/user/ajax/search", &users.AjaxSearchUserController{}) //搜索用户名匹配
+	beego.Router("/system/user/show/:id", &users.ShowUserController{})
+	beego.Router("/system/user/profile", &users.EditUserProfileController{})
+	beego.Router("/system/user/password", &users.EditUserPasswordController{})
+	beego.Router("/system/user/ajax/reset_passwd", &users.AjaxResetPasswordController{})
 
-	beego.Router("/my/manage", &users.ShowUserController{})
+	beego.Router("/system/my/manage", &users.ShowUserController{})
 
 	//消息
-	beego.Router("/message/manage", &messages.ManageMessageController{})
-	beego.Router("/message/ajax/delete", &messages.AjaxDeleteMessageController{})
-	beego.Router("/message/ajax/status", &messages.AjaxStatusMessageController{})
+	beego.Router("/system/message/manage", &messages.ManageMessageController{})
+	beego.Router("/system/message/ajax/delete", &messages.AjaxDeleteMessageController{})
+	beego.Router("/system/message/ajax/status", &messages.AjaxStatusMessageController{})
 
 	//角色
-	beego.Router("/role/manage", &roles.ManageRoleController{})
-	beego.Router("/role/ajax/delete", &roles.AjaxDeleteRoleController{})
-	beego.Router("/role/add", &roles.FormRoleController{})
-	beego.Router("/role/edit/:id", &roles.FormRoleController{})
+	beego.Router("/system/role/manage", &roles.ManageRoleController{})
+	beego.Router("/system/role/ajax/delete", &roles.AjaxDeleteRoleController{})
+	beego.Router("/system/role/add", &roles.FormRoleController{})
+	beego.Router("/system/role/edit/:id", &roles.FormRoleController{})
 	//角色成员
-	beego.Router("/role/user/:id", &roles.ManageRoleUserController{})
-	beego.Router("/role/user/add/:id", &roles.FormRoleUserController{})
-	beego.Router("/role/user/ajax/delete", &roles.AjaxDeleteRoleUserController{})
+	beego.Router("/system/role/user/:id", &roles.ManageRoleUserController{})
+	beego.Router("/system/role/user/add/:id", &roles.FormRoleUserController{})
+	beego.Router("/system/role/user/ajax/delete", &roles.AjaxDeleteRoleUserController{})
 
 	//角色权限
-	beego.Router("/role/permission/:id", &roles.ManageRolePermissionController{})
-	beego.Router("/role/permission/ajax/delete", &roles.AjaxDeleteRolePermissionController{})
+	beego.Router("/system/role/permission/:id", &roles.ManageRolePermissionController{})
+	beego.Router("/system/role/permission/ajax/delete", &roles.AjaxDeleteRolePermissionController{})
 
 	//权限
-	beego.Router("/permission/manage", &roles.ManagePermissionController{})
-	beego.Router("/permission/ajax/delete", &roles.AjaxDeletePermissionController{})
-	beego.Router("/permission/add", &roles.FormPermissionController{})
-	beego.Router("/permission/edit/:id", &roles.FormPermissionController{})
+	beego.Router("/system/permission/manage", &roles.ManagePermissionController{})
+	beego.Router("/system/permission/ajax/delete", &roles.AjaxDeletePermissionController{})
+	beego.Router("/system/permission/add", &roles.FormPermissionController{})
+	beego.Router("/system/permission/edit/:id", &roles.FormPermissionController{})
 
 	//日志
-	beego.Router("/log/manage", &logs.ManageLogController{})
-	beego.Router("/log/ajax/delete", &logs.AjaxDeleteLogController{})
+	beego.Router("/system/log/manage", &logs.ManageLogController{})
+	beego.Router("/system/log/ajax/delete", &logs.AjaxDeleteLogController{})
 
 	//业务系统配置
 	beego.Router("/config/business/manage", &business.ManageBusinessController{})

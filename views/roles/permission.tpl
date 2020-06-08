@@ -20,10 +20,10 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/permission/manage">权限管理</a> </li>
+        <li> <a href="/system/permission/manage">权限管理</a> </li>
         <li class="active"> 权限列表 </li>
       </ul>
-      <!-- <div class="pull-right"> <a href="/permission/add" class="btn btn-success">+新增权限</a> </div>-->
+      <!-- <div class="pull-right"> <a href="/system/permission/add" class="btn btn-success">+新增权限</a> </div>-->
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
@@ -35,7 +35,7 @@
               <div class="form-inline">
                 <div class="form-group">
                   <!--search start-->
-                  <form action="/permission/manage" method="get">
+                  <form action="/system/permission/manage" method="get">
                     <input type="text" class="form-control" name="keywords" placeholder="请输入名称" value="{{.condArr.keywords}}"/>
                     <select name="parentid" class="form-control">
                       <option value="">请选择父节点</option>
@@ -44,7 +44,7 @@
                       {{end}}
                     </select>
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button>
-                    <a href="/permission/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/system/permission/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                   </form>
                   <!--search end-->
                 </div>
@@ -77,7 +77,7 @@
                       <td><div class="btn-group">
                           <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
                           <ul class="dropdown-menu">                       
-                            <li><a href="/permission/edit/{{$v.Id}}">编辑</a></li>
+                            <li><a href="/system/permission/edit/{{$v.Id}}">编辑</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:;" class="js-permission-delete" data-op="delete" data-id="{{$v.Id}}">删除</a></li>
                           </ul>

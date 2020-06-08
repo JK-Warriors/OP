@@ -24,7 +24,7 @@
         <div class="page-heading">
           <!-- <h3> 日志管理 </h3>-->
           <ul class="breadcrumb pull-left">
-            <li><a href="/log/manage">一级面包屑</a></li>
+            <li><a href="/system/log/manage">一级面包屑</a></li>
             <li class="active">二级面包屑</li>
           </ul>
         </div>

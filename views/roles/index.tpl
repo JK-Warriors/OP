@@ -20,7 +20,7 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/role/manage">角色管理</a> </li>
+        <li> <a href="/system/role/manage">角色管理</a> </li>
         <li class="active"> 角色列表 </li>
       </ul>
     </div>
@@ -33,15 +33,15 @@
               <div class="form-inline">
                 <div class="form-group">
                   <!--search start-->
-                  <form action="/role/manage" method="get">
+                  <form action="/system/role/manage" method="get">
                     <input type="text" class="form-control" name="keywords" placeholder="请输入角色名" value="{{.condArr.keywords}}"/>
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button>
-                    <a href="/role/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/system/role/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                   </form>
                   <!--search end-->
                 </div>
                 <div class="pull-right">
-                  <a href="/user/add" class="btn btn-success" id="add_role"><i class="fa fa-plus"></i> 新增角色</a>
+                  <a href="/system/role/add" class="btn btn-success" id="add_role"><i class="fa fa-plus"></i> 新增角色</a>
                 </div>
               </div>
             </div>
@@ -67,11 +67,11 @@
                   <td><div class="btn-group">
                       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
                       <ul class="dropdown-menu">
-                        <li><a href="/role/permission/{{$v.Id}}">权限</a></li>
+                        <li><a href="/system/role/permission/{{$v.Id}}">权限</a></li>
                         <!--<li role="separator" class="divider"></li>-->
                         <!--<li><a href="/group/user/{{$v.Id}}">成员</a></li>-->
                         <li role="separator" class="divider"></li>
-                        <li><a href="/role/edit/{{$v.Id}}">编辑</a></li>
+                        <li><a href="/system/role/edit/{{$v.Id}}">编辑</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a href="javascript:;" class="js-group-delete" data-op="delete" data-id="{{$v.Id}}">删除</a></li>
                       </ul>

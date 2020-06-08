@@ -20,7 +20,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/log/manage">日志管理</a> </li>
+        <li> <a href="/system/log/manage">日志管理</a> </li>
         <li class="active"> 系统日志 </li>
       </ul>
     </div>
@@ -34,11 +34,11 @@
               <div class="form-inline">
                 <div class="form-group">
                   <!--search start-->
-                  <form action="/log/manage" method="get">
+                  <form action="/system/log/manage" method="get">
                     <input type="text" class="form-control" name="username" placeholder="请输入用户名" value="{{.condArr.username}}"/>
                     <input type="text" class="form-control" name="ip" placeholder="请输入IP" value="{{.condArr.ip}}"/>
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button>
-                    <a href="/log/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/system/log/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                   </form>
                   <!--search end-->
                 </div>
@@ -74,7 +74,7 @@
                         <tr>
                             <!--<li class="list-group-item"> <span class="pull-left chk">
                               <input type="checkbox" class="checked" value="{{$v.Id}}">
-                              </span> <a class="thumb pull-left" href="/user/show/{{$v.Userid}}"> <img src="{{getAvatarUserid $v.Userid}}" style="width:22px;"> </a> <a href="{{$v.Url}}"> <small class="pull-right text-muted">{{getDateMH $v.Created}}</small> <strong>{{getRealname $v.Userid}}</strong>&nbsp;&nbsp;{{$v.Title}}</span> </a> 
+                              </span> <a class="thumb pull-left" href="/system/user/show/{{$v.Userid}}"> <img src="{{getAvatarUserid $v.Userid}}" style="width:22px;"> </a> <a href="{{$v.Url}}"> <small class="pull-right text-muted">{{getDateMH $v.Created}}</small> <strong>{{getRealname $v.Userid}}</strong>&nbsp;&nbsp;{{$v.Title}}</span> </a> 
                             </li>-->
                             <td><input type="checkbox" class="checked" value="{{$v.Id}}">
                             </td>
@@ -141,7 +141,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-      $.post('/log/ajax/delete', {ids:str},function(data){
+      $.post('/system/log/ajax/delete', {ids:str},function(data){
         dialogInfo(data.message)
         if (data.code) {
           setTimeout(function(){ window.location.reload(); }, 1000);
@@ -163,7 +163,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/log/ajax/delete', {ids:id},function(data){
+			$.post('/system/log/ajax/delete', {ids:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 1000);

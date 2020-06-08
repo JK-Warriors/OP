@@ -24,7 +24,7 @@
         <div class="jumbotron text-center" style="background-color:transparent;">
           <h2>让容灾管理更加轻松！</h2>
 		<br/><br/>
-			<!--<a style="font-size:38px;" href="/user/show/{{.LoginUserid}}">开启OPMS之旅</a>-->
+			<!--<a style="font-size:38px;" href="/system/user/show/{{.LoginUserid}}">开启OPMS之旅</a>-->
 			<br/><br/>
         </div>
       </div>

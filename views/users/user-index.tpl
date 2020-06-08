@@ -24,8 +24,8 @@
     <div class="page-heading">
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <!--<li> <a href="/user/show/{{.LoginUserid}}">OPMS</a> </li>-->
-        <li> <a href="/user/manage">用户管理</a> </li>
+        <!--<li> <a href="/system/user/show/{{.LoginUserid}}">OPMS</a> </li>-->
+        <li> <a href="/system/user/manage">用户管理</a> </li>
         <li class="active"> 用户列表 </li>
       </ul>
     </div>
@@ -39,7 +39,7 @@
               <div class="form-inline">
                 <div class="form-group">
                   <!--search start-->
-                  <form action="/user/manage" method="get">
+                  <form action="/system/user/manage" method="get">
                     <input type="text" class="form-control" name="keywords" placeholder="请输入用户名" value="{{.condArr.keywords}}"/>
                     <select name="status" class="form-control">
                       <option value="">用户状态</option>
@@ -47,12 +47,12 @@
                       <option value="2" {{if eq "2" .condArr.status}}selected{{end}}>禁用</option>
                     </select>
                     <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>搜索</button>
-                    <a href="/user/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/system/user/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                   </form>
                   <!--search end-->
                 </div>
                 <div class="pull-right">
-                  <a href="/user/add" class="btn btn-success" id="add_user"><i class="fa fa-plus"></i> 新增用户</a>
+                  <a href="/system/user/add" class="btn btn-success" id="add_user"><i class="fa fa-plus"></i> 新增用户</a>
                 </div>
               </div>
             </div>
@@ -82,7 +82,7 @@
                     {{range $k,$v := .user}}
                     <tr>
                       <td>{{$v.Username}}</td>
-                      <!--<td><a href="/user/show/{{$v.Id}}">{{$v.Profile.Realname}}</a></td>-->
+                      <!--<td><a href="/system/user/show/{{$v.Id}}">{{$v.Profile.Realname}}</a></td>-->
                       <td>{{$v.Profile.Realname}}</a></td>
                       <td>{{$v.Profile.Email}}</td>
                       <td>{{$v.Profile.Phone}}</td>
@@ -91,7 +91,7 @@
                       <td><div class="btn-group">
                           <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
                           <ul class="dropdown-menu">
-                            <li><a href="/user/edit/{{$v.Id}}">编辑</a></li>
+                            <li><a href="/system/user/edit/{{$v.Id}}">编辑</a></li>
                             <!--li role="separator" class="divider"></li>
 							<li><a href="/user/permission/{{$v.Id}}">权限</a></li-->
                             <li role="separator" class="divider"></li>

@@ -17,11 +17,11 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/user/show/{{.LoginUserid}}">用户权限</a> </li>
-        <li> <a href="/user/manage">用户管理</a> </li>
+        <li> <a href="/system/user/show/{{.LoginUserid}}">用户权限</a> </li>
+        <li> <a href="/system/user/manage">用户管理</a> </li>
         <li class="active"> 用户 </li>
       </ul>
-      <div class="pull-right"><a href="/user/add" class="btn btn-success">+添加用户</a></div>
+      <div class="pull-right"><a href="/system/user/add" class="btn btn-success">+添加用户</a></div>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->

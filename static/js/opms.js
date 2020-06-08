@@ -69,7 +69,7 @@ $(function(){
 	$('.js-msg-status').on('click', function(){
 		var that = $(this);
 		var id = that.attr('data-id');
-		$.post('/message/ajax/status', {id:id},function(data){
+		$.post('/system/message/ajax/status', {id:id},function(data){
 						
 		},'json');
 	});
@@ -106,7 +106,7 @@ $(function(){
     	var that = $(this);
     	var status = that.attr('data-status')
     	var id = that.attr('data-id');
-		$.post('/user/ajax/status', { status: status, id: id },function(data){
+		$.post('/system/user/ajax/status', { status: status, id: id },function(data){
 			dialogInfo(data.message)
 			if (data.code) {
 				that.attr('data-status', status == 2 ? 1 : 2).text(status == 2 ? '激活' : '禁用').parents('td').prev('td').text(status == 2 ? '禁用' : '激活');
@@ -135,9 +135,9 @@ $(function(){
                     dialogInfo(data.message)
                     if (data.code) {
 						if (data.type) {
-                       		setTimeout(function(){window.location.href="/user/show/"+data.id}, 1000);
+                       		setTimeout(function(){window.location.href="/system/user/show/"+data.id}, 1000);
 						} else {							
-							setTimeout(function(){window.location.href="/user/manage"}, 1000);
+							setTimeout(function(){window.location.href="/system/user/manage"}, 1000);
 						}
                     } else {
                         setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
@@ -166,7 +166,7 @@ $(function(){
                 success:function(data) {
                     dialogInfo(data.message)
                     if (data.code) {						
-                       	setTimeout(function(){window.location.href="/user/show/"+data.id}, 1000);						
+                       	setTimeout(function(){window.location.href="/system/user/show/"+data.id}, 1000);						
                     } else {
                         setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
                     }					
@@ -190,7 +190,7 @@ $(function(){
 			hideid = '#userid';
 		}
         $(this).autocomplete({
-            source: "/user/ajax/search",
+            source: "/system/user/ajax/search",
             minLength: 1,
             autoFocus: true,
             select: function(e, ui) {              
@@ -283,7 +283,7 @@ $(function(){
 		
 		str = str.substring(0, str.length-1)
 		var groupid = $('#groupid').val();
-		var url = '/role/permission/'+groupid;
+		var url = '/system/role/permission/'+groupid;
 		$.post(url, { groupid: groupid, permission: str, model:model, modelc:modelc },function(data){
 			dialogInfo(data.message)
 			if (data.code) {
@@ -347,7 +347,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/user/ajax/delete', {ids:id},function(data){
+			$.post('/system/user/ajax/delete', {ids:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 1000);
@@ -373,7 +373,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/user/ajax/reset_passwd', {id:id},function(data){
+			$.post('/system/user/ajax/reset_passwd', {id:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 10000);
@@ -406,7 +406,7 @@ $(function(){
                 success:function(data) {
                     dialogInfo(data.message)
                     if (data.code) {
-						setTimeout(function(){ window.location.href='/role/manage'; }, 1000);
+						setTimeout(function(){ window.location.href='/system/role/manage'; }, 1000);
                     } else {
                        setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
                     }															
@@ -425,7 +425,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/role/ajax/delete', {ids:id},function(data){
+			$.post('/system/role/ajax/delete', {ids:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 1000);
@@ -458,7 +458,7 @@ $(function(){
                 success:function(data) {
                     dialogInfo(data.message)
                     if (data.code) {
-						setTimeout(function(){ window.location.href='/permission/manage'; }, 1000);
+						setTimeout(function(){ window.location.href='/system/permission/manage'; }, 1000);
                     } else {
                        setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
                     }															
@@ -476,7 +476,7 @@ $(function(){
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/permission/ajax/delete', {ids:id},function(data){
+			$.post('/system/permission/ajax/delete', {ids:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 1000);
@@ -517,7 +517,7 @@ $(function(){
 	$('.js-group-user-single').on('click', function(){
     	var that = $(this);
 		var testid = that.attr('data-id');	
-		$.post('/group/user/ajax/delete', {id:testid},function(data){
+		$.post('/system/group/user/ajax/delete', {id:testid},function(data){
 			dialogInfo(data.message)
 			if (data.code) {
 				that.parents('tr').remove();

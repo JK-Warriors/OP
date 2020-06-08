@@ -6,7 +6,7 @@
    <li {{if eq "/business" .url_first_part}}class="active"{{end}}><a href="/business/manage">业务系统</a></li>
    <li {{if eq "/operation" .url_first_part}}class="active"{{end}}><a href="/operation/disaster_switch/manage">操作</a></li>
    <li {{if eq "/screen" .url_first_part}}class="active"{{end}}><a href="/screen/manage">大屏</a></li>
-   <li {{if eq "/system" .url_first_part}}class="active"{{end}}><a href="/user/manage">系统管理</a></li>
+   <li {{if eq "/system" .url_first_part}}class="active"{{end}}><a href="/system/user/manage">系统管理</a></li>
  </div>
  <!--toggle button end-->
 
@@ -36,17 +36,17 @@
 							 {{else}}
 			                  <li class="text-center">目前还没有最新消息</li>
 			                  {{end}}
-                            <li class="new"><a href="/message/manage">查看更多</a></li>
+                            <li class="new"><a href="/system/message/manage">查看更多</a></li>
                         </ul>
                     </div>
                 </li>
   
     <li> <a href="javascript:;" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> <img src="{{getAvatar .LoginAvatar}}" alt="{{.LoginUsername}}" /> {{.LoginUsername}} <span class="caret"></span> </a>
       <ul class="dropdown-menu dropdown-menu-usermenu pull-right">
-        <!--<li><a href="/user/show/{{.LoginUserid}}"><i class="fa fa-user"></i> 个人主页</a></li>-->
-        <li><a href="/user/profile"><i class="fa fa-cog"></i> 基本资料</a></li>
-		    <li><a href="/user/avatar"><i class="fa fa-camera"></i> 更换头像</a></li>
-		    <li><a href="/user/password"><i class="fa fa-cog"></i> 更换密码</a></li>
+        <!--<li><a href="/system/user/show/{{.LoginUserid}}"><i class="fa fa-user"></i> 个人主页</a></li>-->
+        <li><a href="/system/user/profile"><i class="fa fa-cog"></i> 基本资料</a></li>
+		    <li><a href="/system/user/avatar"><i class="fa fa-camera"></i> 更换头像</a></li>
+		    <li><a href="/system/user/password"><i class="fa fa-cog"></i> 更换密码</a></li>
 		    <!--<li><a href="/my/task"><i class="fa fa-th-list"></i> 我的任务</a></li>-->		
         <li><a href="/logout"><i class="fa fa-sign-out"></i> 退出</a></li>
       </ul>

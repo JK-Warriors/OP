@@ -18,8 +18,8 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/user/manage">用户权限</a> </li>
-        <li> <a href="/permission/manage">权限管理</a> </li>
+        <li> <a href="/system/user/manage">用户权限</a> </li>
+        <li> <a href="/system/permission/manage">权限管理</a> </li>
         <li class="active"> 权限 </li>
       </ul>
     </div>
@@ -54,7 +54,7 @@
 				<div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>菜单地址</label>
                   <div class="col-sm-10">
-                    <input type="text" name="ename" value="{{.permission.Url}}" class="form-control" placeholder="请输入菜单地址，如 /user/edit">
+                    <input type="text" name="ename" value="{{.permission.Url}}" class="form-control" placeholder="请输入菜单地址，如 /system/user/edit">
                   </div>
                 </div>
 				<div class="form-group">

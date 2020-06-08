@@ -18,8 +18,8 @@
     <div class="page-heading">
       <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>
       <ul class="breadcrumb pull-left">
-        <li> <a href="/user/show/{{.LoginUserid}}">OPMS</a> </li>
-        <li> <a href="/group/user/{{.group.Id}}">{{.group.Name}}</a> </li>
+        <li> <a href="/system/user/show/{{.LoginUserid}}">OPMS</a> </li>
+        <li> <a href="/system/group/user/{{.group.Id}}">{{.group.Name}}</a> </li>
         <li class="active"> 成员 </li>
       </ul>
     </div>

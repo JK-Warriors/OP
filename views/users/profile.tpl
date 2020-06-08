@@ -115,7 +115,7 @@
                         <td><a href="/project/{{$v.Id}}">{{$v.Name}}</a></td>
                         <td>{{getDate $v.Ended}}</td>
                         <td>{{if eq 1 $v.Status}}挂起{{else if eq 2 $v.Status}}延期{{else if eq 3 $v.Status}}进行{{else if eq 4 $v.Status}}结束{{end}}</td>
-                        <td><a href="/user/show/{{$v.Projuserid}}">{{getRealname $v.Projuserid}}</a></td>
+                        <td><a href="/system/user/show/{{$v.Projuserid}}">{{getRealname $v.Projuserid}}</a></td>
                       </tr>
                       {{end}}
                       </tbody>
@@ -181,7 +181,7 @@
                           <td><a href="/test/show/{{$v.Id}}">{{$v.Name}}</a></td>
                           <td>{{getDate $v.Created}}</td>
                           <td>{{getTestStatus $v.Status}}</td>
-                          <td><a href="/user/show/{{$v.Userid}}">{{getRealname $v.Userid}}</a></td>
+                          <td><a href="/system/user/show/{{$v.Userid}}">{{getRealname $v.Userid}}</a></td>
                         </tr>
                       {{end}}
                       </tbody>
@@ -221,7 +221,7 @@
                     <li>
                       <div class="avatar"> <img src="{{getAvatarUserid $v.Userid}}" alt="{{getRealname $v.Userid}}"> </div>
                       <div class="activity-desk">
-                        <h5><a href="/user/show/{{$v.Userid}}">{{getRealname $v.Userid}}</a> <span><a href="/knowledge/{{$v.Id}}" style="color:#2a323f">{{$v.Title}}</a></span></h5>
+                        <h5><a href="/system/user/show/{{$v.Userid}}">{{getRealname $v.Userid}}</a> <span><a href="/knowledge/{{$v.Id}}" style="color:#2a323f">{{$v.Title}}</a></span></h5>
                         <p class="text-muted">{{$v.Summary}}</p>
                         <p class="pull-right text-muted"><i class="fa fa-eye"></i> {{$v.Viewnum}}&nbsp;&nbsp;&nbsp;<i class="fa fa-heart"></i> {{$v.Laudnum}}&nbsp;&nbsp;&nbsp;<i class="fa fa-envelope-o"></i> {{$v.Comtnum}}&nbsp;&nbsp;&nbsp;{{getDateMH $v.Created}}</p>
                       </div>

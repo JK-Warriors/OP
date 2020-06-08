@@ -15,7 +15,7 @@
       <a class="toggle-btn"><i class="fa fa-bars"></i></a>
       <!--toggle button end-->
       <!--search start-->
-      <form class="searchform" action="/message/manage" method="get">
+      <form class="searchform" action="/system/message/manage" method="get">
         <select name="status" class="form-control">
           <option value="">状态</option>
           <option value="1" {{if eq "1" .condArr.view}}selected{{end}}>未看</option>
@@ -36,8 +36,8 @@
     <div class="page-heading">
       <!-- <h3> 消息管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/log/manage">系统管理</a> </li>
-        <li> <a href="/message/manage">消息管理</a> </li>
+        <li> <a href="/system/log/manage">系统管理</a> </li>
+        <li> <a href="/system/message/manage">消息管理</a> </li>
         <li class="active"> 消息 </li>
       </ul>
     </div>
@@ -58,7 +58,7 @@
                   {{range $k,$v := .messages}}
                   <li class="list-group-item"> <span class="pull-left chk">
                     <input type="checkbox" class="checked" value="{{$v.Id}}">
-                    </span> <a class="thumb pull-left" href="/user/show/{{$v.Userid}}"> <img src="{{getAvatarUserid $v.Userid}}" style="width:22px;"> </a> <a href="{{$v.Url}}"> <small class="pull-right text-muted">{{getDateMH $v.Created}}</small> <strong>{{getRealname $v.Userid}}</strong> <span>{{getMessageType $v.Type}}了{{getMessageSubtype $v.Subtype}}&nbsp;&nbsp;{{$v.Title}}</span> </a> </li>
+                    </span> <a class="thumb pull-left" href="/system/user/show/{{$v.Userid}}"> <img src="{{getAvatarUserid $v.Userid}}" style="width:22px;"> </a> <a href="{{$v.Url}}"> <small class="pull-right text-muted">{{getDateMH $v.Created}}</small> <strong>{{getRealname $v.Userid}}</strong> <span>{{getMessageType $v.Type}}了{{getMessageSubtype $v.Subtype}}&nbsp;&nbsp;{{$v.Title}}</span> </a> </li>
                   {{else}}
                   <li class="list-group-item text-center">目前还没有任何消息</li>
                   {{end}}
@@ -94,7 +94,7 @@ $(function(){
 			str += n['value']+',';
 		});
 		str = str.substring(0, str.length - 1)
-		$.post('/message/ajax/delete', {ids:str},function(data){
+		$.post('/system/message/ajax/delete', {ids:str},function(data){
 			dialogInfo(data.message)
 			if (data.code) {
 				setTimeout(function(){ window.location.reload(); }, 2000);
