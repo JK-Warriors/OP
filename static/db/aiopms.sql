@@ -422,12 +422,30 @@ DROP TABLE IF EXISTS `pms_db_status`;
 CREATE TABLE `pms_db_status` (
   `id` int(10) unsigned NOT NULL COMMENT 'ID',
   `db_type` tinyint(2) DEFAULT NULL COMMENT '数据库类型',
-  `alias`   varchar(255) DEFAULT NULL COMMENT '别名',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
+  `open_mode` varchar(10) DEFAULT NULL COMMENT '打开模式',
+  `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
+  `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
-  `updated` int(10) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_db_status
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_db_status_his`;
+CREATE TABLE `pms_db_status_his` (
+  `id` int(10) unsigned NOT NULL COMMENT 'ID',
+  `db_type` tinyint(2) DEFAULT NULL COMMENT '数据库类型',
+  `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `role`    varchar(30) DEFAULT NULL COMMENT '角色',
+  `version` varchar(30) DEFAULT NULL COMMENT '版本',
+  `open_mode` varchar(10) DEFAULT NULL COMMENT '打开模式',
+  `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
+  `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -498,3 +516,70 @@ CREATE TABLE `pms_op_process_his` (
   KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`,`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
+
+DROP TABLE IF EXISTS `pms_disaster_pri_status`;
+CREATE TABLE `pms_disaster_pri_status` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `check_seq` smallint(4) NOT NULL DEFAULT '0',
+  `dest_id` smallint(4) NOT NULL DEFAULT '0',
+  `transmit_mode` varchar(20) DEFAULT NULL,
+  `thread` smallint(4) NOT NULL DEFAULT '0',
+  `sequence` int(10) DEFAULT NULL,
+  `curr_scn` bigint(20) DEFAULT NULL,
+  `curr_db_time` varchar(20) DEFAULT NULL,
+  `archived_delay` int(10) DEFAULT NULL,
+  `applied_delay` int(10) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `pms_disaster_pri_status_his`;
+CREATE TABLE `pms_disaster_pri_status_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `check_seq` smallint(4) NOT NULL DEFAULT '0',
+  `dest_id` smallint(4) NOT NULL DEFAULT '0',
+  `transmit_mode` varchar(20) DEFAULT NULL,
+  `thread` smallint(4) NOT NULL DEFAULT '0',
+  `sequence` int(10) DEFAULT NULL,
+  `curr_scn` bigint(20) DEFAULT NULL,
+  `curr_db_time` varchar(20) DEFAULT NULL,
+  `archived_delay` int(10) DEFAULT NULL,
+  `applied_delay` int(10) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `pms_disaster_sta_status`;
+CREATE TABLE `pms_disaster_sta_status` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `thread` smallint(4) NOT NULL,
+  `sequence` int(20) DEFAULT NULL,
+  `block` int(10) DEFAULT NULL,
+  `delay_mins` int(10) DEFAULT NULL,
+  `apply_rate` int(10) DEFAULT NULL,
+  `curr_scn` bigint(20) DEFAULT NULL,
+  `curr_db_time` varchar(20) DEFAULT NULL,
+  `mrp_status` varchar(20) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `pms_disaster_sta_status_his`;
+CREATE TABLE `pms_disaster_sta_status_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `thread` smallint(4) NOT NULL,
+  `sequence` int(20) DEFAULT NULL,
+  `block` int(10) DEFAULT NULL,
+  `delay_mins` int(10) DEFAULT NULL,
+  `apply_rate` int(10) DEFAULT NULL,
+  `curr_scn` bigint(20) DEFAULT NULL,
+  `curr_db_time` varchar(20) DEFAULT NULL,
+  `mrp_status` varchar(20) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;

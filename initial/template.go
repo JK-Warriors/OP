@@ -34,6 +34,8 @@ func InitTemplate() {
 	beego.AddFuncMap("getDate", utils.GetDate)
 	beego.AddFuncMap("getDateMH", utils.GetDateMH)
 	beego.AddFuncMap("GetDateMHS", utils.GetDateMHS)
+	beego.AddFuncMap("GetDateDiff", utils.GetDateDiff)
+	beego.AddFuncMap("GetDateDiffColor", utils.GetDateDiffColor)
 	beego.AddFuncMap("getNeedsStatus", utils.GetNeedsStatus)
 	beego.AddFuncMap("getNeedsSource", utils.GetNeedsSource)
 	beego.AddFuncMap("getNeedsStage", utils.GetNeedsStage)

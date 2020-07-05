@@ -5,6 +5,7 @@ import (
 	"log"
 	"opms/controllers"
 	"opms/lib/exception"
+	"strconv"
 
 	. "opms/models/business"
 	. "opms/models/disaster_oper"
@@ -73,6 +74,38 @@ func (this *ScreenDisasterSwitchController) Get() {
 	userid, _ := this.GetSession("userId").(int64)
 	user, _ := GetUser(userid)
 	this.Data["user"] = user
+
+	idstr := this.Ctx.Input.Param(":id")
+	bs_id, _ := strconv.Atoi(idstr)
+	//灾备配置检查
+	cfg_count, err := CheckDisasterConfig(bs_id)
+	if cfg_count == 0 {
+		//没有配置容灾库
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "该系统没有配置容灾库"}
+		this.ServeJSON()
+		return
+	}
+
+	pri_id, err := GetPrimaryDBId(bs_id)
+	if err != nil {
+		utils.LogDebug("GetPrimaryDBID failed: " + err.Error())
+	}
+	utils.LogDebug("GetPrimaryDBID successfully.")
+	sta_id, err := GetStandbyDBId(bs_id)
+	if err != nil {
+		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
+	}
+	utils.LogDebug("GetStandbyDBID successfully.")
+
+	pri_basic, err := GetOracleBasicInfo(pri_id)
+	sta_basic, err := GetOracleBasicInfo(sta_id)
+	pri_disaster, err := GetPrimaryDisasterInfo(pri_id)
+	sta_disaster, err := GetStandbyDisasterInfo(sta_id)
+
+	this.Data["pri_basic"] = pri_basic
+	this.Data["sta_basic"] = sta_basic
+	this.Data["pri_disaster"] = pri_disaster
+	this.Data["sta_disaster"] = sta_disaster
 
 	this.TplName = "disaster_oper/screen-oracle.tpl"
 }

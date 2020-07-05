@@ -22,8 +22,8 @@
 
  <!-- new left-menu -->
  <div class="navbar-default sidebar navbarstyle" role="navigation">
-  <div class="logo"> <a href="/"><img src="/static/img/logo-left.png" alt="DRM管理系统">DRM管理系统</a>  </div>
-  <div class="logo-icon text-center"> <a href="/"><img src="/static/img/logo_icon.png" style="width:40px;" alt="DRM">DRM</a> </div>
+  <div class="logo"> <a href="/"><img src="/static/img/logo-left.png" alt="磐石数据库容灾">磐石数据库容灾</a>  </div>
+  <div class="logo-icon text-center"> <a href="/"><img src="/static/img/logo_icon.png" style="width:40px;" alt="磐石">磐石</a> </div>
   
   <!--<ul class="nav nav-pills nav-stacked custom-nav js-left-nav">-->
   <div class="sidebar-nav navbar-collapse">

@@ -54,7 +54,7 @@
         <div class="b1">当前时间：&nbsp;<span id="Timer"></span></div>
         <div class="b2">数据平台数据库容灾监控中心</div>
         <div class="b3">
-          最新检测时间：&nbsp;<span>2020-04-27 10:10:23</span>
+          最新检测时间：&nbsp;<span>{{GetDateMHS .sta_disaster.Created}}</span>
 
           <a href="#" class="qbtn"
             ><img src="/static/img/quit.png" title="退出"
@@ -64,7 +64,7 @@
           <h3>灾备状态</h3>
           <div class="m">
             <div class="m2">
-              <div class="container ">
+              <div class="container  {{GetDateDiffColor .pri_disaster.Curr_Db_Time .sta_disaster.Curr_Db_Time}}">
                 <div class="item-1"></div>
                 <div class="item-2"></div>
                 <div class="item-3"></div>
@@ -72,64 +72,61 @@
                 <div class="item-5"></div>
               </div>
               <p>
-                <span class="spancolor">日志应用:</span> 序列: 167209 块号:
-                172469
+                <span class="spancolor">日志应用:</span> 序列: {{.sta_disaster.Sequence}} 块号: {{.sta_disaster.Block}}
               </p>
-              <p><span class="spancolor">传输模式:</span> 异步模式</p>
+              <p><span class="spancolor">传输模式: </span>{{if eq "ASYNCHRONOUS" $.pri_disaster.Transmit_Mode}}异步模式{{else}}同步模式{{end}}</p>
             </div>
             <div class="m1 ml">
               <p>生产系统</p>
               <img src="/static/img/database.png" alt="" />
               <div class="mtext">
-                <li><span>数据库时间:</span> 2020-04-27 10:11:58</li>
-                <li><span>实例名:</span> ORCL</li>
-                <li><span>IP地址:</span> 10.170.24.159</li>
-                <li><span>数据库版本:</span> 11.2.0.4.0</li>
+                <li><span>数据库时间:</span> {{.pri_disaster.Curr_Db_Time}}</li>
+                <li><span>实例名: </span>{{.pri_basic.Instance_name}}</li>
+                <li><span>IP地址: </span>{{.pri_basic.Host}}</li>
+                <li><span>数据库版本: </span>{{.pri_basic.Version}}</li>
               </div>
             </div>
             <div class="m1 mr">
               <p>灾备系统</p>
               <img src="/static/img/database.png" alt="" />
               <div class="mtext">
-                <li><span>数据库时间:</span> 2020-04-27 10:11:54</li>
-                <li><span>实例名:</span> ORCL</li>
-                <li><span>IP地址:</span> 10.170.24.173</li>
-                <li><span>数据库版本:</span> 11.2.0.4.0</li>
+                <li><span>数据库时间:</span> {{.sta_disaster.Curr_Db_Time}}</li>
+                <li><span>实例名: </span>{{.sta_basic.Instance_name}}</li>
+                <li><span>IP地址: </span>{{.sta_basic.Host}}</li>
+                <li><span>数据库版本: </span>{{.sta_basic.Version}}</li>
               </div>
             </div>
             <div class="m3 ml">
               <div class="mtext">
-                <li><span>当前SCN:</span>14736174057981</li>
+                <li><span>当前SCN:</span>{{.pri_disaster.Curr_Scn}}</li>
                 <li>
-                  <span>线程:</span>1
-                  <p class="sp2"><span>序列:</span> 167209</p>
+                  <span>线程:</span>{{.pri_disaster.Thread}}
+                  <p class="sp2"><span>序列:</span> {{.pri_disaster.Sequence}}</p>
                 </li>
 
-                <li><span>状态:</span>读写</li>
-                <li style=""><span>生产库快照状态:</span>未启动</li>
-                <li style="display: none;"><span>最早快照时间:</span></li>
-                <li><span>快照空间使用率:</span>0%</li>
+                <li><span>状态:</span>{{if eq "READ WRITE" $.pri_basic.Open_Mode}}读写{{else if eq "MOUNTED" $.pri_basic.Open_Mode}}应用{{else}}$.pri_basic.Open_Mode{{end}}</li>
+                <li style="{{if eq "YES" $.pri_basic.Flashback_On}}display: none;{{end}}"><span>生产库快照状态:</span>未启动</li>
+                <li style="{{if eq "NO" $.pri_basic.Flashback_On}}display: none;{{end}}"><span>最早快照时间:</span></li>
+                <li><span>快照空间使用率:</span>{{.pri_basic.Flashback_Usage}}%</li>
               </div>
             </div>
             <div class="m3 mr">
               <div class="mtext">
-                <li><span>当前SCN:</span>14736174057978</li>
+                <li><span>当前SCN:</span>{{.sta_disaster.Curr_Scn}}</li>
 
                 <li>
-                  <span>恢复速度:</span>169 KB/sec
+                  <span>恢复速度:</span>{{.sta_disaster.Apply_Rate}} KB/sec
                   <p></p>
                 </li>
                 <li>
-                  <span>当前恢复:</span>线程: 1
-                  <p class="sp2">序列: 167209</p>
+                  <span>当前恢复:</span>线程: {{.sta_disaster.Thread}}
+                  <p class="sp2">序列: {{.sta_disaster.Sequence}}</p>
                 </li>
 
-                <li><span>状态:</span>实时查询</li>
-                <li style="display: none;">
-                  <span>容灾库快照状态:</span>未启动
-                </li>
-                <li style=""><span>最早快照时间:</span>2020-04-22 10:58:47</li>
-                <li><span>快照空间使用率:</span>49.95%</li>
+                <li><span>状态:</span>{{if eq "READ WRITE" $.sta_basic.Open_Mode}}读写{{else if eq "MOUNTED" $.sta_basic.Open_Mode}}应用{{else}}$.sta_basic.Open_Mode{{end}}</li>
+                <li style="{{if eq "YES" $.sta_basic.Flashback_On}}display: none;{{end}}"><span>容灾库快照状态:</span>未启动</li>
+                <li style="{{if eq "NO" $.sta_basic.Flashback_On}}display: none;{{end}}"><span>最早快照时间:</span></li>
+                <li><span>快照空间使用率:</span>{{.sta_basic.Flashback_Usage}}%</li>
               </div>
             </div>
           </div>
@@ -175,32 +172,19 @@
           <h3>备份差异</h3>
           <div class="m">
             <li>
-              <span>数据文件写入延时:</span
-              ><b class="orange">0天0小时0分4秒 </b>
+              <span>数据文件写入延时:</span><b class="orange">{{GetDateDiff .pri_disaster.Curr_Db_Time .sta_disaster.Curr_Db_Time}}</b>
             </li>
             <li>
-              <span>日志传输延时线程:</span
-              ><b class="orange"
-                >1<span style="display:inline-block;width:3.5em;"></span
-              ></b>
+              <span>日志传输延时线程:</span><b class="orange">{{.pri_disaster.Thread}}<span style="display:inline-block;width:3.5em;"></span></b>
             </li>
             <li>
-              <span>日志传输延时序列差异:</span
-              ><b class="orange"
-                >0<span style="display:inline-block;width: 3.5em;"></span
-              ></b>
+              <span>日志传输延时序列差异:</span><b class="orange">{{.pri_disaster.Archived_delay}}<span style="display:inline-block;width: 3.5em;"></span></b>
             </li>
             <li>
-              <span>日志应用延时线程:</span
-              ><b class="orange"
-                >1<span style="display:inline-block;width: 3.5em;"></span
-              ></b>
+              <span>日志应用延时线程:</span><b class="orange">{{.pri_disaster.Thread}}<span style="display:inline-block;width: 3.5em;"></span></b>
             </li>
             <li>
-              <span>日志应用延时序列差异:</span
-              ><b class="orange"
-                >1<span style="display:inline-block;width: 3.5em;"></span
-              ></b>
+              <span>日志应用延时序列差异:</span><b class="orange">{{.pri_disaster.Applied_delay}}<span style="display:inline-block;width: 3.5em;"></span></b>
             </li>
           </div>
         </div>

@@ -393,3 +393,79 @@ func GetOpResultById(op_id int64) (string, string, error) {
 
 	return result, reason, err
 }
+
+type OracleInstance struct {
+	Id              int    `orm:"pk;column(id);"`
+	Db_Type         int    `orm:"column(db_type);"`
+	Connect         int    `orm:"column(connect);"`
+	Instance_name   string `orm:"column(instance_name);"`
+	Db_Name         string `orm:"column(db_name);"`
+	Host            string `orm:"column(host);"`
+	Role            string `orm:"column(role);"`
+	Version         string `orm:"column(version);"`
+	Open_Mode       string `orm:"column(open_mode);"`
+	Flashback_On    string `orm:"column(flashback_on);"`
+	Flashback_Usage string `orm:"column(flashback_usage);"`
+	Created         int64  `orm:"column(created);"`
+}
+
+func GetOracleBasicInfo(db_id int) (OracleInstance, error) {
+	var ora_instance OracleInstance
+
+	sql := `select c.id, c.db_type, s.connect, c.instance_name, c.db_name, c.host, s.role, version, open_mode, flashback_on, flashback_usage, s.created 
+			from pms_db_config c, pms_db_status s 
+			where c.id = s.id and s.id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&ora_instance)
+
+	return ora_instance, err
+}
+
+type DisasterPrimary struct {
+	DB_Id          int    `orm:"pk;column(db_id);"`
+	Check_Seq      string `orm:"column(check_seq);"`
+	Dest_Id        int    `orm:"column(dest_id);"`
+	Transmit_Mode  string `orm:"column(transmit_mode);"`
+	Thread         int    `orm:"column(thread);"`
+	Sequence       int    `orm:"column(sequence);"`
+	Curr_Scn       int64  `orm:"column(curr_scn);"`
+	Curr_Db_Time   string `orm:"column(curr_db_time);"`
+	Archived_delay int    `orm:"column(archived_delay);"`
+	Applied_delay  int    `orm:"column(applied_delay);"`
+	Created        int64  `orm:"column(created);"`
+}
+
+func GetPrimaryDisasterInfo(db_id int) (DisasterPrimary, error) {
+	var dis_pri DisasterPrimary
+
+	sql := `select db_id, check_seq, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created
+			from pms_disaster_pri_status where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_pri)
+
+	return dis_pri, err
+}
+
+type DisasterStandby struct {
+	DB_Id        int    `orm:"pk;column(db_id);"`
+	Thread       int    `orm:"column(thread);"`
+	Sequence     int    `orm:"column(sequence);"`
+	Block        string `orm:"column(block);"`
+	Delay_Mins   int    `orm:"column(delay_mins);"`
+	Apply_Rate   string `orm:"column(apply_rate);"`
+	Curr_Scn     int64  `orm:"column(curr_scn);"`
+	Curr_Db_Time string `orm:"column(curr_db_time);"`
+	Mrp_Status   int    `orm:"column(mrp_status);"`
+	Created      int64  `orm:"column(created);"`
+}
+
+func GetStandbyDisasterInfo(db_id int) (DisasterStandby, error) {
+	var dis_sta DisasterStandby
+
+	sql := `select db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created 
+			from pms_disaster_sta_status where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_sta)
+
+	return dis_sta, err
+}
