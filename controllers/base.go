@@ -56,17 +56,44 @@ func (this *BaseController) Prepare() {
 		//fmt.Println(this.GetSession("userGroupid").(string))
 		//左侧导航
 		url := this.Ctx.Request.RequestURI
+		n_url := ""
+		url_first_part := "---"
+		url_sec_part := "---"
+		//utils.LogDebug(string(url[1:]))
+		if strings.Index(url, "/") >= 0 {
+			if strings.Index(url, "?") >= 0 {
+				pos := strings.Index(url, "?")
+				url = url[0:pos]
+				//utils.LogDebug(url)
+			}
+
+			sec_pos := strings.Index(url[1:], "/")
+			if sec_pos >= 0 {
+				url_first_part = url[0 : sec_pos+1]
+				//utils.LogDebug(url_first_part)
+				n_url = url[sec_pos+2:]
+
+				third_pos := strings.Index(n_url, "/")
+
+				if third_pos >= 0 {
+					url_sec_part = n_url[0:third_pos]
+					//utils.LogDebug(url_sec_part)
+				}
+			}
+		}
 
 		//url为空时
 		if url == "" {
 			url = "/"
 		}
 		this.Data["current_url"] = url
+		
+
 		//_, _, leftNav := ListRoleUserPermission(this.GetSession("userRoleid").(string))
-		_, _, leftNavLevel1 := GetLeftNavLevel1(this.GetSession("userRoleid").(string))
+		_, _, leftNavLevel1 := GetLeftNavLevel1(this.GetSession("userRoleid").(string), url_first_part)
 		this.Data["leftNavLevel1"] = leftNavLevel1
 		
-		_, _, leftNavLevel2 := GetLeftNavLevel2(this.GetSession("userRoleid").(string))
+		_, _, leftNavLevel2 := GetLeftNavLevel2(this.GetSession("userRoleid").(string), url_sec_part)
 		this.Data["leftNavLevel2"] = leftNavLevel2
 
 	}

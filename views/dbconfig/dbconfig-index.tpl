@@ -25,8 +25,8 @@
     <div class="page-heading">
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/db/manage">资产配置</a> </li>
-        <li class="active"> 数据库配置 </li>
+        <li> <a href="/config/db/manage">配置中心</a> </li>
+        <li class="active"> 资产配置 </li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -52,7 +52,7 @@
                   </form>
                 </div>
                 <div class="pull-right">
-                  <a href="/config/db/add" class="btn btn-success" id="add_business"><i class="fa fa-plus"></i> 新增数据库</a>
+                  <a href="#" class="btn btn-success" id="add_db"><i class="fa fa-plus"></i> 新增资产</a>
                 </div>
               </div>
             </div>
@@ -128,10 +128,44 @@
     <!--footer section end-->
   </div>
   <!-- main content end-->
+  <form id="db-form">
+    <div id="db_box" class="layui_drm">
+      <div class="layercontent">
+        <!-- layer content start -->
+        <div class="form-horizontal adminex-form">
+          <div class="form-group">
+            <a href="/config/db/add/?db_type=1" class="col-xs-2  control-label"><img src="/static/img/oracle.png" alt="Oracle"></a>
+            <a href="/config/db/add/?db_type=2" class="col-xs-2  control-label"><img src="/static/img/mysql.png" alt="MySQL"></a>
+            <a href="/config/db/add/?db_type=3" class="col-xs-2  control-label"><img src="/static/img/sqlserver.png" alt="SQLServer"></a>
+          </div>
+        </div>
+        <!-- layer content end -->
+      </div>
+    </div>
+  </form>
 </section>
 
 {{template "inc/foot.tpl" .}}
 <script>
+    //layer
+    $(function() {
+      $('#add_db').click(function() {
+        $("#db_type").attr("value",'');
+
+        layer.open({
+          type: 1,
+          closeBtn: true,
+          shift: 2,
+          title: '新增资产',
+          area: ['600px', '30%'],
+          offset: ['180px'],
+          shadeClose: true,
+          content: $('#db_box')
+        })
+      })
+    })
+
+
     $('.js-dbconfig-single').on('click', function(){
     	var that = $(this);
     	var status = that.attr('data-status')

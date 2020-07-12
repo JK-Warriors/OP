@@ -22,7 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/disaster_recover/manage">操作</a></li>
+        <li><a href="/operation/disaster_recover/manage">容灾操作</a></li>
         <li class="active">误删除恢复</li>
       </ul>
     </div>

@@ -25,9 +25,13 @@
     <div class="page-heading">
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/business/manage">容灾配置</a> </li>
-        <li class="active"> 容灾数据库配置 </li>
+        <li> <a href="/config/business/manage">配置中心</a> </li>
+        <li class="active"> 容灾配置 </li>
       </ul>
+    </div>
+    <div class="pull-right">
+      <a href="javascript:;" class="btn btn-success" id="add_business">
+        <i class="fa fa-plus"></i> 新增业务</a>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
@@ -104,6 +108,28 @@
     <!--footer section end-->
   </div>
   <!-- main content end-->
+  <form id="business-form">
+    <div id="business_box" class="layui_drm">
+      <div class="layercontent">
+        <!-- layer content start -->
+        <div class="form-horizontal adminex-form">
+          <div class="form-group">
+            <label class="col-xs-2  control-label">业务系统名称</label>
+            <div class="col-xs-10">
+              <input type="hidden" id="bs_id" name="bs_id" value="" class="form-control"/>
+              <input type="text" id="bs_name" name="bs_name" value="" class="form-control" placeholder="请填写业务系统名称"/>
+            </div>
+          </div>
+        </div>
+        <!-- layer content end -->
+      </div>
+      <!-- layer foot start -->
+      <div class="layerfoot">
+        <button type="submit" class="btn btn-primary">提 交</button>
+      </div>
+      <!-- layer content end -->
+    </div>
+  </form>
 </section>
 
 {{template "inc/foot.tpl" .}}
@@ -145,6 +171,100 @@
 		
 	});
 
+
+    //layer
+    $(function() {
+      $('#add_business').click(function() {
+        $("#bs_id").attr("value",'');
+        $("#bs_name").attr("value",'');
+
+        layer.open({
+          type: 1,
+          closeBtn: true,
+          shift: 2,
+          title: '新增业务系统',
+          area: ['600px', '30%'],
+          offset: ['180px'],
+          shadeClose: true,
+          content: $('#business_box')
+        })
+      })
+    })
+
+    
+    function edit_bs(e){
+      var id = e.getAttribute("data-id");
+      var bs_name = e.getAttribute("data-name");
+
+      $("#bs_id").attr("value",id);
+      $("#bs_name").attr("value",bs_name);
+
+      layer.open({
+        type: 1,
+        closeBtn: true,
+        shift: 2,
+        title: '编辑业务系统',
+        area: ['600px', '30%'],
+        offset: ['180px'],
+        shadeClose: true,
+        content: $('#business_box')
+      })
+    }
+
+
+    function delete_bs(e){
+      var id = e.getAttribute("data-id");
+      
+      layer.confirm('您确定要删除吗？', {
+        btn: ['确定','取消'] //按钮
+        ,title:"提示"
+      }, function(index){
+        layer.close(index);
+        
+        $.post('/config/business/ajax/delete', {ids:id},function(data){
+          dialogInfo(data.message)
+          if (data.code) {
+            setTimeout(function(){ window.location.reload() }, 1000);
+          } else {
+            setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
+          }
+        },'json');
+      });
+    }
+
+    
+    $('#business-form').validate({
+        ignore:'',        
+		    rules : {
+			      bs_name:{required: true},
+        },
+        messages : {
+			      bs_name:{required: '请填写业务系统名'},
+        },
+
+        submitHandler:function(form) {
+            var id = $("#bs_id").val()
+            if(id == ""){
+                target_url = "/config/business/add";
+            }else{
+                target_url = "/config/business/edit";
+            }
+            $(form).ajaxSubmit({
+                type:'POST',
+                url: target_url, 
+                dataType:'json',
+                success:function(data) {
+                    dialogInfo(data.message)
+                    if (data.code) {
+                       setTimeout(function(){window.location.href="/config/business/manage"}, 1000);
+                    } else {
+                       setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
+                    }
+                }
+            });
+        }
+
+    });
 </script>
 </body>
 </html>

@@ -68,6 +68,8 @@ func (this *AddDBConfigController) Get() {
 	if !strings.Contains(this.GetSession("userPermission").(string), "config-db-add") {
 		this.Abort("401")
 	}
+	db_type, _ := this.GetInt64("db_type")
+	this.Data["db_type"] = db_type
 
 	var dbconf Dbconfigs
 	this.Data["dbconf"] = dbconf

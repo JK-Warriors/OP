@@ -17,11 +17,11 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/business/manage">配置</a> </li>
-        <li> <a href="/config/db/manage">数据库配置</a> </li>
-        <li class="active"> {{if gt .dbconf.Id 0}}编辑{{else}}新增{{end}}数据库 </li>
+        <li> <a href="/config/db/manage">配置中心</a> </li>
+        <li> <a href="/config/db/manage">资产配置</a> </li>
+        <li class="active"> {{if gt .dbconf.Id 0}}编辑{{else}}新增{{end}}资产 </li>
       </ul>
-      <div class="pull-right"><a href="/config/db/add" class="btn btn-success">+添加数据库</a></div>
+      <div class="pull-right"><a href="/config/db/add" class="btn btn-success">+添加资产</a></div>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
@@ -33,7 +33,7 @@
             <div class="panel-body">
               <form class="form-horizontal adminex-form" id="dbconfig-form">
                 <header><b> 基本信息 </b></header>
-                <div class="form-group">
+                <!--<div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span></span>业务系统名</label>
                   <div class="col-sm-10">
                     <select id="bs_id" name="bs_id" class="form-control">
@@ -43,15 +43,15 @@
                       {{end}}
                     </select>
                   </div>
-                </div>
+                </div>-->
                 <div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>数据库类型</label>
                   <div class="col-sm-10">
                     <select id="db_type" name="db_type" class="form-control">
                       <option value="">请选择类型</option>
-                      <option value="1" {{if eq 1 .dbconf.Dbtype}}selected{{end}}>Oracle</option>
-                      <option value="2" {{if eq 2 .dbconf.Dbtype}}selected{{end}}>MySQL</option>
-                      <option value="3" {{if eq 3 .dbconf.Dbtype}}selected{{end}}>SQLServer</option>
+                      <option value="1" {{if eq 1 $.db_type}}selected{{end}}>Oracle</option>
+                      <option value="2" {{if eq 2 $.db_type}}selected{{end}}>MySQL</option>
+                      <option value="3" {{if eq 3 $.db_type}}selected{{end}}>SQLServer</option>
                     </select>
                   </div>
                 </div>

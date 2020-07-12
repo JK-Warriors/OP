@@ -20,6 +20,7 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
+        <li> <a href="/system/user/manage">系统管理</a> </li>
         <li> <a href="/system/permission/manage">权限管理</a> </li>
         <li class="active"> 权限列表 </li>
       </ul>

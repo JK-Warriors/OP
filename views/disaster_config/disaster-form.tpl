@@ -17,7 +17,7 @@
     <div class="page-heading">
       <!-- <h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/business/manage">配置</a> </li>
+        <li> <a href="/config/business/manage">容灾配置</a> </li>
         <li> <a href="/config/disaster/manage">容灾配置</a> </li>
         <li class="active"> {{if gt .bsconf.Id 0}}编辑{{else}}新增{{end}}容灾 </li>
       </ul>

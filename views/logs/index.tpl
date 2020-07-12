@@ -20,6 +20,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
+        <li> <a href="/system/user/manage">系统管理</a> </li>
         <li> <a href="/system/log/manage">日志管理</a> </li>
         <li class="active"> 系统日志 </li>
       </ul>

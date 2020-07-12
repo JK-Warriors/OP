@@ -42,12 +42,12 @@
   <ul class="nav" id="side-menu">
       <li>
         <a href="/" {{if eq $.current_url "/"}}class="active"{{end}}>
-          <i class="fa fa-home"></i> <b>首页</b>
+          <i class="fa fa-home"></i> <b>首页 </b>
         </a>
       </li>
       {{range $index, $elem := .leftNavLevel1}}
         {{if eq 1 $elem.IsShow}}
-        <li>
+        <li {{if eq 1 $elem.IsActive}}class="mm-active"{{end}}>
               <a href="#" data-icon="{{$elem.Icon}}" data-title="{{$elem.Name}}" class="pointer" data-id="{{$elem.Id}}">
                 <i class="fa {{$elem.Icon}}"></i><b>{{$elem.Name}}</b> <span class="fa arrow"></span>
               </a>
@@ -56,7 +56,7 @@
             {{range $index2, $elem2 := $.leftNavLevel2}}
             {{if eq $elem.Id $elem2.ParentId}}
                 <li>
-                      <a href="{{$elem2.Url}}" data-icon="{{$elem2.Icon}}" data-title="{{$elem2.Name}}" {{if eq $.current_url $elem2.Url}}class="active"{{end}} class="pointer" data-id="{{$elem2.Id}}">
+                      <a href="{{$elem2.Url}}" data-icon="{{$elem2.Icon}}" data-title="{{$elem2.Name}}" {{if eq 1 $elem2.IsActive}}class="active"{{end}} class="pointer" data-id="{{$elem2.Id}}">
                         <i class="fa {{$elem2.Icon}}"></i> <span>{{$elem2.Name}}</span>
                       </a>
                 </li>

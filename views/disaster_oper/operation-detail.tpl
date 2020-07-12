@@ -22,7 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/disaster_switch/manage">操作</a></li>
+        <li><a href="/operation/disaster_switch/manage">容灾操作</a></li>
         <li><a href="/operation/disaster_switch/manage">容灾切换</a></li>
         <li class="active">容灾详情</li>
       </ul>

@@ -62,52 +62,61 @@ CREATE TABLE `pms_permissions` (
 -- Records of pms_permissions
 -- ----------------------------
 INSERT INTO `pms_permissions` VALUES ('0', '0', '根节点', 'root', '/root', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1', '0', '系统管理', 'system', '/system', '', '1', '1', '9');
-INSERT INTO `pms_permissions` VALUES ('2', '0', '资产配置', 'config', '/config', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('3', '0', '容灾配置', 'config', '/config', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('4', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/config', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('3', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('4', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('9', '0', '系统管理', 'system', '/system', '', '1', '1', '9');
 
-INSERT INTO `pms_permissions` VALUES ('1010', '1', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '0');
-INSERT INTO `pms_permissions` VALUES ('1011', '1', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1012', '1', '编辑用户', 'user-edit', '/system/user/edit', null, '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1013', '1', '删除用户', 'user-delete', '/system/user/delete', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1020', '1', '角色管理', 'role-manage', '/system/role/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1021', '1', '添加角色', 'role-add', '/system/role/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1022', '1', '编辑角色', 'role-edit', '/system/role/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1023', '1', '删除角色', 'role-delete', '/system/role/delete', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1024', '1', '角色权限', 'role-permission', '/system/role/permission', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('1025', '1', '角色成员', 'role-user', '/system/role/user', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('1026', '1', '添加角色', 'role-user-add', '/system/role/useradd', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('1027', '1', '删除角色', 'role-user-delete', '/system/role/userdelete', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1030', '1', '权限管理', 'permission-manage', '/system/permission/manage', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1031', '1', '添加权限', 'permission-add', '/system/permission/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1032', '1', '编辑权限', 'permission-edit', '/system/permission/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1033', '1', '删除权限', 'permission-delete', '/system/permission/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2100', '2', '资产配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-add', '/config/db/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2102', '2', '编辑资产', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2103', '2', '删除资产', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('1040', '1', '日志管理', 'log-manage', '/system/log/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1041', '1', '日志删除', 'log-delete', '/system/log/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/business/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/business/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/business/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/business/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('1050', '1', '消息管理', 'message-manage', '/system/message/manage', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1051', '1', '消息删除', 'message-delete', '/system/message/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('1100', '3', '业务系统配置', 'config-business-manage', '/config/business/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1101', '3', '添加业务系统', 'config-business-add', '/config/business/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1102', '3', '编辑业务系统', 'config-business-edit', '/config/business/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1103', '3', '删除业务系统', 'config-business-delete', '/config/business/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('1110', '2', '数据库配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('1111', '2', '添加数据库', 'config-db-add', '/config/db/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1112', '2', '编辑数据库', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1113', '2', '删除数据库', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '4');
 
-INSERT INTO `pms_permissions` VALUES ('1120', '3', '容灾数据库配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '5');
 
-INSERT INTO `pms_permissions` VALUES ('1130', '4', '容灾切换', 'oper-switch-manage', '/operation/disaster_switch/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1131', '4', '容灾切换', 'oper-switch-view', '/operation/disaster_switch/view', '', '0', '0', '1');
-INSERT INTO `pms_permissions` VALUES ('1132', '4', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('1133', '4', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
-INSERT INTO `pms_permissions` VALUES ('1134', '4', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
-INSERT INTO `pms_permissions` VALUES ('1135', '4', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('3100', '3', '容灾切换', 'oper-switch-manage', '/operation/disaster_switch/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('3101', '3', '容灾切换', 'oper-switch-view', '/operation/disaster_switch/view', '', '0', '0', '1');
+INSERT INTO `pms_permissions` VALUES ('3102', '3', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('3103', '3', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('3104', '3', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('3105', '3', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
+
+
+INSERT INTO `pms_permissions` VALUES ('9010', '9', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9011', '9', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9012', '9', '编辑用户', 'user-edit', '/system/user/edit', null, '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9013', '9', '删除用户', 'user-delete', '/system/user/delete', '', '0', '0', '0');
+
+INSERT INTO `pms_permissions` VALUES ('9020', '9', '角色管理', 'role-manage', '/system/role/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('9021', '9', '添加角色', 'role-add', '/system/role/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9022', '9', '编辑角色', 'role-edit', '/system/role/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9023', '9', '删除角色', 'role-delete', '/system/role/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9024', '9', '角色权限', 'role-permission', '/system/role/permission', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9025', '9', '角色成员', 'role-user', '/system/role/user', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9026', '9', '添加角色', 'role-user-add', '/system/role/useradd', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9027', '9', '删除角色', 'role-user-delete', '/system/role/userdelete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9030', '9', '权限管理', 'permission-manage', '/system/permission/manage', '', '0', '0', '3');
+INSERT INTO `pms_permissions` VALUES ('9031', '9', '添加权限', 'permission-add', '/system/permission/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9032', '9', '编辑权限', 'permission-edit', '/system/permission/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9033', '9', '删除权限', 'permission-delete', '/system/permission/delete', '', '0', '0', '0');
+
+INSERT INTO `pms_permissions` VALUES ('9040', '9', '日志管理', 'log-manage', '/system/log/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('9041', '9', '日志删除', 'log-delete', '/system/log/delete', '', '0', '0', '0');
+
+INSERT INTO `pms_permissions` VALUES ('9050', '9', '消息管理', 'message-manage', '/system/message/manage', '', '0', '0', '5');
+INSERT INTO `pms_permissions` VALUES ('9051', '9', '消息删除', 'message-delete', '/system/message/delete', '', '0', '0', '0');
+
 -- ----------------------------
 -- Table structure for pms_role_permission
 -- ----------------------------
@@ -123,47 +132,45 @@ CREATE TABLE `pms_role_permission` (
 -- ----------------------------
 -- Records of pms_groups_permission
 -- ----------------------------
-INSERT INTO `pms_role_permission` VALUES ('1 ', '1', '1');
-INSERT INTO `pms_role_permission` VALUES ('2 ', '1', '2');
-INSERT INTO `pms_role_permission` VALUES ('3 ', '1', '3');
-INSERT INTO `pms_role_permission` VALUES ('4 ', '1', '4');
-INSERT INTO `pms_role_permission` VALUES ('5 ', '1', '1010');
-INSERT INTO `pms_role_permission` VALUES ('6 ', '1', '1011');
-INSERT INTO `pms_role_permission` VALUES ('7 ', '1', '1012');
-INSERT INTO `pms_role_permission` VALUES ('8 ', '1', '1013');
-INSERT INTO `pms_role_permission` VALUES ('9 ', '1', '1020');
-INSERT INTO `pms_role_permission` VALUES ('10', '1', '1021');
-INSERT INTO `pms_role_permission` VALUES ('11', '1', '1022');
-INSERT INTO `pms_role_permission` VALUES ('12', '1', '1023');
-INSERT INTO `pms_role_permission` VALUES ('13', '1', '1024');
-INSERT INTO `pms_role_permission` VALUES ('14', '1', '1025');
-INSERT INTO `pms_role_permission` VALUES ('15', '1', '1026');
-INSERT INTO `pms_role_permission` VALUES ('16', '1', '1027');
-INSERT INTO `pms_role_permission` VALUES ('17', '1', '1030');
-INSERT INTO `pms_role_permission` VALUES ('18', '1', '1031');
-INSERT INTO `pms_role_permission` VALUES ('19', '1', '1032');
-INSERT INTO `pms_role_permission` VALUES ('20', '1', '1033');
-INSERT INTO `pms_role_permission` VALUES ('21', '1', '1040');
-INSERT INTO `pms_role_permission` VALUES ('22', '1', '1041');
-INSERT INTO `pms_role_permission` VALUES ('23', '1', '1050');
-INSERT INTO `pms_role_permission` VALUES ('24', '1', '1051');
-
-INSERT INTO `pms_role_permission` VALUES ('25', '1', '1100');
-INSERT INTO `pms_role_permission` VALUES ('26', '1', '1101');
-INSERT INTO `pms_role_permission` VALUES ('27', '1', '1102');
-INSERT INTO `pms_role_permission` VALUES ('28', '1', '1103');
-INSERT INTO `pms_role_permission` VALUES ('29', '1', '1110');
-INSERT INTO `pms_role_permission` VALUES ('30', '1', '1111');
-INSERT INTO `pms_role_permission` VALUES ('31', '1', '1112');
-INSERT INTO `pms_role_permission` VALUES ('32', '1', '1113');
-INSERT INTO `pms_role_permission` VALUES ('33', '1', '1120');
-
-INSERT INTO `pms_role_permission` VALUES ('34', '1', '1130');
-INSERT INTO `pms_role_permission` VALUES ('35', '1', '1131');
-INSERT INTO `pms_role_permission` VALUES ('36', '1', '1132');
-INSERT INTO `pms_role_permission` VALUES ('37', '1', '1133');
-INSERT INTO `pms_role_permission` VALUES ('38', '1', '1134');
-INSERT INTO `pms_role_permission` VALUES ('39', '1', '1135');
+INSERT INTO `pms_role_permission` VALUES ('1 ', '1', '2');
+INSERT INTO `pms_role_permission` VALUES ('2 ', '1', '3');
+INSERT INTO `pms_role_permission` VALUES ('3 ', '1', '4');
+INSERT INTO `pms_role_permission` VALUES ('4 ', '1', '9');
+INSERT INTO `pms_role_permission` VALUES ('5 ', '1', '2100');
+INSERT INTO `pms_role_permission` VALUES ('6 ', '1', '2101');
+INSERT INTO `pms_role_permission` VALUES ('7 ', '1', '2102');
+INSERT INTO `pms_role_permission` VALUES ('8 ', '1', '2103');
+INSERT INTO `pms_role_permission` VALUES ('9 ', '1', '2110');
+INSERT INTO `pms_role_permission` VALUES ('10', '1', '2111');
+INSERT INTO `pms_role_permission` VALUES ('11', '1', '2112');
+INSERT INTO `pms_role_permission` VALUES ('12', '1', '2113');
+INSERT INTO `pms_role_permission` VALUES ('13', '1', '2120');
+INSERT INTO `pms_role_permission` VALUES ('14', '1', '2130');
+INSERT INTO `pms_role_permission` VALUES ('15', '1', '2140');
+INSERT INTO `pms_role_permission` VALUES ('16', '1', '2150');
+INSERT INTO `pms_role_permission` VALUES ('17', '1', '3100');
+INSERT INTO `pms_role_permission` VALUES ('18', '1', '3101');
+INSERT INTO `pms_role_permission` VALUES ('19', '1', '3102');
+INSERT INTO `pms_role_permission` VALUES ('20', '1', '3103');
+INSERT INTO `pms_role_permission` VALUES ('21', '1', '3104');
+INSERT INTO `pms_role_permission` VALUES ('22', '1', '3105');
+INSERT INTO `pms_role_permission` VALUES ('23', '1', '9010');
+INSERT INTO `pms_role_permission` VALUES ('24', '1', '9011');
+INSERT INTO `pms_role_permission` VALUES ('25', '1', '9012');
+INSERT INTO `pms_role_permission` VALUES ('26', '1', '9013');
+INSERT INTO `pms_role_permission` VALUES ('27', '1', '9020');
+INSERT INTO `pms_role_permission` VALUES ('28', '1', '9021');
+INSERT INTO `pms_role_permission` VALUES ('29', '1', '9022');
+INSERT INTO `pms_role_permission` VALUES ('30', '1', '9023');
+INSERT INTO `pms_role_permission` VALUES ('31', '1', '9024');
+INSERT INTO `pms_role_permission` VALUES ('32', '1', '9030');
+INSERT INTO `pms_role_permission` VALUES ('33', '1', '9031');
+INSERT INTO `pms_role_permission` VALUES ('34', '1', '9032');
+INSERT INTO `pms_role_permission` VALUES ('35', '1', '9033');
+INSERT INTO `pms_role_permission` VALUES ('36', '1', '9040');
+INSERT INTO `pms_role_permission` VALUES ('37', '1', '9041');
+INSERT INTO `pms_role_permission` VALUES ('38', '1', '9050');
+INSERT INTO `pms_role_permission` VALUES ('39', '1', '9051');
 
 
 
