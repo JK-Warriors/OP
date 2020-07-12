@@ -12,10 +12,11 @@
 <script src="/static/js/layer/layer.js"></script>
 <script src="/static/js/bootbox.js"></script>
 <script src="/static/js/md5.js"></script>
+<script src="/static/js/metisMenu.js"></script>
 <!-- <script src="/static/js/switchery.js"></script> -->
 
 
-<script src="https://cdn.bootcss.com/metisMenu/3.0.6/metisMenu.js"></script>
+<!-- <script src="https://cdn.bootcss.com/metisMenu/3.0.6/metisMenu.js"></script> -->
 
 <script type="text/javascript">
   $(function() {
