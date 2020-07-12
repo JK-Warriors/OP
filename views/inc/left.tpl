@@ -27,6 +27,7 @@
   
   <!--<ul class="nav nav-pills nav-stacked custom-nav js-left-nav">-->
   <div class="sidebar-nav navbar-collapse">
+  <!--
   <ul class="nav" id="side-menu1">
       {{range $index, $elem := .leftNav}}
         {{if eq 1 $elem.IsShow}}
@@ -37,7 +38,36 @@
         </li>
         {{end}}
       {{end}}
+  </ul>-->
+  <ul class="nav" id="side-menu">
+      <li>
+        <a href="/" {{if eq $.current_url "/"}}class="active"{{end}}>
+          <i class="fa fa-home"></i> <b>首页</b>
+        </a>
+      </li>
+      {{range $index, $elem := .leftNavLevel1}}
+        {{if eq 1 $elem.IsShow}}
+        <li>
+              <a href="#" data-icon="{{$elem.Icon}}" data-title="{{$elem.Name}}" class="pointer" data-id="{{$elem.Id}}">
+                <i class="fa {{$elem.Icon}}"></i><b>{{$elem.Name}}</b> <span class="fa arrow"></span>
+              </a>
+
+            <ul class="nav nav-second-level">
+            {{range $index2, $elem2 := $.leftNavLevel2}}
+            {{if eq $elem.Id $elem2.ParentId}}
+                <li>
+                      <a href="{{$elem2.Url}}" data-icon="{{$elem2.Icon}}" data-title="{{$elem2.Name}}" {{if eq $.current_url $elem2.Url}}class="active"{{end}} class="pointer" data-id="{{$elem2.Id}}">
+                        <i class="fa {{$elem2.Icon}}"></i> <span>{{$elem2.Name}}</span>
+                      </a>
+                </li>
+            {{end}}
+            {{end}}
+            </ul>
+        </li>
+        {{end}}
+      {{end}}
   </ul>
+
 
   <!--
   <ul class="nav" id="side-menu">

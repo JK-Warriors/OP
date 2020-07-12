@@ -22,7 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/config/business/manage">配置</a></li>
+        <li><a href="/config/business/manage">容灾配置</a></li>
         <li class="active">业务系统配置</li>
       </ul>
     </div>

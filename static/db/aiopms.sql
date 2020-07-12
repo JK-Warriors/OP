@@ -62,9 +62,10 @@ CREATE TABLE `pms_permissions` (
 -- Records of pms_permissions
 -- ----------------------------
 INSERT INTO `pms_permissions` VALUES ('0', '0', '根节点', 'root', '/root', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1', '0', '系统管理', 'system', '/system', '', '1', '0', '1');
-INSERT INTO `pms_permissions` VALUES ('2', '0', '业务配置', 'config', '/config', '', '1', '0', '2');
-INSERT INTO `pms_permissions` VALUES ('3', '0', '操作', 'operation', '/operation', '', '1', '0', '3');
+INSERT INTO `pms_permissions` VALUES ('1', '0', '系统管理', 'system', '/system', '', '1', '1', '9');
+INSERT INTO `pms_permissions` VALUES ('2', '0', '资产配置', 'config', '/config', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('3', '0', '容灾配置', 'config', '/config', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('4', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '3');
 
 INSERT INTO `pms_permissions` VALUES ('1010', '1', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '0');
 INSERT INTO `pms_permissions` VALUES ('1011', '1', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
@@ -89,24 +90,24 @@ INSERT INTO `pms_permissions` VALUES ('1041', '1', '日志删除', 'log-delete',
 INSERT INTO `pms_permissions` VALUES ('1050', '1', '消息管理', 'message-manage', '/system/message/manage', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('1051', '1', '消息删除', 'message-delete', '/system/message/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('1100', '2', '业务系统配置', 'config-business-manage', '/config/business/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1101', '2', '添加业务系统', 'config-business-add', '/config/business/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1102', '2', '编辑业务系统', 'config-business-edit', '/config/business/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('1103', '2', '删除业务系统', 'config-business-delete', '/config/business/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('1100', '3', '业务系统配置', 'config-business-manage', '/config/business/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('1101', '3', '添加业务系统', 'config-business-add', '/config/business/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('1102', '3', '编辑业务系统', 'config-business-edit', '/config/business/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('1103', '3', '删除业务系统', 'config-business-delete', '/config/business/delete', '', '0', '0', '0');
 
 INSERT INTO `pms_permissions` VALUES ('1110', '2', '数据库配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '2');
 INSERT INTO `pms_permissions` VALUES ('1111', '2', '添加数据库', 'config-db-add', '/config/db/add', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('1112', '2', '编辑数据库', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('1113', '2', '删除数据库', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('1120', '2', '容灾配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('1120', '3', '容灾数据库配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('1130', '3', '容灾切换', 'oper-switch-manage', '/operation/disaster_switch/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('1131', '3', '容灾切换', 'oper-switch-view', '/operation/disaster_switch/view', '', '0', '0', '1');
-INSERT INTO `pms_permissions` VALUES ('1132', '3', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('1133', '3', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
-INSERT INTO `pms_permissions` VALUES ('1134', '3', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
-INSERT INTO `pms_permissions` VALUES ('1135', '3', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('1130', '4', '容灾切换', 'oper-switch-manage', '/operation/disaster_switch/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('1131', '4', '容灾切换', 'oper-switch-view', '/operation/disaster_switch/view', '', '0', '0', '1');
+INSERT INTO `pms_permissions` VALUES ('1132', '4', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('1133', '4', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('1134', '4', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('1135', '4', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
 -- ----------------------------
 -- Table structure for pms_role_permission
 -- ----------------------------

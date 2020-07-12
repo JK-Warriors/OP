@@ -25,8 +25,8 @@
     <div class="page-heading">
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/business/manage">配置</a> </li>
-        <li class="active"> 容灾配置 </li>
+        <li> <a href="/config/business/manage">容灾配置</a> </li>
+        <li class="active"> 容灾数据库配置 </li>
       </ul>
     </div>
     <!-- page heading end-->

@@ -25,7 +25,7 @@
     <div class="page-heading">
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
-        <li> <a href="/config/db/manage">配置</a> </li>
+        <li> <a href="/config/db/manage">资产配置</a> </li>
         <li class="active"> 数据库配置 </li>
       </ul>
     </div>
