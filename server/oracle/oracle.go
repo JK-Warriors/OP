@@ -147,7 +147,7 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 		// add Begin() before any action
 		err := session.Begin()
 		//move old data to history table
-		sql = `insert into pms_disaster_pri_status_his select * from pms_disaster_pri_status where db_id = ?`
+		sql = `insert into pms_dr_pri_status_his select * from pms_dr_pri_status where db_id = ?`
 		_, err = mysql.Exec(sql, db_id)
 		if err != nil {
 			log.Printf("%s: %w", sql, err)
@@ -155,7 +155,7 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 			return
 		}
 
-		sql = `delete from pms_disaster_pri_status where db_id = ?`
+		sql = `delete from pms_dr_pri_status where db_id = ?`
 		_, err = mysql.Exec(sql, db_id)
 		if err != nil {
 			log.Printf("%s: %w", sql, err)
@@ -163,7 +163,7 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 			return
 		}
 
-		sql = `insert into pms_disaster_pri_status(db_id, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created) 
+		sql = `insert into pms_dr_pri_status(db_id, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created) 
 						values(?,?,?,?,?,?,?,?,?,?)`
 
 		_, err = mysql.Exec(sql, db_id, dest_id, transmit_mode, thread, sequence, current_scn, curr_db_time, archived_delay, applied_delay, time.Now().Unix())
@@ -242,7 +242,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	// add Begin() before any action
 	err = session.Begin()
 	//move old data to history table
-	sql = `insert into pms_disaster_sta_status_his select * from pms_disaster_sta_status where db_id = ?`
+	sql = `insert into pms_dr_sta_status_his select * from pms_dr_sta_status where db_id = ?`
 	_, err = mysql.Exec(sql, db_id)
 	if err != nil {
 		log.Printf("%s: %w", sql, err)
@@ -250,7 +250,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 		return
 	}
 
-	sql = `delete from pms_disaster_sta_status where db_id = ?`
+	sql = `delete from pms_dr_sta_status where db_id = ?`
 	_, err = mysql.Exec(sql, db_id)
 	if err != nil {
 		log.Printf("%s: %w", sql, err)
@@ -258,7 +258,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 		return
 	}
 
-	sql = `insert into pms_disaster_sta_status(db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created) 
+	sql = `insert into pms_dr_sta_status(db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created) 
 						values(?,?,?,?,?,?,?,?,?,?)`
 
 	_, err = mysql.Exec(sql, db_id, thread, sequence, block, delay_mins, apply_rate, sta_scn, curr_db_time, mrp_status, time.Now().Unix())

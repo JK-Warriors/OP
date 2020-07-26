@@ -45,13 +45,13 @@
                   </div>
                 </div>-->
                 <div class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>数据库类型</label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>资产类型</label>
                   <div class="col-sm-10">
                     <select id="db_type" name="db_type" class="form-control">
                       <option value="">请选择类型</option>
-                      <option value="1" {{if eq 1 $.db_type}}selected{{end}}>Oracle</option>
-                      <option value="2" {{if eq 2 $.db_type}}selected{{end}}>MySQL</option>
-                      <option value="3" {{if eq 3 $.db_type}}selected{{end}}>SQLServer</option>
+                      <option value="1" {{if eq 1 .dbconf.Dbtype}}selected{{end}}>Oracle</option>
+                      <option value="2" {{if eq 2 .dbconf.Dbtype}}selected{{end}}>MySQL</option>
+                      <option value="3" {{if eq 3 .dbconf.Dbtype}}selected{{end}}>SQLServer</option>
                     </select>
                   </div>
                 </div>

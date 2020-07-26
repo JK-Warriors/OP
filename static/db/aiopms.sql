@@ -72,25 +72,25 @@ INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-ad
 INSERT INTO `pms_permissions` VALUES ('2102', '2', '编辑资产', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('2103', '2', '删除资产', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/business/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/business/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/business/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/business/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/dr_business/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/dr_business/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/dr_business/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/dr_business/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
 
-INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-disaster-manage', '/config/disaster/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '5');
 
-INSERT INTO `pms_permissions` VALUES ('3100', '3', '容灾切换', 'oper-switch-manage', '/operation/disaster_switch/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('3101', '3', '容灾切换', 'oper-switch-view', '/operation/disaster_switch/view', '', '0', '0', '1');
-INSERT INTO `pms_permissions` VALUES ('3102', '3', '容灾激活', 'oper-active-manage', '/operation/disaster_active/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('3103', '3', '容灾同步', 'oper-sync-manage', '/operation/disaster_sync/manage', '', '1', '1', '3');
-INSERT INTO `pms_permissions` VALUES ('3104', '3', '容灾快照', 'oper-snapshot-manage', '/operation/disaster_snapshot/manage', '', '1', '1', '4');
-INSERT INTO `pms_permissions` VALUES ('3105', '3', '误删除恢复', 'oper-recover-manage', '/operation/disaster_recover/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('3100', '3', '容灾切换', 'oper-switch-manage', '/operation/dr_switch/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('3101', '3', '容灾切换', 'oper-switch-view', '/operation/dr_switch/view', '', '0', '0', '1');
+INSERT INTO `pms_permissions` VALUES ('3102', '3', '容灾激活', 'oper-active-manage', '/operation/dr_active/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('3103', '3', '容灾同步', 'oper-sync-manage', '/operation/dr_sync/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('3104', '3', '容灾快照', 'oper-snapshot-manage', '/operation/dr_snapshot/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('3105', '3', '误删除恢复', 'oper-recover-manage', '/operation/dr_recover/manage', '', '1', '1', '5');
 
 
 INSERT INTO `pms_permissions` VALUES ('9010', '9', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
@@ -316,10 +316,10 @@ CREATE TABLE `pms_db_config` (
 
 
 -- -----------------------------------------------------------------------------
--- Table structure for pms_business
+-- Table structure for pms_dr_business
 -- -----------------------------------------------------------------------------
-DROP TABLE IF EXISTS `pms_business`;
-CREATE TABLE `pms_business` (
+DROP TABLE IF EXISTS `pms_dr_business`;
+CREATE TABLE `pms_dr_business` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `bs_name` varchar(50) DEFAULT '' COMMENT '业务系统名',
   `is_delete` tinyint(2) DEFAULT 0 COMMENT '1: 删除；0：未删除',
@@ -331,10 +331,10 @@ CREATE TABLE `pms_business` (
 
 
 -- -----------------------------------------------------------------------------
--- Table structure for pms_disaster_config
+-- Table structure for pms_dr_config
 -- -----------------------------------------------------------------------------
-DROP TABLE IF EXISTS `pms_disaster_config`;
-CREATE TABLE `pms_disaster_config` (
+DROP TABLE IF EXISTS `pms_dr_config`;
+CREATE TABLE `pms_dr_config` (
   `bs_id` int(10) unsigned NOT NULL COMMENT 'Business Id',
   `db_id_p` int(10) COMMENT 'primary db id',
   `db_dest_p` tinyint(2) COMMENT 'primary dest id',
@@ -362,17 +362,17 @@ CREATE TABLE `pms_disaster_config` (
   PRIMARY KEY (`bs_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='业务系统配置扩展表';
 
-alter table pms_disaster_config modify column on_process tinyint(1) DEFAULT 0 comment '值为1时，表明正在进行Switchover，或者Failover，或者开启停止MRP进程'; 
-alter table pms_disaster_config modify column on_switchover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Switchover切换'; 
-alter table pms_disaster_config modify column on_failover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Failover切换'; 
-alter table pms_disaster_config modify column on_startsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启同步进程'; 
-alter table pms_disaster_config modify column on_stopsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止同步进程'; 
-alter table pms_disaster_config modify column on_startread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启可读'; 
-alter table pms_disaster_config modify column on_stopread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止可读'; 
-alter table pms_disaster_config modify column on_startsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在激活数据库快照'; 
-alter table pms_disaster_config modify column on_stopsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从快照恢复到物理备库'; 
-alter table pms_disaster_config modify column on_startflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行数据库闪回'; 
-alter table pms_disaster_config modify column on_stopflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从闪回恢复到同步状态'; 
+alter table pms_dr_config modify column on_process tinyint(1) DEFAULT 0 comment '值为1时，表明正在进行Switchover，或者Failover，或者开启停止MRP进程'; 
+alter table pms_dr_config modify column on_switchover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Switchover切换'; 
+alter table pms_dr_config modify column on_failover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Failover切换'; 
+alter table pms_dr_config modify column on_startsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启同步进程'; 
+alter table pms_dr_config modify column on_stopsync tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止同步进程'; 
+alter table pms_dr_config modify column on_startread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在开启可读'; 
+alter table pms_dr_config modify column on_stopread tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在停止可读'; 
+alter table pms_dr_config modify column on_startsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在激活数据库快照'; 
+alter table pms_dr_config modify column on_stopsnapshot tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从快照恢复到物理备库'; 
+alter table pms_dr_config modify column on_startflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行数据库闪回'; 
+alter table pms_dr_config modify column on_stopflashback tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在从闪回恢复到同步状态'; 
 
 -- -----------------------------------------------------------------------------
 -- Table structure for pms_template
@@ -525,8 +525,8 @@ CREATE TABLE `pms_op_process_his` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `pms_disaster_pri_status`;
-CREATE TABLE `pms_disaster_pri_status` (
+DROP TABLE IF EXISTS `pms_dr_pri_status`;
+CREATE TABLE `pms_dr_pri_status` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `db_id` int(10) NOT NULL,
   `check_seq` smallint(4) NOT NULL DEFAULT '0',
@@ -542,8 +542,8 @@ CREATE TABLE `pms_disaster_pri_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `pms_disaster_pri_status_his`;
-CREATE TABLE `pms_disaster_pri_status_his` (
+DROP TABLE IF EXISTS `pms_dr_pri_status_his`;
+CREATE TABLE `pms_dr_pri_status_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `db_id` int(10) NOT NULL,
   `check_seq` smallint(4) NOT NULL DEFAULT '0',
@@ -560,8 +560,8 @@ CREATE TABLE `pms_disaster_pri_status_his` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `pms_disaster_sta_status`;
-CREATE TABLE `pms_disaster_sta_status` (
+DROP TABLE IF EXISTS `pms_dr_sta_status`;
+CREATE TABLE `pms_dr_sta_status` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `db_id` int(10) NOT NULL,
   `thread` smallint(4) NOT NULL,
@@ -576,8 +576,8 @@ CREATE TABLE `pms_disaster_sta_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `pms_disaster_sta_status_his`;
-CREATE TABLE `pms_disaster_sta_status_his` (
+DROP TABLE IF EXISTS `pms_dr_sta_status_his`;
+CREATE TABLE `pms_dr_sta_status_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `db_id` int(10) NOT NULL,
   `thread` smallint(4) NOT NULL,

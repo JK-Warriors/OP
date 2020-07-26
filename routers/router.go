@@ -1,11 +1,11 @@
 package routers
 
 import (
-	"opms/controllers/business"
 	"opms/controllers/dbconfig"
 	"opms/controllers/demo"
-	"opms/controllers/disaster_config"
-	"opms/controllers/disaster_oper"
+	"opms/controllers/dr_business"
+	"opms/controllers/dr_config"
+	"opms/controllers/dr_oper"
 	"opms/controllers/logs"
 	"opms/controllers/messages"
 	"opms/controllers/roles"
@@ -65,10 +65,10 @@ func init() {
 	beego.Router("/system/log/ajax/delete", &logs.AjaxDeleteLogController{})
 
 	//业务系统配置
-	beego.Router("/config/business/manage", &business.ManageBusinessController{})
-	beego.Router("/config/business/add", &business.AddBusinessController{})
-	beego.Router("/config/business/edit", &business.EditBusinessController{})
-	beego.Router("/config/business/ajax/delete", &business.AjaxDeleteBusinessController{})
+	beego.Router("/config/dr_business/manage", &dr_business.ManageBusinessController{})
+	beego.Router("/config/dr_business/add", &dr_business.AddBusinessController{})
+	beego.Router("/config/dr_business/edit", &dr_business.EditBusinessController{})
+	beego.Router("/config/dr_business/ajax/delete", &dr_business.AjaxDeleteBusinessController{})
 
 	//数据库配置
 	beego.Router("/config/db/manage", &dbconfig.ManageDBConfigController{})
@@ -79,29 +79,29 @@ func init() {
 	beego.Router("/config/db/ajax/connect", &dbconfig.AjaxConnectDBConfigController{})
 
 	//容灾配置
-	beego.Router("/config/disaster/manage", &disaster_config.ManageDisasterController{})
-	beego.Router("/config/disaster/edit/:id", &disaster_config.EditDisasterController{})
+	beego.Router("/config/dr_config/manage", &dr_config.ManageDrController{})
+	beego.Router("/config/dr_config/edit/:id", &dr_config.EditDrController{})
 
 	//操作
-	beego.Router("/operation/disaster_switch/manage", &disaster_oper.ManageDisasterSwitchController{})
-	//beego.Router("/operation/disaster_switch/view/:id", &disaster_oper.ViewDisasterSwitchController{})
-	beego.Router("/operation/disaster_switch/screen/:id", &disaster_oper.ScreenDisasterSwitchController{})
-	beego.Router("/operation/disaster_switch/switchover", &disaster_oper.AjaxDisasterSwitchoverController{})
-	beego.Router("/operation/disaster_switch/failover", &disaster_oper.AjaxDisasterFailoverController{})
-	beego.Router("/operation/disaster_switch/process", &disaster_oper.AjaxDisasterProcessController{})
-	beego.Router("/operation/disaster_active/manage", &disaster_oper.ManageDisasterActiveController{})
-	beego.Router("/operation/disaster_active/startread", &disaster_oper.AjaxDisasterStartReadController{})
-	beego.Router("/operation/disaster_active/stopread", &disaster_oper.AjaxDisasterStopReadController{})
-	beego.Router("/operation/disaster_snapshot/manage", &disaster_oper.ManageDisasterSnapshotController{})
-	beego.Router("/operation/disaster_snapshot/startsnapshot", &disaster_oper.AjaxDisasterStartSnapshotController{})
-	beego.Router("/operation/disaster_snapshot/stopsnapshot", &disaster_oper.AjaxDisasterStopSnapshotController{})
-	beego.Router("/operation/disaster_sync/manage", &disaster_oper.ManageDisasterSyncController{})
-	beego.Router("/operation/disaster_sync/startsync", &disaster_oper.AjaxDisasterStartSyncController{})
-	beego.Router("/operation/disaster_sync/stopsync", &disaster_oper.AjaxDisasterStopSyncController{})
-	beego.Router("/operation/disaster_recover/manage", &disaster_oper.ManageDisasterRecoverController{})
-	beego.Router("/operation/disaster_recover/oper/:id", &disaster_oper.OperDisasterRecoverController{})
-	beego.Router("/operation/disaster_recover/flashback", &disaster_oper.AjaxDisasterFlashbackController{})
-	beego.Router("/operation/disaster_recover/recover", &disaster_oper.AjaxDisasterRecoverController{})
+	beego.Router("/operation/dr_switch/manage", &dr_oper.ManageDrSwitchController{})
+	//beego.Router("/operation/dr_switch/view/:id", &dr_oper.ViewDrSwitchController{})
+	beego.Router("/operation/dr_switch/screen/:id", &dr_oper.ScreenDrSwitchController{})
+	beego.Router("/operation/dr_switch/switchover", &dr_oper.AjaxDrSwitchoverController{})
+	beego.Router("/operation/dr_switch/failover", &dr_oper.AjaxDrFailoverController{})
+	beego.Router("/operation/dr_switch/process", &dr_oper.AjaxDrProcessController{})
+	beego.Router("/operation/dr_active/manage", &dr_oper.ManageDrActiveController{})
+	beego.Router("/operation/dr_active/startread", &dr_oper.AjaxDrStartReadController{})
+	beego.Router("/operation/dr_active/stopread", &dr_oper.AjaxDrStopReadController{})
+	beego.Router("/operation/dr_snapshot/manage", &dr_oper.ManageDrSnapshotController{})
+	beego.Router("/operation/dr_snapshot/startsnapshot", &dr_oper.AjaxDrStartSnapshotController{})
+	beego.Router("/operation/dr_snapshot/stopsnapshot", &dr_oper.AjaxDrStopSnapshotController{})
+	beego.Router("/operation/dr_sync/manage", &dr_oper.ManageDrSyncController{})
+	beego.Router("/operation/dr_sync/startsync", &dr_oper.AjaxDrStartSyncController{})
+	beego.Router("/operation/dr_sync/stopsync", &dr_oper.AjaxDrStopSyncController{})
+	beego.Router("/operation/dr_recover/manage", &dr_oper.ManageDrRecoverController{})
+	beego.Router("/operation/dr_recover/oper/:id", &dr_oper.OperDrRecoverController{})
+	beego.Router("/operation/dr_recover/flashback", &dr_oper.AjaxDrFlashbackController{})
+	beego.Router("/operation/dr_recover/recover", &dr_oper.AjaxDrRecoverController{})
 
 	//大屏
 	beego.Router("/screen/manage", &screen.ManageScreenController{})

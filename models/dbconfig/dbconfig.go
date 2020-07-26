@@ -175,13 +175,12 @@ func ListAllDBconfig() (dbconf []Dbconfigs) {
 	return dbconf
 }
 
-func ListPrimaryDBconfig(bs_id int) (dbconf []Dbconfigs) {
+func ListPrimaryDBconfig() (dbconf []Dbconfigs) {
 	o := orm.NewOrm()
 	o.Using("default")
 	qs := o.QueryTable(models.TableName("db_config"))
 	cond := orm.NewCondition()
 
-	cond = cond.And("bs_id", bs_id)
 	cond = cond.And("role", 1)
 	cond = cond.And("is_delete", 0)
 	qs = qs.SetCond(cond)
@@ -190,13 +189,12 @@ func ListPrimaryDBconfig(bs_id int) (dbconf []Dbconfigs) {
 	return dbconf
 }
 
-func ListStandbyDBconfig(bs_id int) (dbconf []Dbconfigs) {
+func ListStandbyDBconfig() (dbconf []Dbconfigs) {
 	o := orm.NewOrm()
 	o.Using("default")
 	qs := o.QueryTable(models.TableName("db_config"))
 	cond := orm.NewCondition()
 
-	cond = cond.And("bs_id", bs_id)
 	cond = cond.And("role", 2)
 	cond = cond.And("is_delete", 0)
 	qs = qs.SetCond(cond)

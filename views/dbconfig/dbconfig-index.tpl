@@ -40,7 +40,7 @@
                 <div class="form-group">
                   <form action="/config/db/manage" method="get">
                     <select name="dbtype" class="form-control">
-                      <option value="">数据库类型</option>
+                      <option value="">资产类型</option>
                       <option value="1" {{if eq "1" .condArr.dbtype}}selected{{end}}>Oracle</option>
                       <option value="2" {{if eq "2" .condArr.dbtype}}selected{{end}}>MySQL</option>
                       <option value="3" {{if eq "3" .condArr.dbtype}}selected{{end}}>SQLServer</option>
@@ -58,7 +58,7 @@
             </div>
           </div>
           <section class="panel">
-            <header class="panel-heading"> 数据库列表 / 总数：{{.countDb}}
+            <header class="panel-heading"> 资产列表 / 总数：{{.countDb}}
               <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
               <!--a href="javascript:;" class="fa fa-times"></a-->
               </span> 
@@ -70,7 +70,7 @@
                   <table class="table table-bordered table-striped table-condensed">
                     <thead>
                       <tr>
-                        <th>数据库类型</th>
+                        <th>资产类型</th>
                         <th>主机IP</th>
                         <th>端口</th>
                         <th>别名</th>

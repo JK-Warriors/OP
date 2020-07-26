@@ -12,7 +12,7 @@ import (
 	"github.com/xormplus/xorm"
 )
 
-type Disaster struct {
+type Dr struct {
 	Id          int    `xorm:"int 'id'"`
 	Bs_Name     string `xorm:"varchar(200) 'bs_name'"`
 	Db_Id_P     int    `xorm:"int 'db_id_p'"`
@@ -34,7 +34,7 @@ type Disaster struct {
 
 func Oracle_Collect(db *xorm.Engine) {
 
-	var disaster []Disaster
+	var dr []Dr
 	sql := `select b.id, 
 					b.bs_name,
 					d.db_id_p, 
@@ -52,25 +52,25 @@ func Oracle_Collect(db *xorm.Engine) {
 					ps.instance_name as inst_name_s, 
 					ps.db_name as db_name_s, 
 					d.is_shift
-				from pms_business b 
-				left join pms_disaster_config d on d.bs_id = b.id 
+				from pms_dr_business b 
+				left join pms_dr_config d on d.bs_id = b.id 
 				left join pms_db_config pp on d.db_id_p = pp.id
 				left join pms_db_config ps on d.db_id_s = ps.id
 				where b.is_delete = 0`
 
-	err := db.SQL(sql).Find(&disaster)
+	err := db.SQL(sql).Find(&dr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, v := range disaster {
+	for _, v := range dr {
 		if v.Db_Id_P > 0 {
 			if v.Db_Type_P == 1 {
 				log.Println("获取Oracle容灾数据开始！")
 
 				if v.Db_Type_P == v.Db_Type_S {
 					log.Println("获取容灾数据开始！")
-					GenerateDisaster(db, v)
+					GenerateDr(db, v)
 				} else {
 					log.Printf("业务系统 %s 里配置的容灾数据库类型不一致！", v.Bs_Name)
 				}
@@ -84,7 +84,7 @@ func Oracle_Collect(db *xorm.Engine) {
 
 }
 
-func GenerateDisaster(db *xorm.Engine, dis Disaster) {
+func GenerateDr(db *xorm.Engine, dis Dr) {
 	var pri_id int
 	var sta_id int
 	if dis.Is_Shift == 0 {
