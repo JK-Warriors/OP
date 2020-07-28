@@ -63,9 +63,12 @@ CREATE TABLE `pms_permissions` (
 -- ----------------------------
 INSERT INTO `pms_permissions` VALUES ('0', '0', '根节点', 'root', '/root', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/config', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('3', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '3');
-INSERT INTO `pms_permissions` VALUES ('4', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('9', '0', '系统管理', 'system', '/system', '', '1', '1', '9');
+INSERT INTO `pms_permissions` VALUES ('3', '0', 'Oracle', 'Oracle', '/oracle', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('4', '0', 'MySQL', 'MySQL', '/mysql', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('5', '0', 'SQLServer', 'SQLServer', '/mssql', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('9', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '9');
+INSERT INTO `pms_permissions` VALUES ('98', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '98');
+INSERT INTO `pms_permissions` VALUES ('99', '0', '系统管理', 'system', '/system', '', '1', '1', '99');
 
 INSERT INTO `pms_permissions` VALUES ('2100', '2', '资产配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-add', '/config/db/add', '', '0', '0', '0');
@@ -85,37 +88,50 @@ INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-ma
 
 INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '5');
 
-INSERT INTO `pms_permissions` VALUES ('3100', '3', '容灾切换', 'oper-switch-manage', '/operation/dr_switch/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('3101', '3', '容灾切换', 'oper-switch-view', '/operation/dr_switch/view', '', '0', '0', '1');
-INSERT INTO `pms_permissions` VALUES ('3102', '3', '容灾激活', 'oper-active-manage', '/operation/dr_active/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('3103', '3', '容灾同步', 'oper-sync-manage', '/operation/dr_sync/manage', '', '1', '1', '3');
-INSERT INTO `pms_permissions` VALUES ('3104', '3', '容灾快照', 'oper-snapshot-manage', '/operation/dr_snapshot/manage', '', '1', '1', '4');
-INSERT INTO `pms_permissions` VALUES ('3105', '3', '误删除恢复', 'oper-recover-manage', '/operation/dr_recover/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('3100', '3', '实例状态', 'oracle-status-manage', '/oracle/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('3110', '3', '表空间', 'oracle-tbs-manage', '/oracle/tbs/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('3120', '3', '磁盘组', 'oracle-asm-manage', '/oracle/asm/manage', '', '1', '1', '3');
+
+INSERT INTO `pms_permissions` VALUES ('4100', '4', '实例状态', 'mysql-status-manage', '/mysql/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('4110', '4', '资源', 'mysql-resource-manage', '/mysql/resource/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('4120', '4', '键缓存', 'mysql-key-manage', '/mysql/key/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('4130', '4', 'InnoDB', 'mysql-innodb-manage', '/mysql/innodb/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('4140', '4', '大表分析', 'mysql-bigtable-manage', '/mysql/bigtable/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('4150', '4', 'AWR报告', 'mysql-awr-manage', '/mysql/awr/manage', '', '1', '1', '1');
+
+INSERT INTO `pms_permissions` VALUES ('5100', '5', '实例状态', 'sqlserver-status-manage', '/sqlserver/status/manage', '', '1', '1', '1');
+
+INSERT INTO `pms_permissions` VALUES ('9100', '9', '容灾切换', 'oper-switch-manage', '/operation/dr_switch/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9101', '9', '容灾切换', 'oper-switch-view', '/operation/dr_switch/view', '', '0', '0', '1');
+INSERT INTO `pms_permissions` VALUES ('9102', '9', '容灾激活', 'oper-active-manage', '/operation/dr_active/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('9103', '9', '容灾同步', 'oper-sync-manage', '/operation/dr_sync/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('9104', '9', '容灾快照', 'oper-snapshot-manage', '/operation/dr_snapshot/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('9105', '9', '误删除恢复', 'oper-recover-manage', '/operation/dr_recover/manage', '', '1', '1', '5');
 
 
-INSERT INTO `pms_permissions` VALUES ('9010', '9', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9011', '9', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9012', '9', '编辑用户', 'user-edit', '/system/user/edit', null, '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9013', '9', '删除用户', 'user-delete', '/system/user/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9910', '99', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9911', '99', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9912', '99', '编辑用户', 'user-edit', '/system/user/edit', null, '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9913', '99', '删除用户', 'user-delete', '/system/user/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('9020', '9', '角色管理', 'role-manage', '/system/role/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('9021', '9', '添加角色', 'role-add', '/system/role/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9022', '9', '编辑角色', 'role-edit', '/system/role/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9023', '9', '删除角色', 'role-delete', '/system/role/delete', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9024', '9', '角色权限', 'role-permission', '/system/role/permission', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('9025', '9', '角色成员', 'role-user', '/system/role/user', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('9026', '9', '添加角色', 'role-user-add', '/system/role/useradd', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('9027', '9', '删除角色', 'role-user-delete', '/system/role/userdelete', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9030', '9', '权限管理', 'permission-manage', '/system/permission/manage', '', '0', '0', '3');
-INSERT INTO `pms_permissions` VALUES ('9031', '9', '添加权限', 'permission-add', '/system/permission/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9032', '9', '编辑权限', 'permission-edit', '/system/permission/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('9033', '9', '删除权限', 'permission-delete', '/system/permission/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9920', '99', '角色管理', 'role-manage', '/system/role/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('9921', '99', '添加角色', 'role-add', '/system/role/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9922', '99', '编辑角色', 'role-edit', '/system/role/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9923', '99', '删除角色', 'role-delete', '/system/role/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9924', '99', '角色权限', 'role-permission', '/system/role/permission', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9925', '99', '角色成员', 'role-user', '/system/role/user', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9926', '99', '添加角色', 'role-user-add', '/system/role/useradd', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('9927', '99', '删除角色', 'role-user-delete', '/system/role/userdelete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9930', '99', '权限管理', 'permission-manage', '/system/permission/manage', '', '0', '0', '3');
+INSERT INTO `pms_permissions` VALUES ('9931', '99', '添加权限', 'permission-add', '/system/permission/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9932', '99', '编辑权限', 'permission-edit', '/system/permission/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9933', '99', '删除权限', 'permission-delete', '/system/permission/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('9040', '9', '日志管理', 'log-manage', '/system/log/manage', '', '1', '1', '4');
-INSERT INTO `pms_permissions` VALUES ('9041', '9', '日志删除', 'log-delete', '/system/log/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9940', '99', '日志管理', 'log-manage', '/system/log/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('9941', '99', '日志删除', 'log-delete', '/system/log/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('9050', '9', '消息管理', 'message-manage', '/system/message/manage', '', '0', '0', '5');
-INSERT INTO `pms_permissions` VALUES ('9051', '9', '消息删除', 'message-delete', '/system/message/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('9950', '99', '消息管理', 'message-manage', '/system/message/manage', '', '0', '0', '5');
+INSERT INTO `pms_permissions` VALUES ('9951', '99', '消息删除', 'message-delete', '/system/message/delete', '', '0', '0', '0');
 
 -- ----------------------------
 -- Table structure for pms_role_permission
@@ -123,54 +139,67 @@ INSERT INTO `pms_permissions` VALUES ('9051', '9', '消息删除', 'message-dele
 DROP TABLE IF EXISTS `pms_role_permission`;
 CREATE TABLE `pms_role_permission` (
   `id` bigint(20) NOT NULL,
-  `role_id` bigint(20) DEFAULT NULL,
+  `role_id` bigint(20) NOT NULL,
   `permission_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`role_id`),
   KEY `INDEX_GP` (`role_id`,`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色权限表';
 
 -- ----------------------------
 -- Records of pms_groups_permission
 -- ----------------------------
-INSERT INTO `pms_role_permission` VALUES ('1 ', '1', '2');
-INSERT INTO `pms_role_permission` VALUES ('2 ', '1', '3');
-INSERT INTO `pms_role_permission` VALUES ('3 ', '1', '4');
-INSERT INTO `pms_role_permission` VALUES ('4 ', '1', '9');
-INSERT INTO `pms_role_permission` VALUES ('5 ', '1', '2100');
-INSERT INTO `pms_role_permission` VALUES ('6 ', '1', '2101');
-INSERT INTO `pms_role_permission` VALUES ('7 ', '1', '2102');
-INSERT INTO `pms_role_permission` VALUES ('8 ', '1', '2103');
-INSERT INTO `pms_role_permission` VALUES ('9 ', '1', '2110');
-INSERT INTO `pms_role_permission` VALUES ('10', '1', '2111');
-INSERT INTO `pms_role_permission` VALUES ('11', '1', '2112');
-INSERT INTO `pms_role_permission` VALUES ('12', '1', '2113');
-INSERT INTO `pms_role_permission` VALUES ('13', '1', '2120');
-INSERT INTO `pms_role_permission` VALUES ('14', '1', '2130');
-INSERT INTO `pms_role_permission` VALUES ('15', '1', '2140');
-INSERT INTO `pms_role_permission` VALUES ('16', '1', '2150');
-INSERT INTO `pms_role_permission` VALUES ('17', '1', '3100');
-INSERT INTO `pms_role_permission` VALUES ('18', '1', '3101');
-INSERT INTO `pms_role_permission` VALUES ('19', '1', '3102');
-INSERT INTO `pms_role_permission` VALUES ('20', '1', '3103');
-INSERT INTO `pms_role_permission` VALUES ('21', '1', '3104');
-INSERT INTO `pms_role_permission` VALUES ('22', '1', '3105');
-INSERT INTO `pms_role_permission` VALUES ('23', '1', '9010');
-INSERT INTO `pms_role_permission` VALUES ('24', '1', '9011');
-INSERT INTO `pms_role_permission` VALUES ('25', '1', '9012');
-INSERT INTO `pms_role_permission` VALUES ('26', '1', '9013');
-INSERT INTO `pms_role_permission` VALUES ('27', '1', '9020');
-INSERT INTO `pms_role_permission` VALUES ('28', '1', '9021');
-INSERT INTO `pms_role_permission` VALUES ('29', '1', '9022');
-INSERT INTO `pms_role_permission` VALUES ('30', '1', '9023');
-INSERT INTO `pms_role_permission` VALUES ('31', '1', '9024');
-INSERT INTO `pms_role_permission` VALUES ('32', '1', '9030');
-INSERT INTO `pms_role_permission` VALUES ('33', '1', '9031');
-INSERT INTO `pms_role_permission` VALUES ('34', '1', '9032');
-INSERT INTO `pms_role_permission` VALUES ('35', '1', '9033');
-INSERT INTO `pms_role_permission` VALUES ('36', '1', '9040');
-INSERT INTO `pms_role_permission` VALUES ('37', '1', '9041');
-INSERT INTO `pms_role_permission` VALUES ('38', '1', '9050');
-INSERT INTO `pms_role_permission` VALUES ('39', '1', '9051');
+INSERT INTO `pms_role_permission` VALUES ('2', '1', '2');
+INSERT INTO `pms_role_permission` VALUES ('3', '1', '3');
+INSERT INTO `pms_role_permission` VALUES ('4', '1', '4');
+INSERT INTO `pms_role_permission` VALUES ('5', '1', '5');
+INSERT INTO `pms_role_permission` VALUES ('9', '1', '9');
+INSERT INTO `pms_role_permission` VALUES ('98', '1', '98');
+INSERT INTO `pms_role_permission` VALUES ('99', '1', '99');
+INSERT INTO `pms_role_permission` VALUES ('2100', '1', '2100');
+INSERT INTO `pms_role_permission` VALUES ('2101', '1', '2101');
+INSERT INTO `pms_role_permission` VALUES ('2102', '1', '2102');
+INSERT INTO `pms_role_permission` VALUES ('2103', '1', '2103');
+INSERT INTO `pms_role_permission` VALUES ('2110', '1', '2110');
+INSERT INTO `pms_role_permission` VALUES ('2111', '1', '2111');
+INSERT INTO `pms_role_permission` VALUES ('2112', '1', '2112');
+INSERT INTO `pms_role_permission` VALUES ('2113', '1', '2113');
+INSERT INTO `pms_role_permission` VALUES ('2120', '1', '2120');
+INSERT INTO `pms_role_permission` VALUES ('2130', '1', '2130');
+INSERT INTO `pms_role_permission` VALUES ('2140', '1', '2140');
+INSERT INTO `pms_role_permission` VALUES ('2150', '1', '2150');
+INSERT INTO `pms_role_permission` VALUES ('3100', '1', '3100');
+INSERT INTO `pms_role_permission` VALUES ('3110', '1', '3110');
+INSERT INTO `pms_role_permission` VALUES ('3120', '1', '3120');
+INSERT INTO `pms_role_permission` VALUES ('4100', '1', '4100');
+INSERT INTO `pms_role_permission` VALUES ('4110', '1', '4110');
+INSERT INTO `pms_role_permission` VALUES ('4120', '1', '4120');
+INSERT INTO `pms_role_permission` VALUES ('4130', '1', '4130');
+INSERT INTO `pms_role_permission` VALUES ('4140', '1', '4140');
+INSERT INTO `pms_role_permission` VALUES ('4150', '1', '4150');
+INSERT INTO `pms_role_permission` VALUES ('5100', '1', '5100');
+INSERT INTO `pms_role_permission` VALUES ('9100', '1', '9100');
+INSERT INTO `pms_role_permission` VALUES ('9101', '1', '9101');
+INSERT INTO `pms_role_permission` VALUES ('9102', '1', '9102');
+INSERT INTO `pms_role_permission` VALUES ('9103', '1', '9103');
+INSERT INTO `pms_role_permission` VALUES ('9104', '1', '9104');
+INSERT INTO `pms_role_permission` VALUES ('9105', '1', '9105');
+INSERT INTO `pms_role_permission` VALUES ('9910', '1', '9910');
+INSERT INTO `pms_role_permission` VALUES ('9911', '1', '9911');
+INSERT INTO `pms_role_permission` VALUES ('9912', '1', '9912');
+INSERT INTO `pms_role_permission` VALUES ('9913', '1', '9913');
+INSERT INTO `pms_role_permission` VALUES ('9920', '1', '9920');
+INSERT INTO `pms_role_permission` VALUES ('9921', '1', '9921');
+INSERT INTO `pms_role_permission` VALUES ('9922', '1', '9922');
+INSERT INTO `pms_role_permission` VALUES ('9923', '1', '9923');
+INSERT INTO `pms_role_permission` VALUES ('9924', '1', '9924');
+INSERT INTO `pms_role_permission` VALUES ('9930', '1', '9930');
+INSERT INTO `pms_role_permission` VALUES ('9931', '1', '9931');
+INSERT INTO `pms_role_permission` VALUES ('9932', '1', '9932');
+INSERT INTO `pms_role_permission` VALUES ('9933', '1', '9933');
+INSERT INTO `pms_role_permission` VALUES ('9940', '1', '9940');
+INSERT INTO `pms_role_permission` VALUES ('9941', '1', '9941');
+INSERT INTO `pms_role_permission` VALUES ('9950', '1', '9950');
+INSERT INTO `pms_role_permission` VALUES ('9951', '1', '9951');
 
 
 
@@ -193,7 +222,7 @@ CREATE TABLE `pms_users` (
 -- Records of pms_users
 -- ----------------------------
 INSERT INTO `pms_users` VALUES ('1', '1', 'admin', 'e10adc3949ba59abbe56e057f20f883e', '/static/img/avatar/1.jpg', '1');
-INSERT INTO `pms_users` VALUES ('2', '2', 'audit', 'e10adc3949ba59abbe56e057f20f883e', '/static/uploadfile/2017-3/28/5b41faa955a4c1acdb6d7e6c116bce2f-cropper.jpg', '1');
+INSERT INTO `pms_users` VALUES ('2', '2', 'audit', 'e10adc3949ba59abbe56e057f20f883e', '/static/img/avatar/1.jpg', '1');
 
 -- ----------------------------
 -- Table structure for pms_users_profile
@@ -424,33 +453,110 @@ CREATE TABLE `pms_item_data` (
 
 
 -- ----------------------------
--- Table structure for pms_db_status
+-- Table structure for pms_asset_status
 -- ----------------------------
-DROP TABLE IF EXISTS `pms_db_status`;
-CREATE TABLE `pms_db_status` (
-  `id` int(10) unsigned NOT NULL COMMENT 'ID',
-  `db_type` tinyint(2) DEFAULT NULL COMMENT '数据库类型',
-  `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+DROP TABLE IF EXISTS `pms_asset_status`;
+CREATE TABLE `pms_asset_status` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `asset_id` int(10) NOT NULL DEFAULT '0',
+  `asset_type` tinyint(2) DEFAULT NULL COMMENT '资产类型',
+  `host` varchar(30) NOT NULL DEFAULT '',
+  `port` varchar(10) NOT NULL DEFAULT '',
+  `alias` varchar(50) NOT NULL DEFAULT '',
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
-  `open_mode` varchar(10) DEFAULT NULL COMMENT '打开模式',
-  `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
-  `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
+  `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `sessions` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
+  `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+ALTER TABLE `pms_asset_status` ADD CONSTRAINT asset_id UNIQUE(`asset_id`);
+
+
+-- ----------------------------
+-- Table structure for pms_asset_status_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_asset_status_his`;
+CREATE TABLE `pms_asset_status_his` (
+  `id` int(10) unsigned NOT NULL COMMENT 'ID',
+  `asset_id` int(10) NOT NULL DEFAULT '0',
+  `asset_type` tinyint(2) DEFAULT NULL COMMENT '资产类型',
+  `host` varchar(30) NOT NULL DEFAULT '',
+  `port` varchar(10) NOT NULL DEFAULT '',
+  `alias` varchar(50) NOT NULL DEFAULT '',
+  `role`    varchar(30) DEFAULT NULL COMMENT '角色',
+  `version` varchar(30) DEFAULT NULL COMMENT '版本',
+  `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `sessions` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
+  `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for pms_db_status
+-- Table structure for pms_oracle_status
 -- ----------------------------
-DROP TABLE IF EXISTS `pms_db_status_his`;
-CREATE TABLE `pms_db_status_his` (
-  `id` int(10) unsigned NOT NULL COMMENT 'ID',
-  `db_type` tinyint(2) DEFAULT NULL COMMENT '数据库类型',
+DROP TABLE IF EXISTS `pms_oracle_status`;
+CREATE TABLE `pms_oracle_status` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `db_id` int(10) NOT NULL DEFAULT '0',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
-  `role`    varchar(30) DEFAULT NULL COMMENT '角色',
-  `version` varchar(30) DEFAULT NULL COMMENT '版本',
-  `open_mode` varchar(10) DEFAULT NULL COMMENT '打开模式',
+  `inst_num` tinyint(2) NOT NULL DEFAULT '-1',
+  `inst_name` varchar(30) NOT NULL DEFAULT '-1',
+  `inst_role` varchar(50) NOT NULL DEFAULT '-1',
+  `inst_status` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `startup_time` varchar(100) NOT NULL DEFAULT '-1',
+  `host_name` varchar(50) NOT NULL DEFAULT '-1',
+  `archiver` varchar(50) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30) NOT NULL DEFAULT '-1',
+  `db_role` varchar(50) NOT NULL DEFAULT '-1',
+  `open_mode` varchar(30) NOT NULL DEFAULT '-1',
+  `protection_mode` varchar(30) NOT NULL DEFAULT '-1',
+  `session_total` int(10) NOT NULL DEFAULT '-1',
+  `session_actives` int(4) NOT NULL DEFAULT '-1',
+  `session_waits` int(4) NOT NULL DEFAULT '-1',
+  `dg_stats` varchar(255) NOT NULL DEFAULT '-1',
+  `dg_delay` int(10) NOT NULL DEFAULT '-1',
+  `processes` int(10) NOT NULL DEFAULT '-1',
+  `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
+  `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_oracle_status_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_oracle_status_his`;
+CREATE TABLE `pms_oracle_status_his` (
+  `id` int(10) unsigned NOT NULL COMMENT 'ID',
+  `db_id` int(10) NOT NULL DEFAULT '0',
+  `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `inst_num` tinyint(2) NOT NULL DEFAULT '-1',
+  `inst_name` varchar(30) NOT NULL DEFAULT '-1',
+  `inst_role` varchar(50) NOT NULL DEFAULT '-1',
+  `inst_status` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `startup_time` varchar(100) NOT NULL DEFAULT '-1',
+  `host_name` varchar(50) NOT NULL DEFAULT '-1',
+  `archiver` varchar(50) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30) NOT NULL DEFAULT '-1',
+  `db_role` varchar(50) NOT NULL DEFAULT '-1',
+  `open_mode` varchar(30) NOT NULL DEFAULT '-1',
+  `protection_mode` varchar(30) NOT NULL DEFAULT '-1',
+  `session_total` int(10) NOT NULL DEFAULT '-1',
+  `session_actives` int(4) NOT NULL DEFAULT '-1',
+  `session_waits` int(4) NOT NULL DEFAULT '-1',
+  `dg_stats` varchar(255) NOT NULL DEFAULT '-1',
+  `dg_delay` int(10) NOT NULL DEFAULT '-1',
+  `processes` int(10) NOT NULL DEFAULT '-1',
   `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',

@@ -6,6 +6,7 @@ import (
 	"opms/controllers/dr_business"
 	"opms/controllers/dr_config"
 	"opms/controllers/dr_oper"
+	"opms/controllers/asset"
 	"opms/controllers/logs"
 	"opms/controllers/messages"
 	"opms/controllers/roles"
@@ -81,6 +82,9 @@ func init() {
 	//容灾配置
 	beego.Router("/config/dr_config/manage", &dr_config.ManageDrController{})
 	beego.Router("/config/dr_config/edit/:id", &dr_config.EditDrController{})
+
+	//资产状态
+	beego.Router("/asset/status/manage", &asset.ManageAssetController{})
 
 	//操作
 	beego.Router("/operation/dr_switch/manage", &dr_oper.ManageDrSwitchController{})
