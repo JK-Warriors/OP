@@ -82,11 +82,11 @@ INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config
 
 INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
+INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-global-manage', '/config/config_global/manage', '', '1', '1', '3');
 
-INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
+--INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
 
-INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-alert-manage', '/config/config_alert/manage', '', '1', '1', '5');
 
 INSERT INTO `pms_permissions` VALUES ('3100', '3', '实例状态', 'oracle-status-manage', '/oracle/status/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('3110', '3', '表空间', 'oracle-tbs-manage', '/oracle/tbs/manage', '', '1', '1', '2');
@@ -460,9 +460,9 @@ CREATE TABLE `pms_asset_status` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `asset_id` int(10) NOT NULL DEFAULT '0',
   `asset_type` tinyint(2) DEFAULT NULL COMMENT '资产类型',
-  `host` varchar(30) NOT NULL DEFAULT '',
-  `port` varchar(10) NOT NULL DEFAULT '',
-  `alias` varchar(50) NOT NULL DEFAULT '',
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
@@ -485,9 +485,9 @@ CREATE TABLE `pms_asset_status_his` (
   `id` int(10) unsigned NOT NULL COMMENT 'ID',
   `asset_id` int(10) NOT NULL DEFAULT '0',
   `asset_type` tinyint(2) DEFAULT NULL COMMENT '资产类型',
-  `host` varchar(30) NOT NULL DEFAULT '',
-  `port` varchar(10) NOT NULL DEFAULT '',
-  `alias` varchar(50) NOT NULL DEFAULT '',
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
@@ -505,7 +505,10 @@ CREATE TABLE `pms_asset_status_his` (
 DROP TABLE IF EXISTS `pms_oracle_status`;
 CREATE TABLE `pms_oracle_status` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `db_id` int(10) NOT NULL DEFAULT '0',
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
   `inst_num` tinyint(2) NOT NULL DEFAULT '-1',
   `inst_name` varchar(30) NOT NULL DEFAULT '-1',
@@ -537,7 +540,10 @@ CREATE TABLE `pms_oracle_status` (
 DROP TABLE IF EXISTS `pms_oracle_status_his`;
 CREATE TABLE `pms_oracle_status_his` (
   `id` int(10) unsigned NOT NULL COMMENT 'ID',
-  `db_id` int(10) NOT NULL DEFAULT '0',
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
   `inst_num` tinyint(2) NOT NULL DEFAULT '-1',
   `inst_name` varchar(30) NOT NULL DEFAULT '-1',
@@ -561,6 +567,93 @@ CREATE TABLE `pms_oracle_status_his` (
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_oracle_tablespace
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_oracle_tablespace`;
+CREATE TABLE `pms_oracle_tablespace` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
+  `tablespace_name` varchar(100) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `management` varchar(20) NOT NULL,
+  `total_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_size` bigint(18) NOT NULL DEFAULT '0',
+  `max_rate` float(10,2) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_oracle_tablespace_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_oracle_tablespace_his`;
+CREATE TABLE `pms_oracle_tablespace_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
+  `tablespace_name` varchar(100) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `management` varchar(20) NOT NULL,
+  `total_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_size` bigint(18) NOT NULL DEFAULT '0',
+  `max_rate` float(10,2) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_oracle_diskgroup
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_oracle_diskgroup`;
+CREATE TABLE `pms_oracle_diskgroup` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
+  `diskgroup_name` varchar(100) NOT NULL,
+  `state` varchar(20) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `total_mb` bigint(18) NOT NULL DEFAULT '0',
+  `free_mb` bigint(18) NOT NULL DEFAULT '0',
+  `used_rate` float(10,2) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+
+-- ----------------------------
+-- Table structure for pms_oracle_diskgroup_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_oracle_diskgroup_his`;
+CREATE TABLE `pms_oracle_diskgroup_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `port` varchar(30) NOT NULL,
+  `alias` varchar(50) NOT NULL,
+  `diskgroup_name` varchar(100) NOT NULL,
+  `state` varchar(20) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `total_mb` bigint(18) NOT NULL DEFAULT '0',
+  `free_mb` bigint(18) NOT NULL DEFAULT '0',
+  `used_rate` float(10,2) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -697,3 +790,42 @@ CREATE TABLE `pms_dr_sta_status_his` (
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_global_options
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_global_options`;
+CREATE TABLE `pms_global_options` (
+  `id`  varchar(50) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  KEY `idx_id` (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of pms_global_options
+-- ----------------------------
+INSERT INTO `pms_global_options` VALUES ('monitor', '监控', '1', '是否开启全局监控,此项如果关闭则所有项目都不会被监控，下面监控选项都失效');
+INSERT INTO `pms_global_options` VALUES ('monitor_mysql', '监控MySQL', '1', '是否开启MySQL状态监控');
+INSERT INTO `pms_global_options` VALUES ('monitor_oracle', '监控Oracle', '1', '是否监控Oracle');
+INSERT INTO `pms_global_options` VALUES ('monitor_sqlserver', '监控SQLServer', '1', '是否开启SQLServer监控');
+INSERT INTO `pms_global_options` VALUES ('monitor_os', '监控OS', '1', '是否开启OS监控');
+INSERT INTO `pms_global_options` VALUES ('frequency_monitor', '监控频率', '60', '监控频率');
+INSERT INTO `pms_global_options` VALUES ('alert', '告警', '1', '是否开启告警');
+INSERT INTO `pms_global_options` VALUES ('send_alert_mail', '发送报警邮件', '1', '是否发送报警邮件');
+INSERT INTO `pms_global_options` VALUES ('send_mail_to_list', '告警邮件收件人', '', '报警邮件通知人员');
+INSERT INTO `pms_global_options` VALUES ('send_mail_sleep_time', '发送邮件休眠时间', '300', '告警休眠时间(秒)');
+INSERT INTO `pms_global_options` VALUES ('mailtype', '邮件类型', 'html', '邮件发送配置:邮件类型');
+INSERT INTO `pms_global_options` VALUES ('mailprotocol', '邮件协议', 'smtp', '邮件发送配置:邮件协议');
+INSERT INTO `pms_global_options` VALUES ('smtp_host', 'SMTP主机', 'smtp.163.com', '邮件发送配置:邮件主机');
+INSERT INTO `pms_global_options` VALUES ('smtp_port', 'SMTP端口', '25', '邮件发送配置:邮件端口');
+INSERT INTO `pms_global_options` VALUES ('smtp_user', 'SMTP账号', 'wlblazers', '邮件发送配置:用户');
+INSERT INTO `pms_global_options` VALUES ('smtp_pass', 'SMTP密码', '', '邮件发送配置:密码');
+INSERT INTO `pms_global_options` VALUES ('smtp_timeout', 'SMTP超时时间', '10', '邮件发送配置:超时时间');
+INSERT INTO `pms_global_options` VALUES ('mailfrom', '邮件发件人', 'wlblazers@163.com', '邮件发送配置:发件人');
+INSERT INTO `pms_global_options` VALUES ('send_alert_sms', '发送告警短信', '0', '是否发送短信');
+INSERT INTO `pms_global_options` VALUES ('send_sms_to_list', '告警短信收件人', '', '短信收件人列表');
+INSERT INTO `pms_global_options` VALUES ('send_sms_sleep_time', '发送短信休眠时间', '300', '发送短信休眠时间(分钟)');
+INSERT INTO `pms_global_options` VALUES ('send_alarm_wx', '发送告警微信', '0', '是否发送微信');

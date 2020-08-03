@@ -7,6 +7,9 @@ import (
 	"opms/controllers/dr_config"
 	"opms/controllers/dr_oper"
 	"opms/controllers/asset"
+	"opms/controllers/oracle"
+	"opms/controllers/config_alert"
+	"opms/controllers/config_global"
 	"opms/controllers/logs"
 	"opms/controllers/messages"
 	"opms/controllers/roles"
@@ -83,8 +86,18 @@ func init() {
 	beego.Router("/config/dr_config/manage", &dr_config.ManageDrController{})
 	beego.Router("/config/dr_config/edit/:id", &dr_config.EditDrController{})
 
+	//全局配置
+	beego.Router("/config/config_global/manage", &config_global.ManageGlobalController{})
+	beego.Router("/config/config_global/ajax/save", &config_global.AjaxSaveGlobalController{})
+	beego.Router("/config/config_alert/manage", &config_alert.ManageAlertController{})
+
 	//资产状态
 	beego.Router("/asset/status/manage", &asset.ManageAssetController{})
+	beego.Router("/oracle/status/manage", &oracle.ManageOracleController{})
+	beego.Router("/oracle/tbs/manage", &oracle.ManageOracleTbsController{})
+	beego.Router("/oracle/asm/manage", &oracle.ManageOracleAsmController{})
+
+
 
 	//操作
 	beego.Router("/operation/dr_switch/manage", &dr_oper.ManageDrSwitchController{})

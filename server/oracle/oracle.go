@@ -6,6 +6,7 @@ import (
 	"opms/server/utils"
 	"time"
 	"sync"
+	"context"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/godror/godror"
@@ -18,10 +19,56 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 	P, err := godror.ParseConnString(dsn)
 
 	db, err := sql.Open("godror", P.StringWithPassword())
-	if err != nil {
-		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
-	}
 	defer db.Close()
+	if err != nil {
+		utils.LogDebugf("%s: %s", P.StringWithPassword(), err.Error())
+
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	//dl, _ := ctx.Deadline()
+	err = db.PingContext(ctx)
+	//ok := dl.After(time.Now())
+	if err != nil {
+		utils.LogDebugf("PingContext: %s", err.Error())
+		MoveToHistory(mysql, "pms_asset_status", "asset_id", db_id)
+		MoveToHistory(mysql, "pms_oracle_status", "db_id", db_id)
+
+		sql := `insert into pms_asset_status(asset_id, asset_type, host, port, alias, connect, created) 
+				values(?,?,?,?,?,?,?)`
+		_, err = mysql.Exec(sql, db_id, 1, host, port, alias, -1, time.Now().Unix())
+		if err != nil {
+			log.Printf("%s: %w", sql, err)
+		}
+
+		sql = `insert into pms_oracle_status(db_id, host, port, alias, connect, created) 
+		values(?,?,?,?,?,?)`
+		_, err = mysql.Exec(sql, db_id, host, port, alias, -1, time.Now().Unix())
+		if err != nil {
+			log.Printf("%s: %w", sql, err)
+		}
+	} else {
+		log.Println("ping succeeded")
+		//if !ok {
+		//	log.Println("ping succeeded after deadline!")
+		//}
+		//get oracle basic infomation
+		GatherBasicInfo(db, mysql , db_id, host, port, alias)
+		
+		//get tablespace
+		GatherTablespaces(db, mysql , db_id, host, port, alias)
+	
+		//get asm diskgroup
+		GatherDiskgroups(db, mysql , db_id, host, port, alias)
+	}
+
+	(*wg).Done()
+
+}
+
+func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
 
 	connect := 1
 	//get instance info 
@@ -42,95 +89,166 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 	flashback_on := Get_Database(db, "flashback_on")
 
 	
-	//get session
-	var sessions int
-	sql := `select count(1) from v$session where status = 'ACTIVE'`
-	err = db.QueryRow(sql).Scan(&sessions)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-	}
+	//get sessions
+	session_total := GetSessionTotal(db)
+	session_actives := GetSessionActive(db)
+	session_waits := GetSessionWait(db)
 
 	//get flashback_usage
-	var flashback_usage int
-	sql = `select sum(nvl(percent_space_used,0)) from v$flash_recovery_area_usage`
-	err = db.QueryRow(sql).Scan(&flashback_usage)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-		flashback_usage = 0
-	}
+	flashback_usage := GetFlashbackUsage(db)
 
 	// storage result
 	session := mysql.NewSession()
 	defer session.Close()
 	// add Begin() before any action
-	err = session.Begin()
+	err := session.Begin()
 	//storage stats into pms_asset_status
 	//move old data to history table
-	sql = `insert into pms_asset_status_his select * from pms_asset_status where asset_id = ?`
-	_, err = mysql.Exec(sql, db_id)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-	}
+	MoveToHistory(mysql, "pms_asset_status", "asset_id", db_id)
 
-	sql = `delete from pms_asset_status where asset_id = ?`
-	_, err = mysql.Exec(sql, db_id)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-	}
-
-	sql = `insert into pms_asset_status(asset_id, asset_type, host, port, alias, role, version, connect, sessions, created) 
+	sql := `insert into pms_asset_status(asset_id, asset_type, host, port, alias, role, version, connect, sessions, created) 
 						values(?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, db_id, 1, host, port, alias, db_role, version, connect, sessions, time.Now().Unix())
+	_, err = mysql.Exec(sql, db_id, 1, host, port, alias, db_role, version, connect, session_total, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %w", sql, err)
 	}
 
 	//storage stats into pms_oracle_status
-	sql = `insert into pms_oracle_status_his select * from pms_oracle_status where db_id = ?`
-	_, err = mysql.Exec(sql, db_id)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-	}
+	MoveToHistory(mysql, "pms_oracle_status", "db_id", db_id)
 
-	sql = `delete from pms_oracle_status where db_id = ?`
-	_, err = mysql.Exec(sql, db_id)
-	if err != nil {
-		log.Printf("%s: %w", sql, err)
-	}
-
-	sql = `insert into pms_oracle_status(db_id, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, flashback_on, flashback_usage, created) 
-						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, db_id, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, flashback_on, flashback_usage, time.Now().Unix())
+	sql = `insert into pms_oracle_status(db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, flashback_on, flashback_usage, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, flashback_on, flashback_usage, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %w", sql, err)
 	}
 
 	// add Commit() after all actions
 	err = session.Commit()
-	(*wg).Done()
+}
+
+func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
+
+	session := mysql.NewSession()
+	defer session.Close()
+	err := session.Begin()
+	//move old data to history table
+	MoveToHistory(mysql, "pms_oracle_tablespace", "db_id", db_id)
+
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	sql := `select tpsname,status,mgr,max_size,curr_size, max_used
+				from (SELECT d.tablespace_name tpsname,
+							d.status status,
+							d.segment_space_management mgr,
+							TO_CHAR(NVL(trunc(A.maxbytes / 1024 / 1024), 0), '99999990') max_size,
+							TO_CHAR(NVL(trunc(a.bytes / 1024 / 1024), 0), '99999990') curr_size,
+							TO_CHAR(NVL((a.bytes - NVL(f.bytes, 0)) / a.bytes * 100, 0),
+									'990D00') c_used,
+							TO_CHAR(NVL((a.bytes - NVL(f.bytes, 0)) / a.maxbytes * 100, 0),
+									'990D00') max_used
+						FROM sys.dba_tablespaces d,
+							(SELECT tablespace_name,
+									sum(bytes) bytes,
+									SUM(case autoextensible
+										when 'NO' then
+											BYTES
+										when 'YES' then
+											MAXBYTES
+										else
+											null
+										end) maxbytes
+								FROM dba_data_files
+							GROUP BY tablespace_name) a,
+							(SELECT tablespace_name,
+									SUM(bytes) bytes,
+									MAX(bytes) largest_free
+								FROM dba_free_space
+							GROUP BY tablespace_name) f
+					WHERE d.tablespace_name = a.tablespace_name
+						AND d.tablespace_name = f.tablespace_name(+))
+			order by max_used desc`
+	rows, err := db.QueryContext(ctx, sql)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+		err = session.Rollback()
+	}else{
+		defer rows.Close()
+		for rows.Next() {
+			var tbsname, status, mgr, max_size, curr_size, max_used string
+			err = rows.Scan(&tbsname, &status, &mgr, &max_size, &curr_size, &max_used)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			
+			sql = `insert into pms_oracle_tablespace(db_id, host, port, alias, tablespace_name, status, management, total_size, used_size, max_rate, created) 
+							values(?,?,?,?,?,?,?,?,?,?,?)`
+			_, err = mysql.Exec(sql, db_id, host, port, alias, tbsname, status, mgr, max_size, curr_size, max_used, time.Now().Unix())
+			if err != nil {
+				log.Printf("%s: %w", sql, err)
+			}
+		}
+		err = session.Commit()
+	}
 
 }
 
-func Get_Instance(db *sql.DB, matrix_name string) string{
-	var matrix_value string
-	sql := `select ` + matrix_name + ` from v$instance`
-	err := db.QueryRow(sql).Scan(&matrix_value)
+func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
+
+	session := mysql.NewSession()
+	defer session.Close()
+	err := session.Begin()
+	//move old data to history table
+	MoveToHistory(mysql, "pms_oracle_diskgroup", "db_id", db_id)
+
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	sql := `select name,
+				state,
+				type,
+				total_mb,
+				free_mb,
+				trunc(((total_mb - free_mb) / total_mb) * 100, 2) used_rate
+			from v$asm_diskgroup`
+	rows, err := db.QueryContext(ctx, sql)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
-		return ""
+		log.Printf("%s: %s", sql, err.Error())
+		err = session.Rollback()
+	}else{
+		defer rows.Close()
+		for rows.Next() {
+			var group_name, state, group_type, total_mb, free_mb, used_rate string
+			err = rows.Scan(&group_name, &state, &group_type, &total_mb, &free_mb, &used_rate)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			
+			sql = `insert into pms_oracle_diskgroup(db_id, host, port, alias, diskgroup_name, state, type, total_mb, free_mb, used_rate, created) 
+							values(?,?,?,?,?,?,?,?,?,?,?)`
+			_, err = mysql.Exec(sql, db_id, host, port, alias, group_name, state, group_type, total_mb, free_mb, used_rate, time.Now().Unix())
+			if err != nil {
+				log.Printf("%s: %w", sql, err)
+			}
+		}
+		err = session.Commit()
 	}
-	return matrix_value
+
 }
 
-func Get_Database(db *sql.DB, matrix_name string) string{
-	var matrix_value string
-	sql := `select ` + matrix_name + ` from v$database`
-	err := db.QueryRow(sql).Scan(&matrix_value)
+func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int){
+	sql := `insert into ` + table_name + `_his select * from ` + table_name + ` where ` + key_name + ` = ?`
+	_, err := mysql.Exec(sql, key_value)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
-		return ""
+		log.Printf("%s: %s", sql, err.Error())
 	}
-	return matrix_value
+
+	sql = `delete from ` + table_name + ` where ` + key_name + ` = ?`
+	_, err = mysql.Exec(sql, key_value)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
 }
 
 func GetDsn(db *xorm.Engine, db_id int, db_type int) (string, error) {
