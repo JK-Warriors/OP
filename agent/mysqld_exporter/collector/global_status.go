@@ -95,7 +95,7 @@ func (ScrapeGlobalStatus) Scrape(ctx context.Context, db *sql.DB, ch chan<- prom
 	defer globalStatusRows.Close()
 
 	var key string
-	var val sql.RawBytes
+	var val string
 	var textItems = map[string]string{
 		"wsrep_local_state_uuid":   "",
 		"wsrep_cluster_state_uuid": "",

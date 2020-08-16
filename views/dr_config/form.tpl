@@ -19,7 +19,7 @@
       <ul class="breadcrumb pull-left">
         <li> <a href="/config/dr_business/manage">容灾配置</a> </li>
         <li> <a href="/config/dr_config/manage">容灾配置</a> </li>
-        <li class="active"> {{if gt .bsconf.Id 0}}编辑{{else}}新增{{end}}容灾 </li>
+        <li class="active"> {{if gt .drconf.Bs_Id 0}}编辑{{else}}新增{{end}}容灾组 </li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -33,11 +33,24 @@
               <form class="form-horizontal adminex-form" id="dr_config-form">
                 <header><b> 基本信息 </b></header>
                 <div class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span></span>业务系统名</label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>容灾组名</label>
                   <div class="col-sm-10">
-                    <input type="text" id="bs_name" name="bs_name"  value="{{.bsconf.BsName}}" class="form-control">
+                    <input type="text" id="bs_name" name="bs_name"  value="{{.drconf.Bs_Name}}" class="form-control">
                   </div>
                 </div>
+                
+                <div class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>数据库类型</label>
+                  <div class="col-sm-10">
+                    <select id="db_type" name="db_type" class="form-control">
+                      <option value="">请选择主库</option>
+                      <option value="1" {{if eq 1 $.drconf.Db_Type}}selected{{end}}>Oracle</option>
+                      <option value="2" {{if eq 2 $.drconf.Db_Type}}selected{{end}}>MySQL</option>
+                      <option value="3" {{if eq 3 $.drconf.Db_Type}}selected{{end}}>SQLServer</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>主库</label>
                   <div class="col-sm-10">
@@ -49,8 +62,8 @@
                     </select>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>主库通道</label>
+                <div id="div_db_dest_p" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主库通道</label>
                   <div class="col-sm-10">
                     <select id="db_dest_p" name="db_dest_p" class="form-control">
                       {{range $k := .dest_list }}
@@ -70,8 +83,8 @@
                     </select>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>备库通道</label>
+                <div id="div_db_dest_s" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>备库通道</label>
                   <div class="col-sm-10">
                     <select id="db_dest_s" name="db_dest_s" class="form-control">
                       {{range $k := .dest_list }}
@@ -80,12 +93,21 @@
                     </select>
                   </div>
                 </div>
-                <div class="form-group">
+                <div id="div_fb_retention" class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span></span>闪回天数</label>
                   <div class="col-sm-10">
                     <input type="text" name="fb_retention"  value="{{.drconf.Fb_Retention}}" class="form-control">
                   </div>
                 </div>
+                
+                <div id="div_db_name" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>数据库名</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="db_name" name="db_name"  value="{{.drconf.Db_Name}}" class="form-control">
+                  </div>
+                </div>
+
+
                 <div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span></span>是否漂移IP</label>
                   <div class="col-sm-10">
@@ -113,7 +135,7 @@
                 <div class="form-group">
                   <label class="col-lg-2 col-sm-2 control-label"></label>
                   <div class="col-lg-10">
-                    <input type="hidden" id="bs_id" name="bs_id" value="{{.bsconf.Id}}">
+                    <input type="hidden" id="bs_id" name="bs_id" value="{{.drconf.Bs_Id}}">
                     <button type="submit" class="btn btn-primary">提 交</button>
                   </div>
                 </div>
@@ -134,7 +156,7 @@
 <script src="/static/js/jquery-ui-1.10.3.min.js"></script>
 <script>
     $(function() {// 初始化内容
-        id =  {{.bsconf.Id}};
+        id =  {{.drconf.Bs_Id}};
         is_shift =  {{.drconf.Is_Shift}};
         shift_vips =  {{.drconf.Shift_Vips}};
         network_p =  {{.drconf.Network_P}};
@@ -158,11 +180,41 @@
             $("#network_s").attr("value","");
         }
 
-        if(id && id > 0){
-            $('#bs_name').attr("disabled",true);
+        
+        if($("#db_type option:selected").val() == 3){
+            $("#div_db_name").show();
+        }else{
+            $("#div_db_name").hide();
+        }
+        if($("#db_type option:selected").val() == 1){
+            $("#div_db_dest_p").show();
+            $("#div_db_dest_s").show();
+            $("#div_fb_retention").show();
+        }else{
+            $("#div_db_dest_p").hide();
+            $("#div_db_dest_s").hide();
+            $("#div_fb_retention").hide();
         }
 
     });  
+
+    $("#db_type").change(function(){
+        if($("#db_type option:selected").val() == 3){
+            $("#div_db_name").show();
+        }else{
+            $("#div_db_name").hide();
+        }
+        
+        if($("#db_type option:selected").val() == 1){
+            $("#div_db_dest_p").show();
+            $("#div_db_dest_s").show();
+            $("#div_fb_retention").show();
+        }else{
+            $("#div_db_dest_p").hide();
+            $("#div_db_dest_s").hide();
+            $("#div_fb_retention").hide();
+        }
+    });
 
     $("#is_shift").change(function(){
         if($('#is_shift').prop('checked')){         

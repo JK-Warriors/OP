@@ -3,10 +3,11 @@ package oracle
 import (
 	"database/sql"
 	"log"
-	"opms/server/utils"
-	"opms/server/common"
+	"opms/monitor/utils"
+	"opms/monitor/common"
 	"sync"
 	"time"
+	"context"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/godror/godror"
@@ -22,17 +23,18 @@ func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr
 	} else {
 		pri_id = dis.Db_Id_S
 		sta_id = dis.Db_Id_P
-
 	}
 
 	dsn_p, err := GetDsn(mysql, pri_id, 1)
 	if err != nil {
 		log.Printf("GetDsn failed: %s", err.Error())
+		return
 	}
 
 	dsn_s, err := GetDsn(mysql, sta_id, 1)
 	if err != nil {
 		log.Printf("GetDsn failed: %s", err.Error())
+		return
 	}
 
 	p_pri, _ := godror.ParseConnString(dsn_p)
@@ -41,7 +43,9 @@ func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr
 
 	GeneratePrimary(mysql, p_pri, pri_id)
 	GenerateStandby(mysql, p_pri, p_sta, sta_id)
-	
+
+	log.Println("获取Oracle容灾数据结束！")
+
 	(*wg).Done()
 }
 
@@ -50,9 +54,20 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
+		utils.LogDebugf("%s: %s", P.StringWithPassword(), err.Error())
+		return
 	}
 	defer db.Close()
+
+	//DB ping
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = db.PingContext(ctx)
+	if err != nil {
+		utils.LogDebugf("DB Ping failed: %s", err.Error())
+		return 
+	}
+
 
 	sql := `select dest_id, transmit_mode, thread, sequence, archived, applied, current_scn, curr_db_time
 			from (select t.dest_id,
@@ -70,7 +85,7 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 			where rn = 1`
 	rows, err := db.Query(sql)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		log.Printf("%s: %s", sql, err.Error())
 	}
 	defer rows.Close()
 
@@ -153,6 +168,15 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	}
 	defer db.Close()
 
+	//DB ping
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = db.PingContext(ctx)
+	if err != nil {
+		utils.LogDebugf("DB Ping failed: %s", err.Error())
+		return 
+	}
+
 	var thread, sequence, block, delay_mins int
 	sql := `select ms.thread#,
 					ms.sequence#,
@@ -163,7 +187,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 				and ms.sequence# <> 0`
 	err = db.QueryRow(sql).Scan(&thread, &sequence, &block, &delay_mins)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	//get apply_rate
@@ -176,7 +200,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 		where rownum < 2`
 	err = db.QueryRow(sql).Scan(&apply_rate)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	//get sta_scn
@@ -184,13 +208,13 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	sql = `select current_scn from v$database`
 	err = db.QueryRow(sql).Scan(&sta_scn)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	//get standby db time by sta_scn
 	curr_db_time, err := GetDbtimeBySCN(p_pri, sta_scn)
 	if err != nil {
-		log.Printf("%w", err)
+		utils.LogDebugf("GetDbtimeBySCN failed: %s", err.Error())
 		curr_db_time = ""
 	}
 
@@ -199,7 +223,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	sql = `select status from gv$session where program like '%(MRP0)'`
 	err = db.QueryRow(sql).Scan(&mrp_status)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	// storage result
@@ -211,7 +235,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	sql = `insert into pms_dr_sta_status_his select * from pms_dr_sta_status where db_id = ?`
 	_, err = mysql.Exec(sql, db_id)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 		session.Rollback()
 		return
 	}
@@ -219,7 +243,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	sql = `delete from pms_dr_sta_status where db_id = ?`
 	_, err = mysql.Exec(sql, db_id)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 		session.Rollback()
 		return
 	}
@@ -230,7 +254,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	_, err = mysql.Exec(sql, db_id, thread, sequence, block, delay_mins, apply_rate, sta_scn, curr_db_time, mrp_status, time.Now().Unix())
 
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
 		session.Rollback()
 		return
 	}
@@ -242,7 +266,7 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 func GetDbtimeBySCN(P godror.ConnectionParams, scn int64) (string, error) {
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
-		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
+		utils.LogDebugf("%s: %s", P.StringWithPassword(), err.Error())
 		return "", err
 	}
 	defer db.Close()
@@ -252,7 +276,8 @@ func GetDbtimeBySCN(P godror.ConnectionParams, scn int64) (string, error) {
 	sql := `select to_char(scn_to_timestamp(:1), 'yyyy-mm-dd hh24:mi:ss') from v$database`
 	err = db.QueryRow(sql, scn).Scan(&curr_db_time)
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		utils.LogDebugf("%s: %s", sql, err.Error())
+		return "", err
 	}
 	return curr_db_time, err
 }

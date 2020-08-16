@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
-	oracle "opms/server/oracle"
+	oracle "opms/monitor/oracle"
+	mssql "opms/monitor/mssql"
+	mysql "opms/monitor/mysql"
 	"os"
 	"runtime"
 	"sync"
 	"time"
-	"opms/server/common"
+	"opms/monitor/common"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pythonsite/yamlConfig"
@@ -119,11 +121,11 @@ func GatherAssetStats(wg *sync.WaitGroup) int {
 			wga.Add(1)
 			go oracle.GenerateOracleStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
 		}else if v.Asset_Type == 2{
-			//wga.Add(1)
-			//go mysql.GenerateMySQLStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			wga.Add(1)
+			go mysql.GenerateMySQLStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
 		}else if v.Asset_Type == 3{
-			//wga.Add(1)
-			//go mssql.GenerateSQLServerStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			wga.Add(1)
+			go mssql.GenerateMssqlStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
 		}
 	}
 	wga.Wait()
@@ -138,28 +140,25 @@ func GatherAssetStats(wg *sync.WaitGroup) int {
 
 func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 	var dr []common.Dr
-	sql := `select b.id, 
-					b.bs_name,
+	sql := `select d.bs_id as id, 
+					d.bs_name,
+					d.db_type,
 					d.db_id_p, 
-					pp.db_type as db_type_p,
 					pp.host as host_p,
 					pp.port as port_p, 
 					pp.alias as alias_p, 
 					pp.instance_name as inst_name_p, 
-					pp.db_name as db_name_p, 
 					d.db_id_s, 
-					ps.db_type as db_type_s,
 					ps.host as host_s,
 					ps.port as port_s, 
 					ps.alias as alias_s, 
 					ps.instance_name as inst_name_s, 
-					ps.db_name as db_name_s, 
+					d.db_name, 
 					d.is_shift
-				from pms_dr_business b 
-				left join pms_dr_config d on d.bs_id = b.id 
+				from pms_dr_config d
 				left join pms_db_config pp on d.db_id_p = pp.id
 				left join pms_db_config ps on d.db_id_s = ps.id
-				where b.is_delete = 0`
+				where d.status = 1 and d.is_delete = 0`
 
 	err := db.SQL(sql).Find(&dr)
 	if err != nil {
@@ -168,28 +167,24 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 
 	var wgb sync.WaitGroup
 	for _, v := range dr {
-		if v.Db_Id_P > 0 {
-			if v.Db_Type_P == 1 {
-				log.Println("获取Oracle容灾数据开始！")
-
-				if v.Db_Type_P == v.Db_Type_S {
-					log.Println("获取容灾数据开始！")
-					wgb.Add(1)
-					go oracle.GenerateOracleDrStats(&wgb, db, v)
-
-				} else {
-					log.Printf("业务系统 %s 里配置的容灾数据库类型不一致！", v.Bs_Name)
-				}
-
-				log.Println("获取Oracle容灾数据结束！")
-			}
-		} else {
-			log.Printf("业务系统 %s 没有配置容灾！", v.Bs_Name)
+		if v.Db_Type == 1 {
+			log.Println("获取Oracle容灾数据开始！")
+			wgb.Add(1)
+			go oracle.GenerateOracleDrStats(&wgb, db, v)
+		}else if v.Db_Type == 2 {
+			log.Println("获取MySQL容灾数据开始！")
+			wgb.Add(1)
+			go mysql.GenerateMySQLDrStats(&wgb, db, v)
+		}else if v.Db_Type == 3 {
+			log.Println("获取SQLServer容灾数据开始！")
+			wgb.Add(1)
+			go mssql.GenerateMssqlDrStats(&wgb, db, v)
 		}
 	}
 
 	wgb.Wait()
 	
 	(*wg).Done()
+
 	return 0
 }

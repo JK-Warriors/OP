@@ -30,8 +30,8 @@
       </ul>
     </div>
     <div class="pull-right">
-      <a href="javascript:;" class="btn btn-success" id="add_business">
-        <i class="fa fa-plus"></i> 新增业务</a>
+      <a href="/config/dr_config/add" class="btn btn-success" id="add_dr">
+        <i class="fa fa-plus"></i> 新增容灾组</a>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
@@ -53,7 +53,7 @@
             </div>
           </div>
           <section class="panel">
-            <header class="panel-heading"> 业务系统列表 / 总数：{{.countDr}}
+            <header class="panel-heading"> 容灾组列表 / 总数：{{.countDr}}
               <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
               <!--a href="javascript:;" class="fa fa-times"></a-->
               </span>
@@ -65,7 +65,7 @@
                   <table class="table table-bordered table-striped table-condensed">
                     <thead>
                       <tr class="text-center">
-                        <th>业务系统名</th>
+                        <th>容灾组</th>
                         <th>主库</th>
                         <th>灾备</th>
                         <th>闪回保留天数</th>
@@ -78,16 +78,27 @@
                     <tbody>
                     {{range $k,$v := .drconf}}
                     <tr>
-                      <td>{{getBsName $v.Bs_Id}}</td>
+                      <td>{{$v.Bs_Name}}</td>
                       <td>{{$v.Db_Id_P}}</td>
                       <td>{{$v.Db_Id_S}}</td>
                       <td>{{$v.Fb_Retention}}</td>
                       <td>{{$v.Shift_Vips}}</td>
                       <td>{{$v.Network_P}}</td>
                       <td>{{$v.Network_S}}</td>
-                      <td><a href="/config/dr_config/edit/{{$v.Bs_Id}}" class="table_btn">
-                            <i class="iconfont icon-xianghujiaohuan"></i>修改
-                          </a>
+                      <td><div class="btn-group">
+                          <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="/config/dr_config/edit/{{$v.Bs_Id}}">编辑</a></li>
+                            <li role="separator" class="divider"></li>
+                            {{if eq 1 $v.Status}}
+                            <li><a href="javascript:;" class="js-drconfig-single" data-id="{{$v.Bs_Id}}" data-status="2">禁用</a></li>
+                            {{else}}
+                            <li><a href="javascript:;" class="js-drconfig-single" data-id="{{$v.Bs_Id}}" data-status="1">激活</a></li>
+                            {{end}}
+                            <li role="separator" class="divider"></li>
+                            <li><a href="javascript:;" class="js-drconfig-delete" data-op="delete" data-id="{{$v.Bs_Id}}">删除</a></li>
+                          </ul>
+                        </div>
                         </td>
                     </tr>
                     {{end}}
@@ -108,40 +119,18 @@
     <!--footer section end-->
   </div>
   <!-- main content end-->
-  <form id="business-form">
-    <div id="business_box" class="layui_drm">
-      <div class="layercontent">
-        <!-- layer content start -->
-        <div class="form-horizontal adminex-form">
-          <div class="form-group">
-            <label class="col-xs-2  control-label">业务系统名称</label>
-            <div class="col-xs-10">
-              <input type="hidden" id="bs_id" name="bs_id" value="" class="form-control"/>
-              <input type="text" id="bs_name" name="bs_name" value="" class="form-control" placeholder="请填写业务系统名称"/>
-            </div>
-          </div>
-        </div>
-        <!-- layer content end -->
-      </div>
-      <!-- layer foot start -->
-      <div class="layerfoot">
-        <button type="submit" class="btn btn-primary">提 交</button>
-      </div>
-      <!-- layer content end -->
-    </div>
-  </form>
 </section>
 
 {{template "inc/foot.tpl" .}}
 <script>
-    $('.js-dbconfig-single').on('click', function(){
+    $('.js-drconfig-single').on('click', function(){
     	var that = $(this);
     	var status = that.attr('data-status')
     	var id = that.attr('data-id');
-      $.post('/config/db/ajax/status', { status: status, id: id },function(data){
+      $.post('/config/dr_config/ajax/status', { status: status, id: id },function(data){
         dialogInfo(data.message)
         if (data.code) {
-          that.attr('data-status', status == 2 ? 1 : 2).text(status == 2 ? '激活' : '禁用').parents('td').prev('td').text(status == 2 ? '禁用' : '激活');
+          //that.attr('data-status', status == 2 ? 1 : 2).text(status == 2 ? '激活' : '禁用').parents('td').prev('td').text(status == 2 ? '禁用' : '激活');
         } else {
           
         }
@@ -149,7 +138,7 @@
       },'json');
     }); 
 	
-	$('.js-dbconfig-delete').on('click', function(){
+	$('.js-drconfig-delete').on('click', function(){
 		var that = $(this);
 		var id = that.attr('data-id');
 
@@ -159,7 +148,7 @@
 		}, function(index){
 			layer.close(index);
 			
-			$.post('/config/db/ajax/delete', {ids:id},function(data){
+			$.post('/config/dr_config/ajax/delete', {ids:id},function(data){
 				dialogInfo(data.message)
 				if (data.code) {
 					setTimeout(function(){ window.location.reload() }, 1000);
@@ -172,99 +161,6 @@
 	});
 
 
-    //layer
-    $(function() {
-      $('#add_business').click(function() {
-        $("#bs_id").attr("value",'');
-        $("#bs_name").attr("value",'');
-
-        layer.open({
-          type: 1,
-          closeBtn: true,
-          shift: 2,
-          title: '新增业务系统',
-          area: ['600px', '30%'],
-          offset: ['180px'],
-          shadeClose: true,
-          content: $('#business_box')
-        })
-      })
-    })
-
-    
-    function edit_bs(e){
-      var id = e.getAttribute("data-id");
-      var bs_name = e.getAttribute("data-name");
-
-      $("#bs_id").attr("value",id);
-      $("#bs_name").attr("value",bs_name);
-
-      layer.open({
-        type: 1,
-        closeBtn: true,
-        shift: 2,
-        title: '编辑业务系统',
-        area: ['600px', '30%'],
-        offset: ['180px'],
-        shadeClose: true,
-        content: $('#business_box')
-      })
-    }
-
-
-    function delete_bs(e){
-      var id = e.getAttribute("data-id");
-      
-      layer.confirm('您确定要删除吗？', {
-        btn: ['确定','取消'] //按钮
-        ,title:"提示"
-      }, function(index){
-        layer.close(index);
-        
-        $.post('/config/dr_business/ajax/delete', {ids:id},function(data){
-          dialogInfo(data.message)
-          if (data.code) {
-            setTimeout(function(){ window.location.reload() }, 1000);
-          } else {
-            setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
-          }
-        },'json');
-      });
-    }
-
-    
-    $('#business-form').validate({
-        ignore:'',        
-		    rules : {
-			      bs_name:{required: true},
-        },
-        messages : {
-			      bs_name:{required: '请填写业务系统名'},
-        },
-
-        submitHandler:function(form) {
-            var id = $("#bs_id").val()
-            if(id == ""){
-                target_url = "/config/dr_business/add";
-            }else{
-                target_url = "/config/dr_business/edit";
-            }
-            $(form).ajaxSubmit({
-                type:'POST',
-                url: target_url, 
-                dataType:'json',
-                success:function(data) {
-                    dialogInfo(data.message)
-                    if (data.code) {
-                       setTimeout(function(){window.location.href="/config/dr_business/manage"}, 1000);
-                    } else {
-                       setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
-                    }
-                }
-            });
-        }
-
-    });
 </script>
 </body>
 </html>

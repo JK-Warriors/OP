@@ -8,6 +8,8 @@ import (
 	"opms/controllers/dr_oper"
 	"opms/controllers/asset"
 	"opms/controllers/oracle"
+	"opms/controllers/mssql"
+	"opms/controllers/mysql"
 	"opms/controllers/config_alert"
 	"opms/controllers/config_global"
 	"opms/controllers/logs"
@@ -84,7 +86,10 @@ func init() {
 
 	//容灾配置
 	beego.Router("/config/dr_config/manage", &dr_config.ManageDrController{})
+	beego.Router("/config/dr_config/add", &dr_config.AddDrController{})
 	beego.Router("/config/dr_config/edit/:id", &dr_config.EditDrController{})
+	beego.Router("/config/dr_config/ajax/status", &dr_config.AjaxStatusDrConfigController{})
+	beego.Router("/config/dr_config/ajax/delete", &dr_config.AjaxDeleteDrConfigController{})
 
 	//全局配置
 	beego.Router("/config/config_global/manage", &config_global.ManageGlobalController{})
@@ -96,6 +101,14 @@ func init() {
 	beego.Router("/oracle/status/manage", &oracle.ManageOracleController{})
 	beego.Router("/oracle/tbs/manage", &oracle.ManageOracleTbsController{})
 	beego.Router("/oracle/asm/manage", &oracle.ManageOracleAsmController{})
+
+	beego.Router("/mysql/status/manage", &mysql.ManageMysqlController{})
+	beego.Router("/mysql/resource/manage", &mysql.ResourceMysqlController{})
+	beego.Router("/mysql/key/manage", &mysql.KeyMysqlController{})
+	
+	beego.Router("/mssql/status/manage", &mssql.ManageMssqlController{})
+
+	
 
 
 

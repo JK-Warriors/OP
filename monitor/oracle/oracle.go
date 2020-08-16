@@ -3,7 +3,7 @@ package oracle
 import (
 	"database/sql"
 	"log"
-	"opms/server/utils"
+	"opms/monitor/utils"
 	"time"
 	"sync"
 	"context"
@@ -25,12 +25,9 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	//dl, _ := ctx.Deadline()
 	err = db.PingContext(ctx)
-	//ok := dl.After(time.Now())
 	if err != nil {
 		utils.LogDebugf("PingContext: %s", err.Error())
 		MoveToHistory(mysql, "pms_asset_status", "asset_id", db_id)
@@ -47,7 +44,7 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		values(?,?,?,?,?,?)`
 		_, err = mysql.Exec(sql, db_id, host, port, alias, -1, time.Now().Unix())
 		if err != nil {
-			log.Printf("%s: %w", sql, err)
+			log.Printf("%s: %s", sql, err.Error())
 		}
 	} else {
 		log.Println("ping succeeded")
@@ -110,7 +107,7 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 						values(?,?,?,?,?,?,?,?,?,?)`
 	_, err = mysql.Exec(sql, db_id, 1, host, port, alias, db_role, version, connect, session_total, time.Now().Unix())
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		log.Printf("%s: %s", sql, err.Error())
 	}
 
 	//storage stats into pms_oracle_status
@@ -120,7 +117,7 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, flashback_on, flashback_usage, time.Now().Unix())
 	if err != nil {
-		log.Printf("%s: %w", sql, err)
+		log.Printf("%s: %s", sql, err.Error())
 	}
 
 	// add Commit() after all actions
@@ -258,11 +255,11 @@ func GetDsn(db *xorm.Engine, db_id int, db_type int) (string, error) {
 		sql = `select concat("oracle://",username,":",password ,"@" , host , ":" , port , "/" , instance_name , "?sysdba=1") as dsn 
 				from pms_db_config where id = ? and db_type = ?`
 	} else if db_type == 2 {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
+		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_db_config where id = ? and db_type = ?`
 	} else if db_type == 3 {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
+		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_db_config where id = ? and db_type = ?`
 	} else {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
+		sql = `select "" from pms_db_config where id = ? and db_type = ?`
 	}
 
 	_, err := db.SQL(sql, db_id, db_type).Get(&dsn)

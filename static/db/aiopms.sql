@@ -75,16 +75,16 @@ INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-ad
 INSERT INTO `pms_permissions` VALUES ('2102', '2', '编辑资产', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('2103', '2', '删除资产', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
 
-INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/dr_business/manage', '', '1', '1', '2');
-INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/dr_business/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/dr_business/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/dr_business/delete', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/dr_business/manage', '', '1', '1', '2');
+-- INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/dr_business/add', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/dr_business/edit', '', '0', '0', '0');
+-- INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/dr_business/delete', '', '0', '0', '0');
 
 INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
 
 INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-global-manage', '/config/config_global/manage', '', '1', '1', '3');
 
---INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
+-- INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
 
 INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-alert-manage', '/config/config_alert/manage', '', '1', '1', '5');
 
@@ -96,10 +96,10 @@ INSERT INTO `pms_permissions` VALUES ('4100', '4', '实例状态', 'mysql-status
 INSERT INTO `pms_permissions` VALUES ('4110', '4', '资源', 'mysql-resource-manage', '/mysql/resource/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('4120', '4', '键缓存', 'mysql-key-manage', '/mysql/key/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('4130', '4', 'InnoDB', 'mysql-innodb-manage', '/mysql/innodb/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('4140', '4', '大表分析', 'mysql-bigtable-manage', '/mysql/bigtable/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('4150', '4', 'AWR报告', 'mysql-awr-manage', '/mysql/awr/manage', '', '1', '1', '1');
+-- INSERT INTO `pms_permissions` VALUES ('4140', '4', '大表分析', 'mysql-bigtable-manage', '/mysql/bigtable/manage', '', '1', '1', '1');
+-- INSERT INTO `pms_permissions` VALUES ('4150', '4', 'AWR报告', 'mysql-awr-manage', '/mysql/awr/manage', '', '1', '1', '1');
 
-INSERT INTO `pms_permissions` VALUES ('5100', '5', '实例状态', 'sqlserver-status-manage', '/sqlserver/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('5100', '5', '实例状态', 'mssql-status-manage', '/mssql/status/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('9100', '9', '容灾切换', 'oper-switch-manage', '/operation/dr_switch/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9101', '9', '容灾切换', 'oper-switch-view', '/operation/dr_switch/view', '', '0', '0', '1');
@@ -159,10 +159,10 @@ INSERT INTO `pms_role_permission` VALUES ('2100', '1', '2100');
 INSERT INTO `pms_role_permission` VALUES ('2101', '1', '2101');
 INSERT INTO `pms_role_permission` VALUES ('2102', '1', '2102');
 INSERT INTO `pms_role_permission` VALUES ('2103', '1', '2103');
-INSERT INTO `pms_role_permission` VALUES ('2110', '1', '2110');
-INSERT INTO `pms_role_permission` VALUES ('2111', '1', '2111');
-INSERT INTO `pms_role_permission` VALUES ('2112', '1', '2112');
-INSERT INTO `pms_role_permission` VALUES ('2113', '1', '2113');
+-- INSERT INTO `pms_role_permission` VALUES ('2110', '1', '2110');
+-- INSERT INTO `pms_role_permission` VALUES ('2111', '1', '2111');
+-- INSERT INTO `pms_role_permission` VALUES ('2112', '1', '2112');
+-- INSERT INTO `pms_role_permission` VALUES ('2113', '1', '2113');
 INSERT INTO `pms_role_permission` VALUES ('2120', '1', '2120');
 INSERT INTO `pms_role_permission` VALUES ('2130', '1', '2130');
 INSERT INTO `pms_role_permission` VALUES ('2140', '1', '2140');
@@ -174,8 +174,8 @@ INSERT INTO `pms_role_permission` VALUES ('4100', '1', '4100');
 INSERT INTO `pms_role_permission` VALUES ('4110', '1', '4110');
 INSERT INTO `pms_role_permission` VALUES ('4120', '1', '4120');
 INSERT INTO `pms_role_permission` VALUES ('4130', '1', '4130');
-INSERT INTO `pms_role_permission` VALUES ('4140', '1', '4140');
-INSERT INTO `pms_role_permission` VALUES ('4150', '1', '4150');
+-- INSERT INTO `pms_role_permission` VALUES ('4140', '1', '4140');
+-- INSERT INTO `pms_role_permission` VALUES ('4150', '1', '4150');
 INSERT INTO `pms_role_permission` VALUES ('5100', '1', '5100');
 INSERT INTO `pms_role_permission` VALUES ('9100', '1', '9100');
 INSERT INTO `pms_role_permission` VALUES ('9101', '1', '9101');
@@ -364,17 +364,22 @@ CREATE TABLE `pms_dr_business` (
 -- -----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `pms_dr_config`;
 CREATE TABLE `pms_dr_config` (
-  `bs_id` int(10) unsigned NOT NULL COMMENT 'Business Id',
+  `bs_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Business Id',
+  `bs_name` varchar(200) DEFAULT NULL,
+  `db_type` tinyint(2) DEFAULT NULL,
   `db_id_p` int(10) COMMENT 'primary db id',
   `db_dest_p` tinyint(2) COMMENT 'primary dest id',
   `db_id_s` int(10) COMMENT 'standby db id',
   `db_dest_s` tinyint(2) COMMENT 'standby dest id',
+  `db_name` varchar(100) DEFAULT NULL,
   `fb_retention` int(10) COMMENT 'flashback retention',
   `is_shift` tinyint(1),
   `shift_vips` varchar(400),
   `network_p` varchar(100) COMMENT 'primary network card',
   `network_s` varchar(100) COMMENT 'standby network card',
   `is_switch` tinyint(1) DEFAULT 0,
+  `status` tinyint(1) DEFAULT 1 COMMENT '1: 激活；0：禁用',
+  `is_delete` tinyint(1) DEFAULT 0 COMMENT '1: 删除；0：未删除',
   `on_process` tinyint(1) DEFAULT 0,
   `on_switchover` tinyint(1) DEFAULT 0,
   `on_failover` tinyint(1) DEFAULT 0,
@@ -389,7 +394,7 @@ CREATE TABLE `pms_dr_config` (
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   `updated` int(10) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`bs_id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='业务系统配置扩展表';
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='业务系统配置扩展表';
 
 alter table pms_dr_config modify column on_process tinyint(1) DEFAULT 0 comment '值为1时，表明正在进行Switchover，或者Failover，或者开启停止MRP进程'; 
 alter table pms_dr_config modify column on_switchover tinyint(1) DEFAULT 0 comment '值为1时，表明当前正在进行Switchover切换'; 
@@ -496,7 +501,8 @@ CREATE TABLE `pms_asset_status_his` (
   `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -515,7 +521,7 @@ CREATE TABLE `pms_oracle_status` (
   `inst_role` varchar(50) NOT NULL DEFAULT '-1',
   `inst_status` varchar(50) NOT NULL DEFAULT '-1',
   `version` varchar(50) NOT NULL DEFAULT '-1',
-  `startup_time` varchar(100) NOT NULL DEFAULT '-1',
+  `startup_time` varchar(50) NOT NULL DEFAULT '-1',
   `host_name` varchar(50) NOT NULL DEFAULT '-1',
   `archiver` varchar(50) NOT NULL DEFAULT '-1',
   `db_name` varchar(30) NOT NULL DEFAULT '-1',
@@ -550,7 +556,7 @@ CREATE TABLE `pms_oracle_status_his` (
   `inst_role` varchar(50) NOT NULL DEFAULT '-1',
   `inst_status` varchar(50) NOT NULL DEFAULT '-1',
   `version` varchar(50) NOT NULL DEFAULT '-1',
-  `startup_time` varchar(100) NOT NULL DEFAULT '-1',
+  `startup_time` varchar(50) NOT NULL DEFAULT '-1',
   `host_name` varchar(50) NOT NULL DEFAULT '-1',
   `archiver` varchar(50) NOT NULL DEFAULT '-1',
   `db_name` varchar(30) NOT NULL DEFAULT '-1',
@@ -566,7 +572,8 @@ CREATE TABLE `pms_oracle_status_his` (
   `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -608,7 +615,8 @@ CREATE TABLE `pms_oracle_tablespace_his` (
   `max_rate` float(10,2) NOT NULL DEFAULT '0',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
-  KEY `idx_db_id` (`db_id`) USING BTREE
+  KEY `idx_db_id` (`db_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -653,7 +661,8 @@ CREATE TABLE `pms_oracle_diskgroup_his` (
   `used_rate` float(10,2) NOT NULL DEFAULT '0',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
-  KEY `idx_db_id` (`db_id`) USING BTREE
+  KEY `idx_db_id` (`db_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -686,7 +695,8 @@ CREATE TABLE `pms_opration_his` (
   `reason` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`bs_id`, `db_type`, `op_type`,`created`) USING BTREE
+  KEY `idx_op_type` (`bs_id`, `db_type`, `op_type`,`created`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -720,7 +730,8 @@ CREATE TABLE `pms_op_process_his` (
   `process_desc` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`,`created`) USING BTREE
+  KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`,`created`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 
@@ -755,7 +766,8 @@ CREATE TABLE `pms_dr_pri_status_his` (
   `archived_delay` int(10) DEFAULT NULL,
   `applied_delay` int(10) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 
@@ -788,8 +800,371 @@ CREATE TABLE `pms_dr_sta_status_his` (
   `curr_db_time` varchar(20) DEFAULT NULL,
   `mrp_status` varchar(20) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_mssql_status
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_mssql_status`;
+CREATE TABLE `pms_mssql_status` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(30) NOT NULL,
+  `port` varchar(10) NOT NULL,
+  `alias` varchar(50) NOT NULL DEFAULT '',
+  `connect` smallint(4) NOT NULL DEFAULT '0',
+  `role` varchar(30) NOT NULL DEFAULT '-1',
+  `uptime` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `lock_timeout` int(11) NOT NULL DEFAULT '-1',
+  `trancount` int(11) NOT NULL DEFAULT '-1',
+  `max_connections` int(11) NOT NULL DEFAULT '-1',
+  `processes` int(11) NOT NULL DEFAULT '-1',
+  `processes_running` int(11) NOT NULL DEFAULT '-1',
+  `processes_waits` int(11) NOT NULL DEFAULT '-1',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_mssql_status_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_mssql_status_his`;
+CREATE TABLE `pms_mssql_status_his` (
+  `id` int(10) NOT NULL,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(30) NOT NULL,
+  `port` varchar(10) NOT NULL,
+  `alias` varchar(50) NOT NULL DEFAULT '',
+  `connect` smallint(4) NOT NULL DEFAULT '0',
+  `role` varchar(30) NOT NULL DEFAULT '-1',
+  `uptime` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `lock_timeout` int(11) NOT NULL DEFAULT '-1',
+  `trancount` int(11) NOT NULL DEFAULT '-1',
+  `max_connections` int(11) NOT NULL DEFAULT '-1',
+  `processes` int(11) NOT NULL DEFAULT '-1',
+  `processes_running` int(11) NOT NULL DEFAULT '-1',
+  `processes_waits` int(11) NOT NULL DEFAULT '-1',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_dr_mssql_p
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mssql_p`;
+CREATE TABLE `pms_dr_mssql_p` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `database_id` int(10) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30)  DEFAULT NULL,
+  `role` tinyint(1) DEFAULT NULL,
+  `state` tinyint(1) DEFAULT NULL,
+  `state_desc` varchar(60) DEFAULT NULL,
+  `safety_level` tinyint(1) DEFAULT NULL,
+  `partner_name` varchar(128) DEFAULT NULL,
+  `partner_instance` varchar(128) DEFAULT NULL,
+  `failover_lsn` numeric(25,0) DEFAULT NULL,
+  `connection_timeout` int(10) DEFAULT NULL,
+  `redo_queue` int(10) DEFAULT '-1' COMMENT '-1 表示对镜像服务器重做的最大日志量为UNLIMITED',
+  `end_of_log_lsn` numeric(25,0) DEFAULT NULL,
+  `replication_lsn` numeric(25,0) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_dr_mssql_p_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mssql_p_his`;
+CREATE TABLE `pms_dr_mssql_p_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `database_id` int(10) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30)  DEFAULT NULL,
+  `role` tinyint(1) DEFAULT NULL,
+  `state` tinyint(1) DEFAULT NULL,
+  `state_desc` varchar(60) DEFAULT NULL,
+  `safety_level` tinyint(1) DEFAULT NULL,
+  `partner_name` varchar(128) DEFAULT NULL,
+  `partner_instance` varchar(128) DEFAULT NULL,
+  `failover_lsn` numeric(25,0) DEFAULT NULL,
+  `connection_timeout` int(10) DEFAULT NULL,
+  `redo_queue` int(10) DEFAULT '-1' COMMENT '-1 表示对镜像服务器重做的最大日志量为UNLIMITED',
+  `end_of_log_lsn` numeric(25,0) DEFAULT NULL,
+  `replication_lsn` numeric(25,0) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_dr_mssql_s
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mssql_s`;
+CREATE TABLE `pms_dr_mssql_s` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `database_id` int(10) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30)  DEFAULT NULL,
+  `master_server` varchar(30) DEFAULT NULL,
+  `master_port` varchar(20) DEFAULT NULL,
+  `role` tinyint(1) DEFAULT NULL,
+  `state` tinyint(1) DEFAULT NULL,
+  `state_desc` varchar(60) DEFAULT NULL,
+  `safety_level` tinyint(1) DEFAULT NULL,
+  `partner_name` varchar(128) DEFAULT NULL,
+  `partner_instance` varchar(128) DEFAULT NULL,
+  `failover_lsn` numeric(25,0) DEFAULT NULL,
+  `connection_timeout` int(10) DEFAULT NULL,
+  `redo_queue` int(10) DEFAULT '-1' COMMENT '-1 表示对镜像服务器重做的最大日志量为UNLIMITED',
+  `end_of_log_lsn` numeric(25,0) DEFAULT NULL,
+  `replication_lsn` numeric(25,0) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_dr_mssql_s_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mssql_s_his`;
+CREATE TABLE `pms_dr_mssql_s_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `database_id` int(10) NOT NULL DEFAULT '-1',
+  `db_name` varchar(30)  DEFAULT NULL,
+  `master_server` varchar(30) DEFAULT NULL,
+  `master_port` varchar(20) DEFAULT NULL,
+  `role` tinyint(1) DEFAULT NULL,
+  `state` tinyint(1) DEFAULT NULL,
+  `state_desc` varchar(60) DEFAULT NULL,
+  `safety_level` tinyint(1) DEFAULT NULL,
+  `partner_name` varchar(128) DEFAULT NULL,
+  `partner_instance` varchar(128) DEFAULT NULL,
+  `failover_lsn` numeric(25,0) DEFAULT NULL,
+  `connection_timeout` int(10) DEFAULT NULL,
+  `redo_queue` int(10) DEFAULT '-1' COMMENT '-1 表示对镜像服务器重做的最大日志量为UNLIMITED',
+  `end_of_log_lsn` numeric(25,0) DEFAULT NULL,
+  `replication_lsn` numeric(25,0) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_mysql_status
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_mysql_status`;
+CREATE TABLE `pms_mysql_status` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(30) NOT NULL,
+  `port` varchar(10) NOT NULL,
+  `alias` varchar(50) NOT NULL DEFAULT '',
+  `connect` smallint(4) NOT NULL DEFAULT '0',
+  `role` varchar(30) NOT NULL DEFAULT '-1',
+  `uptime` int(11) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `max_connections` smallint(4) NOT NULL DEFAULT '-1',
+  `max_connect_errors` smallint(4) NOT NULL DEFAULT '-1',
+  `open_files_limit` int(10) NOT NULL DEFAULT '-1',
+  `open_files` smallint(4) NOT NULL DEFAULT '-1',
+  `table_open_cache` smallint(4) NOT NULL DEFAULT '-1',
+  `open_tables` smallint(4) NOT NULL DEFAULT '-1',
+  `max_tmp_tables` smallint(4) NOT NULL DEFAULT '-1',
+  `max_heap_table_size` int(10) NOT NULL DEFAULT '-1',
+  `max_allowed_packet` int(10) NOT NULL DEFAULT '-1',
+  `threads_connected` int(10) NOT NULL DEFAULT '-1',
+  `threads_running` int(10) NOT NULL DEFAULT '-1',
+  `threads_waits` int(10) NOT NULL DEFAULT '-1',
+  `threads_created` int(10) NOT NULL DEFAULT '-1',
+  `threads_cached` int(10) NOT NULL DEFAULT '-1',
+  `connections` int(10) NOT NULL DEFAULT '-1',
+  `aborted_clients` int(10) NOT NULL DEFAULT '-1',
+  `aborted_connects` int(10) NOT NULL DEFAULT '-1',
+  `connections_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `bytes_received_persecond` int(10) NOT NULL DEFAULT '-1',
+  `bytes_sent_persecond` int(10) NOT NULL DEFAULT '-1',
+  `com_select_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_insert_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_update_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_delete_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_commit_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_rollback_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `questions_persecond` int(10) NOT NULL DEFAULT '-1',
+  `queries_persecond` int(10) NOT NULL DEFAULT '-1',
+  `transaction_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_tables_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_disk_tables_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_files_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `table_locks_immediate_persecond` int(4) NOT NULL DEFAULT '-1',
+  `table_locks_waited_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `key_buffer_size` bigint(18) NOT NULL DEFAULT '-1',
+  `sort_buffer_size` int(10) NOT NULL DEFAULT '-1',
+  `join_buffer_size` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_not_flushed` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_unused` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_used` int(10) NOT NULL DEFAULT '-1',
+  `key_read_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_reads_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_write_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_writes_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_version` varchar(30) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_instances` smallint(4) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_size` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_doublewrite` char(10) NOT NULL DEFAULT '-1',
+  `innodb_file_per_table` char(10) NOT NULL DEFAULT '-1',
+  `innodb_flush_log_at_trx_commit` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_flush_method` varchar(30) NOT NULL DEFAULT '-1',
+  `innodb_force_recovery` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_io_capacity` int(10) NOT NULL DEFAULT '-1',
+  `innodb_read_io_threads` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_write_io_threads` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_pages_total` int(10) NOT NULL DEFAULT '-1' COMMENT '页总数目',
+  `innodb_buffer_pool_pages_data` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中包含数据的页的数目，包括脏页,单位page',
+  `innodb_buffer_pool_pages_dirty` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中脏页的数目-单位page',
+  `innodb_buffer_pool_pages_flushed` bigint(18) NOT NULL DEFAULT '-1' COMMENT '缓存池中刷新页请求的数目-单位page',
+  `innodb_buffer_pool_pages_free` int(10) NOT NULL DEFAULT '-1' COMMENT '剩余的页数目-单位是page',
+  `innodb_buffer_pool_pages_misc` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中当前已经被用作管理用途或hash index而不能用作为普通数据页的数目',
+  `innodb_page_size` int(10) NOT NULL DEFAULT '-1',
+  `innodb_pages_created` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_pages_read` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_pages_written` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_row_lock_current_waits` varchar(100) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_pages_flushed_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_read_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_reads_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_write_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_read_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_inserted_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_updated_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_deleted_persecond` int(10) NOT NULL DEFAULT '-1',
+  `query_cache_hitrate` varchar(10) NOT NULL DEFAULT '-1',
+  `thread_cache_hitrate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_buffer_read_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_buffer_write_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_blocks_used_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `created_tmp_disk_tables_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `connections_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `open_files_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `open_tables_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_mysql_status_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_mysql_status_his`;
+CREATE TABLE `pms_mysql_status_his` (
+  `id` int(10) NOT NULL,
+  `db_id` int(10) NOT NULL,
+  `host` varchar(30) NOT NULL,
+  `port` varchar(10) NOT NULL,
+  `alias` varchar(50) NOT NULL DEFAULT '',
+  `connect` smallint(4) NOT NULL DEFAULT '0',
+  `role` varchar(30) NOT NULL DEFAULT '-1',
+  `uptime` int(11) NOT NULL DEFAULT '-1',
+  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `max_connections` smallint(4) NOT NULL DEFAULT '-1',
+  `max_connect_errors` smallint(4) NOT NULL DEFAULT '-1',
+  `open_files_limit` int(10) NOT NULL DEFAULT '-1',
+  `open_files` smallint(4) NOT NULL DEFAULT '-1',
+  `table_open_cache` smallint(4) NOT NULL DEFAULT '-1',
+  `open_tables` smallint(4) NOT NULL DEFAULT '-1',
+  `max_tmp_tables` smallint(4) NOT NULL DEFAULT '-1',
+  `max_heap_table_size` int(10) NOT NULL DEFAULT '-1',
+  `max_allowed_packet` int(10) NOT NULL DEFAULT '-1',
+  `threads_connected` int(10) NOT NULL DEFAULT '-1',
+  `threads_running` int(10) NOT NULL DEFAULT '-1',
+  `threads_waits` int(10) NOT NULL DEFAULT '-1',
+  `threads_created` int(10) NOT NULL DEFAULT '-1',
+  `threads_cached` int(10) NOT NULL DEFAULT '-1',
+  `connections` int(10) NOT NULL DEFAULT '-1',
+  `aborted_clients` int(10) NOT NULL DEFAULT '-1',
+  `aborted_connects` int(10) NOT NULL DEFAULT '-1',
+  `connections_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `bytes_received_persecond` int(10) NOT NULL DEFAULT '-1',
+  `bytes_sent_persecond` int(10) NOT NULL DEFAULT '-1',
+  `com_select_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_insert_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_update_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_delete_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_commit_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `com_rollback_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `questions_persecond` int(10) NOT NULL DEFAULT '-1',
+  `queries_persecond` int(10) NOT NULL DEFAULT '-1',
+  `transaction_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_tables_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_disk_tables_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `created_tmp_files_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `table_locks_immediate_persecond` int(4) NOT NULL DEFAULT '-1',
+  `table_locks_waited_persecond` smallint(4) NOT NULL DEFAULT '-1',
+  `key_buffer_size` bigint(18) NOT NULL DEFAULT '-1',
+  `sort_buffer_size` int(10) NOT NULL DEFAULT '-1',
+  `join_buffer_size` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_not_flushed` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_unused` int(10) NOT NULL DEFAULT '-1',
+  `key_blocks_used` int(10) NOT NULL DEFAULT '-1',
+  `key_read_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_reads_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_write_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `key_writes_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_version` varchar(30) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_instances` smallint(4) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_size` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_doublewrite` char(10) NOT NULL DEFAULT '-1',
+  `innodb_file_per_table` char(10) NOT NULL DEFAULT '-1',
+  `innodb_flush_log_at_trx_commit` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_flush_method` varchar(30) NOT NULL DEFAULT '-1',
+  `innodb_force_recovery` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_io_capacity` int(10) NOT NULL DEFAULT '-1',
+  `innodb_read_io_threads` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_write_io_threads` tinyint(2) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_pages_total` int(10) NOT NULL DEFAULT '-1' COMMENT '页总数目',
+  `innodb_buffer_pool_pages_data` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中包含数据的页的数目，包括脏页,单位page',
+  `innodb_buffer_pool_pages_dirty` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中脏页的数目-单位page',
+  `innodb_buffer_pool_pages_flushed` bigint(18) NOT NULL DEFAULT '-1' COMMENT '缓存池中刷新页请求的数目-单位page',
+  `innodb_buffer_pool_pages_free` int(10) NOT NULL DEFAULT '-1' COMMENT '剩余的页数目-单位是page',
+  `innodb_buffer_pool_pages_misc` int(10) NOT NULL DEFAULT '-1' COMMENT '缓存池中当前已经被用作管理用途或hash index而不能用作为普通数据页的数目',
+  `innodb_page_size` int(10) NOT NULL DEFAULT '-1',
+  `innodb_pages_created` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_pages_read` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_pages_written` bigint(18) NOT NULL DEFAULT '-1',
+  `innodb_row_lock_current_waits` varchar(100) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_pages_flushed_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_read_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_reads_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_buffer_pool_write_requests_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_read_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_inserted_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_updated_persecond` int(10) NOT NULL DEFAULT '-1',
+  `innodb_rows_deleted_persecond` int(10) NOT NULL DEFAULT '-1',
+  `query_cache_hitrate` varchar(10) NOT NULL DEFAULT '-1',
+  `thread_cache_hitrate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_buffer_read_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_buffer_write_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `key_blocks_used_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `created_tmp_disk_tables_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `connections_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `open_files_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `open_tables_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 -- ----------------------------

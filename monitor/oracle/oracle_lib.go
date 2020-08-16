@@ -5,7 +5,7 @@ import (
 	"log"
 	//"time"
 	//"context"
-	//"opms/server/utils"
+	//"opms/monitor/utils"
 
 	_ "github.com/go-sql-driver/mysql"
 	//"github.com/godror/godror"
