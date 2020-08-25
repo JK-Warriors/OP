@@ -85,8 +85,8 @@ func (this *AddDrController) Post() {
 	}
 	bs_name := this.GetString("bs_name")
 	
-	typestr := this.GetString("db_type")
-	db_type, _ := strconv.Atoi(typestr)
+	typestr := this.GetString("asset_type")
+	asset_type, _ := strconv.Atoi(typestr)
 
 	idstr := this.GetString("db_id_p")
 	db_id_p, _ := strconv.Atoi(idstr)
@@ -123,7 +123,7 @@ func (this *AddDrController) Post() {
 	var drconf DrConfig
 
 	drconf.Bs_Name = bs_name
-	drconf.Db_Type = db_type
+	drconf.Asset_Type = asset_type
 	drconf.Db_Id_P = db_id_p
 	drconf.Db_Dest_P = db_dest_p
 	drconf.Db_Id_S = db_id_s
@@ -190,8 +190,8 @@ func (this *EditDrController) Post() {
 
 	bs_name := this.GetString("bs_name")
 	
-	typestr := this.GetString("db_type")
-	db_type, _ := strconv.Atoi(typestr)
+	typestr := this.GetString("asset_type")
+	asset_type, _ := strconv.Atoi(typestr)
 
 	idstr = this.GetString("db_id_p")
 	db_id_p, _ := strconv.Atoi(idstr)
@@ -228,7 +228,7 @@ func (this *EditDrController) Post() {
 	var drconf DrConfig
 
 	drconf.Bs_Name = bs_name
-	drconf.Db_Type = db_type
+	drconf.Asset_Type = asset_type
 	drconf.Db_Id_P = db_id_p
 	drconf.Db_Dest_P = db_dest_p
 	drconf.Db_Id_S = db_id_s

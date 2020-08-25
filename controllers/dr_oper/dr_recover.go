@@ -90,9 +90,9 @@ func (this *OperDrRecoverController) Get() {
 	utils.LogDebug("GetStandbyDBID successfully.")
 
 	// 获取db type
-	db_type := GetDBtypeByDBId(db_id)
+	asset_type := GetDBtypeByDBId(db_id)
 
-	dsn, err := GetDsn(db_id, db_type)
+	dsn, err := GetDsn(db_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -142,10 +142,10 @@ func (this *AjaxDrFlashbackController) Post() {
 	}
 
 	// 获取db type
-	db_type := GetDBtypeByDBId(db_id)
+	asset_type := GetDBtypeByDBId(db_id)
 
 	// Get dsn
-	dsn_s, err := GetDsn(db_id, db_type)
+	dsn_s, err := GetDsn(db_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetDsn failed: " + err.Error())
 	}
@@ -166,10 +166,10 @@ func (this *AjaxDrFlashbackController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始恢复快照任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -188,11 +188,11 @@ func (this *AjaxDrFlashbackController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
@@ -223,7 +223,7 @@ func (this *AjaxDrRecoverController) Post() {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := "STOPFLASHBACK"
 
 	//灾备配置检查
@@ -241,7 +241,7 @@ func (this *AjaxDrRecoverController) Post() {
 	}
 	utils.LogDebug("GetStandbyDBID successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -262,10 +262,10 @@ func (this *AjaxDrRecoverController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始恢复同步任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -284,11 +284,11 @@ func (this *AjaxDrRecoverController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 

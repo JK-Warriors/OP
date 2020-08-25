@@ -66,6 +66,7 @@ INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/conf
 INSERT INTO `pms_permissions` VALUES ('3', '0', 'Oracle', 'Oracle', '/oracle', '', '1', '1', '3');
 INSERT INTO `pms_permissions` VALUES ('4', '0', 'MySQL', 'MySQL', '/mysql', '', '1', '1', '4');
 INSERT INTO `pms_permissions` VALUES ('5', '0', 'SQLServer', 'SQLServer', '/mssql', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('6', '0', 'OS', 'OS', '/os', '', '1', '1', '6');
 INSERT INTO `pms_permissions` VALUES ('9', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '9');
 INSERT INTO `pms_permissions` VALUES ('98', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '98');
 INSERT INTO `pms_permissions` VALUES ('99', '0', '系统管理', 'system', '/system', '', '1', '1', '99');
@@ -100,6 +101,10 @@ INSERT INTO `pms_permissions` VALUES ('4130', '4', 'InnoDB', 'mysql-innodb-manag
 -- INSERT INTO `pms_permissions` VALUES ('4150', '4', 'AWR报告', 'mysql-awr-manage', '/mysql/awr/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('5100', '5', '实例状态', 'mssql-status-manage', '/mssql/status/manage', '', '1', '1', '1');
+
+INSERT INTO `pms_permissions` VALUES ('6100', '6', '健康状态', 'os-status-manage', '/os/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('6110', '6', '磁盘', 'disk-status-manage', '/disk/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('6120', '6', '磁盘IO', 'diskio-status-manage', '/diskio/status/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('9100', '9', '容灾切换', 'oper-switch-manage', '/operation/dr_switch/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9101', '9', '容灾切换', 'oper-switch-view', '/operation/dr_switch/view', '', '0', '0', '1');
@@ -152,6 +157,7 @@ INSERT INTO `pms_role_permission` VALUES ('2', '1', '2');
 INSERT INTO `pms_role_permission` VALUES ('3', '1', '3');
 INSERT INTO `pms_role_permission` VALUES ('4', '1', '4');
 INSERT INTO `pms_role_permission` VALUES ('5', '1', '5');
+INSERT INTO `pms_role_permission` VALUES ('6', '1', '6');
 INSERT INTO `pms_role_permission` VALUES ('9', '1', '9');
 INSERT INTO `pms_role_permission` VALUES ('98', '1', '98');
 INSERT INTO `pms_role_permission` VALUES ('99', '1', '99');
@@ -177,6 +183,9 @@ INSERT INTO `pms_role_permission` VALUES ('4130', '1', '4130');
 -- INSERT INTO `pms_role_permission` VALUES ('4140', '1', '4140');
 -- INSERT INTO `pms_role_permission` VALUES ('4150', '1', '4150');
 INSERT INTO `pms_role_permission` VALUES ('5100', '1', '5100');
+INSERT INTO `pms_role_permission` VALUES ('6100', '1', '6100');
+INSERT INTO `pms_role_permission` VALUES ('6110', '1', '6110');
+INSERT INTO `pms_role_permission` VALUES ('6120', '1', '6120');
 INSERT INTO `pms_role_permission` VALUES ('9100', '1', '9100');
 INSERT INTO `pms_role_permission` VALUES ('9101', '1', '9101');
 INSERT INTO `pms_role_permission` VALUES ('9102', '1', '9102');
@@ -318,20 +327,20 @@ CREATE TABLE `pms_admin_log` (
 
 
 -- -----------------------------------------------------------------------------
--- Table structure for pms_db_config
+-- Table structure for pms_asset_config
 -- -----------------------------------------------------------------------------
-DROP TABLE IF EXISTS `pms_db_config`;
-CREATE TABLE `pms_db_config` (
+DROP TABLE IF EXISTS `pms_asset_config`;
+CREATE TABLE `pms_asset_config` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `db_type` tinyint(2) DEFAULT NULL,
-  `host` varchar(30) NOT NULL DEFAULT '' COMMENT '数据库IP',
-  `port` int(10) NOT NULL DEFAULT 0 COMMENT '数据库端口',
+  `asset_type` tinyint(2) DEFAULT NULL,
+  `host` varchar(30) NOT NULL DEFAULT '' COMMENT 'IP',
+  `protocol` varchar(10) NOT NULL DEFAULT 0 COMMENT '协议',
+  `port` int(10) NOT NULL DEFAULT 0 COMMENT '端口',
   `alias` varchar(255) DEFAULT '' COMMENT '别名',
   `instance_name` varchar(50) DEFAULT '' COMMENT '实例名',
   `db_name` varchar(50) DEFAULT '' COMMENT '数据库名',
   `username` varchar(30) DEFAULT '' COMMENT '用户名',
   `password` varchar(255) DEFAULT '' COMMENT '密码',
-  `bs_id` int(10) DEFAULT NULL COMMENT '业务系统ID',
   `role` tinyint(2) DEFAULT 1 COMMENT '1：主；2: 备',
   `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；0：禁用',
   `is_delete` tinyint(2) DEFAULT 0 COMMENT '1: 删除；0：未删除',
@@ -341,7 +350,7 @@ CREATE TABLE `pms_db_config` (
   PRIMARY KEY (`id`),
   KEY `host` (`host`),
   KEY `alias` (`alias`)
-)ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8 COMMENT='数据库配置表';
+)ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8 COMMENT='资产配置表';
 
 
 -- -----------------------------------------------------------------------------
@@ -366,7 +375,7 @@ DROP TABLE IF EXISTS `pms_dr_config`;
 CREATE TABLE `pms_dr_config` (
   `bs_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Business Id',
   `bs_name` varchar(200) DEFAULT NULL,
-  `db_type` tinyint(2) DEFAULT NULL,
+  `asset_type` tinyint(2) DEFAULT NULL,
   `db_id_p` int(10) COMMENT 'primary db id',
   `db_dest_p` tinyint(2) COMMENT 'primary dest id',
   `db_id_s` int(10) COMMENT 'standby db id',
@@ -414,7 +423,7 @@ alter table pms_dr_config modify column on_stopflashback tinyint(1) DEFAULT 0 co
 DROP TABLE IF EXISTS `pms_template`;
 CREATE TABLE `pms_template` (
   `template_id` int(10) NOT NULL AUTO_INCREMENT,
-  `db_type`     varchar(50) DEFAULT NULL,
+  `asset_type`     varchar(50) DEFAULT NULL,
   `scraper_name` varchar(255)  DEFAULT NULL,
   `subsystem` varchar(255)  DEFAULT NULL,
   `metrix_name` varchar(255)  DEFAULT NULL,
@@ -502,6 +511,7 @@ CREATE TABLE `pms_asset_status_his` (
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
+  KEY `idx_asset_id` (`asset_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -573,6 +583,7 @@ CREATE TABLE `pms_oracle_status_his` (
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -673,13 +684,13 @@ DROP TABLE IF EXISTS `pms_opration`;
 CREATE TABLE `pms_opration` (
   `id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
-  `db_type` varchar(50) NOT NULL,
+  `asset_type` varchar(50) NOT NULL,
   `op_type` varchar(20),
   `result` varchar(2),
   `reason` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`bs_id`,`db_type`,`op_type`) USING BTREE
+  KEY `idx_op_type` (`bs_id`,`asset_type`,`op_type`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -689,13 +700,13 @@ DROP TABLE IF EXISTS `pms_opration_his`;
 CREATE TABLE `pms_opration_his` (
   `id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
-  `db_type` varchar(50) NOT NULL,
+  `asset_type` varchar(50) NOT NULL,
   `op_type` varchar(20),
   `result` varchar(2),
   `reason` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`bs_id`, `db_type`, `op_type`,`created`) USING BTREE,
+  KEY `idx_op_type` (`bs_id`, `asset_type`, `op_type`,`created`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -709,12 +720,12 @@ CREATE TABLE `pms_op_process` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `op_id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
-  `db_type` varchar(50) NOT NULL,
+  `asset_type` varchar(50) NOT NULL,
   `process_type` varchar(20) COMMENT '2个类型：SWITCHOVER;FAILOVER;',
   `process_desc` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`) USING BTREE
+  KEY `idx_op_type` (`asset_type`, `bs_id`, `process_type`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -725,12 +736,12 @@ CREATE TABLE `pms_op_process_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `op_id` bigint(20) NOT NULL,
   `bs_id` int(10) NOT NULL,
-  `db_type` varchar(50) NOT NULL,
+  `asset_type` varchar(50) NOT NULL,
   `process_type` varchar(20) COMMENT '2个类型：SWITCHOVER;FAILOVER;',
   `process_desc` varchar(1000),
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_op_type` (`db_type`, `bs_id`, `process_type`,`created`) USING BTREE,
+  KEY `idx_op_type` (`asset_type`, `bs_id`, `process_type`,`created`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
@@ -767,6 +778,7 @@ CREATE TABLE `pms_dr_pri_status_his` (
   `applied_delay` int(10) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
@@ -801,6 +813,7 @@ CREATE TABLE `pms_dr_sta_status_his` (
   `mrp_status` varchar(20) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
 
@@ -851,6 +864,7 @@ CREATE TABLE `pms_mssql_status_his` (
   `processes_waits` int(11) NOT NULL DEFAULT '-1',
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -903,6 +917,7 @@ CREATE TABLE `pms_dr_mssql_p_his` (
   `replication_lsn` numeric(25,0) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_dr_id` (`dr_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -959,6 +974,7 @@ CREATE TABLE `pms_dr_mssql_s_his` (
   `replication_lsn` numeric(25,0) DEFAULT NULL,
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_dr_id` (`dr_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1163,7 +1179,227 @@ CREATE TABLE `pms_mysql_status_his` (
   `open_tables_usage_rate` varchar(10) NOT NULL DEFAULT '-1',
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
+  KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_os_status
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_status`;
+CREATE TABLE `pms_os_status` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) NOT NULL,
+  `connect` tinyint(2) NOT NULL DEFAULT '0',
+  `hostname` varchar(100) NOT NULL DEFAULT '-1',
+  `kernel` varchar(100) NOT NULL DEFAULT '-1',
+  `system_date` varchar(50) NOT NULL DEFAULT '-1',
+  `system_uptime` varchar(50) NOT NULL DEFAULT '-1',
+  `process` int(10) NOT NULL DEFAULT '-1',
+  `load_1` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `load_5` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `load_15` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `cpu_user_time` int(4) NOT NULL DEFAULT '-1',
+  `cpu_system_time` int(4) NOT NULL DEFAULT '-1',
+  `cpu_idle_time` int(4) NOT NULL DEFAULT '-1',
+  `swap_total` int(11) NOT NULL DEFAULT '-1',
+  `swap_avail` int(11) NOT NULL DEFAULT '-1',
+  `mem_total` int(11) NOT NULL DEFAULT '-1',
+  `mem_avail` int(11) NOT NULL DEFAULT '-1',
+  `mem_free` int(11) NOT NULL DEFAULT '-1',
+  `mem_shared` int(11) NOT NULL DEFAULT '-1',
+  `mem_buffered` int(11) NOT NULL DEFAULT '-1',
+  `mem_cached` int(11) NOT NULL DEFAULT '-1',
+  `mem_usage_rate` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `mem_available` int(11) NOT NULL DEFAULT -1,
+  `disk_io_reads_total` int(10) NOT NULL DEFAULT -1,
+  `disk_io_writes_total` int(10) NOT NULL DEFAULT -1,
+  `net_in_bytes_total` bigint(18) NOT NULL DEFAULT -1,
+  `net_out_bytes_total` bigint(18) NOT NULL DEFAULT -1,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_status_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_status_his`;
+CREATE TABLE `pms_os_status_his` (
+  `id` int(10) NOT NULL,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) NOT NULL,
+  `connect` tinyint(2) NOT NULL DEFAULT '0',
+  `hostname` varchar(100) NOT NULL DEFAULT '-1',
+  `kernel` varchar(100) NOT NULL DEFAULT '-1',
+  `system_date` varchar(50) NOT NULL DEFAULT '-1',
+  `system_uptime` varchar(50) NOT NULL DEFAULT '-1',
+  `process` int(10) NOT NULL DEFAULT '-1',
+  `load_1` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `load_5` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `load_15` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `cpu_user_time` int(4) NOT NULL DEFAULT '-1',
+  `cpu_system_time` int(4) NOT NULL DEFAULT '-1',
+  `cpu_idle_time` int(4) NOT NULL DEFAULT '-1',
+  `swap_total` int(11) NOT NULL DEFAULT '-1',
+  `swap_avail` int(11) NOT NULL DEFAULT '-1',
+  `mem_total` int(11) NOT NULL DEFAULT '-1',
+  `mem_avail` int(11) NOT NULL DEFAULT '-1',
+  `mem_free` int(11) NOT NULL DEFAULT '-1',
+  `mem_shared` int(11) NOT NULL DEFAULT '-1',
+  `mem_buffered` int(11) NOT NULL DEFAULT '-1',
+  `mem_cached` int(11) NOT NULL DEFAULT '-1',
+  `mem_usage_rate` decimal(4,2) NOT NULL DEFAULT '-1.00',
+  `mem_available` int(11) NOT NULL DEFAULT -1,
+  `disk_io_reads_total` int(10) NOT NULL DEFAULT -1,
+  `disk_io_writes_total` int(10) NOT NULL DEFAULT -1,
+  `net_in_bytes_total` bigint(18) NOT NULL DEFAULT -1,
+  `net_out_bytes_total` bigint(18) NOT NULL DEFAULT -1,
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_os_id` (`os_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_os_disk
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_disk`;
+CREATE TABLE `pms_os_disk` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `mounted` varchar(50) NOT NULL DEFAULT '0',
+  `total_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_size` bigint(18) NOT NULL DEFAULT '0',
+  `avail_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_rate` varchar(10) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_disk_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_disk_his`;
+CREATE TABLE `pms_os_disk_his` (
+  `id` int(10) NOT NULL,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `mounted` varchar(50) NOT NULL DEFAULT '0',
+  `total_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_size` bigint(18) NOT NULL DEFAULT '0',
+  `avail_size` bigint(18) NOT NULL DEFAULT '0',
+  `used_rate` varchar(10) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_os_id` (`os_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_os_diskio
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_diskio`;
+CREATE TABLE `pms_os_diskio` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `fdisk` varchar(50) NOT NULL DEFAULT '0',
+  `disk_io_reads` bigint(18) NOT NULL DEFAULT '0',
+  `disk_io_writes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_diskio_tmp
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_diskio_tmp`;
+CREATE TABLE `pms_os_diskio_tmp` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `fdisk` varchar(50) NOT NULL DEFAULT '0',
+  `disk_io_reads` bigint(18) NOT NULL DEFAULT '0',
+  `disk_io_writes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_diskio_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_diskio_his`;
+CREATE TABLE `pms_os_diskio_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `fdisk` varchar(50) NOT NULL DEFAULT '0',
+  `disk_io_reads` bigint(18) NOT NULL DEFAULT '0',
+  `disk_io_writes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_os_id` (`os_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_net
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_net`;
+CREATE TABLE `pms_os_net` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `if_descr` varchar(50) NOT NULL DEFAULT '0',
+  `in_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `out_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_os_net_tmp
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_net_tmp`;
+CREATE TABLE `pms_os_net_tmp` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `if_descr` varchar(50) NOT NULL DEFAULT '0',
+  `in_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `out_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for os_net_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_os_net_his`;
+CREATE TABLE `pms_os_net_his` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `os_id` int(10) NOT NULL,
+  `host` varchar(50) NOT NULL,
+  `alias` varchar(100) DEFAULT NULL,
+  `if_descr` varchar(50) NOT NULL DEFAULT '0',
+  `in_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `out_bytes` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_os_id` (`os_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

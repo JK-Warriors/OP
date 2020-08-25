@@ -121,11 +121,11 @@ func (this *AjaxDrSwitchoverController) Post() {
 	// }
 
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := this.GetString("op_type")
 
 	utils.LogDebug(bs_id)
-	utils.LogDebug(db_type)
+	utils.LogDebug(asset_type)
 	utils.LogDebug(op_type)
 	utils.LogDebug(op_type)
 
@@ -150,13 +150,13 @@ func (this *AjaxDrSwitchoverController) Post() {
 	utils.LogDebug("GetStandbyDBID successfully.")
 
 	// Get dsn
-	dsn_p, err := GetDsn(pri_id, db_type)
+	dsn_p, err := GetDsn(pri_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetPrimaryDsn failed: " + err.Error())
 	}
 	utils.LogDebug("GetPrimaryDsn successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -180,10 +180,10 @@ func (this *AjaxDrSwitchoverController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始切换")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_pri, err := godror.ParseConnString(dsn_p)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_p, err)
@@ -215,14 +215,13 @@ func (this *AjaxDrSwitchoverController) Post() {
 					Update_OP_Result(op_id, -1)
 				}
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
-
 			}
 
 		}).Catch(1, func(e exception.Exception) {
@@ -252,11 +251,11 @@ func (this *AjaxDrFailoverController) Post() {
 	// }
 
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := this.GetString("op_type")
 
 	utils.LogDebug(bs_id)
-	utils.LogDebug(db_type)
+	utils.LogDebug(asset_type)
 	utils.LogDebug(op_type)
 	utils.LogDebug(op_type)
 
@@ -276,7 +275,7 @@ func (this *AjaxDrFailoverController) Post() {
 	utils.LogDebug("GetStandbyDBID successfully.")
 
 	// Get dsn
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -298,10 +297,10 @@ func (this *AjaxDrFailoverController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始灾难切换")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
@@ -322,11 +321,11 @@ func (this *AjaxDrFailoverController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 

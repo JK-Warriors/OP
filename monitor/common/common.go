@@ -7,7 +7,7 @@ import (
 type Dr struct {
 	Id          int    `xorm:"int 'id'"`
 	Bs_Name     string `xorm:"varchar(200) 'bs_name'"`
-	Db_Type   	int    `xorm:"int 'db_type'"`
+	Asset_Type   	int    `xorm:"int 'asset_type'"`
 	Db_Id_P     int    `xorm:"int 'db_id_p'"`
 	Host_P      string `xorm:"varchar(20) 'host_p'"`
 	Port_P      int    `xorm:"int 'port_p'"`

@@ -16,7 +16,7 @@ func ErrorConnection(dbid int, db *sql.DB) error {
 
 	err := db.QueryRow("SELECT `id` FROM pms_db_status where `id` = ?", dbid).Scan(&db_id)
 	if err == sql.ErrNoRows {
-		db.Exec("insert into pms_db_status (`id`, db_type, alias, connect, created) select `id`, db_type, alias, -1, ? from pms_db_config where id = ?", curr_time, dbid)
+		db.Exec("insert into pms_db_status (`id`, asset_type, alias, connect, created) select `id`, asset_type, alias, -1, ? from pms_asset_config where id = ?", curr_time, dbid)
 	} else if err != nil {
 		db.Exec("update pms_db_status set connect=-1, role='', version = '', updated = ? where id = ?", curr_time, dbid)
 	}

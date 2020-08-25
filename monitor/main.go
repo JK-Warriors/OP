@@ -6,6 +6,8 @@ import (
 	oracle "opms/monitor/oracle"
 	mssql "opms/monitor/mssql"
 	mysql "opms/monitor/mysql"
+	mos "opms/monitor/os"
+
 	"os"
 	"runtime"
 	"sync"
@@ -81,8 +83,8 @@ func DoTasks(x int) {
 		wg.Add(1)
 		GatherAssetStats(&wg)
 		
-		wg.Add(1)
-		GatherDisasterRecoveryStats(&wg)
+		//wg.Add(1)
+		//GatherDisasterRecoveryStats(&wg)
 
 		log.Println("循环结束！")
 
@@ -96,7 +98,7 @@ func DoTasks(x int) {
 
 type Asset struct {
     Id 				int				`xorm:"int 'id'"`
-    Asset_Type 		int		    	`xorm:"int 'db_type'"`
+    Asset_Type 		int		    	`xorm:"int 'asset_type'"`
     Host 			string		    `xorm:"int 'host'"`
     Port 			string		    `xorm:"int 'port'"`
     Alias 			string		    `xorm:"int 'alias'"`
@@ -108,7 +110,7 @@ type Asset struct {
 
 func GatherAssetStats(wg *sync.WaitGroup) int {
 	var assets []Asset
-	sql := `select id, db_type, host, port, alias, instance_name, db_name, username, password from pms_db_config where status = 1 and is_delete = 0`
+	sql := `select id, asset_type, host, port, alias, instance_name, db_name, username, password from pms_asset_config where status = 1 and is_delete = 0`
 	err := db.SQL(sql).Find(&assets)
 	if err != nil {
 		log.Fatal(err)
@@ -126,6 +128,9 @@ func GatherAssetStats(wg *sync.WaitGroup) int {
 		}else if v.Asset_Type == 3{
 			wga.Add(1)
 			go mssql.GenerateMssqlStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+		}else if v.Asset_Type == 99{
+			wga.Add(1)
+			go mos.GenerateOSStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
 		}
 	}
 	wga.Wait()
@@ -142,7 +147,7 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 	var dr []common.Dr
 	sql := `select d.bs_id as id, 
 					d.bs_name,
-					d.db_type,
+					d.asset_type,
 					d.db_id_p, 
 					pp.host as host_p,
 					pp.port as port_p, 
@@ -156,8 +161,8 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 					d.db_name, 
 					d.is_shift
 				from pms_dr_config d
-				left join pms_db_config pp on d.db_id_p = pp.id
-				left join pms_db_config ps on d.db_id_s = ps.id
+				left join pms_asset_config pp on d.db_id_p = pp.id
+				left join pms_asset_config ps on d.db_id_s = ps.id
 				where d.status = 1 and d.is_delete = 0`
 
 	err := db.SQL(sql).Find(&dr)
@@ -167,15 +172,15 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 
 	var wgb sync.WaitGroup
 	for _, v := range dr {
-		if v.Db_Type == 1 {
+		if v.Asset_Type == 1 {
 			log.Println("获取Oracle容灾数据开始！")
 			wgb.Add(1)
 			go oracle.GenerateOracleDrStats(&wgb, db, v)
-		}else if v.Db_Type == 2 {
+		}else if v.Asset_Type == 2 {
 			log.Println("获取MySQL容灾数据开始！")
 			wgb.Add(1)
 			go mysql.GenerateMySQLDrStats(&wgb, db, v)
-		}else if v.Db_Type == 3 {
+		}else if v.Asset_Type == 3 {
 			log.Println("获取SQLServer容灾数据开始！")
 			wgb.Add(1)
 			go mssql.GenerateMssqlDrStats(&wgb, db, v)

@@ -32,11 +32,11 @@ func (this *ManageAssetController) Get() {
 		offset = 15
 	}
 
-	dbtype := this.GetString("dbtype")
+	asset_type := this.GetString("asset_type")
 	host := this.GetString("host")
 	alias := this.GetString("alias")
 	condArr := make(map[string]string)
-	condArr["dbtype"] = dbtype
+	condArr["asset_type"] = asset_type
 	condArr["host"] = host
 	condArr["alias"] = alias
 

@@ -453,7 +453,7 @@ func main() {
 	var dbinst *sql.DB
 	for {
 		log.Infoln("check mysql controller start.")
-		rows, err := maindb.Query("select id, host, port, username, password, db_name from pms_db_config where db_type = 2 and status = 1 and is_delete = 0")
+		rows, err := maindb.Query("select id, host, port, username, password, db_name from pms_asset_config where asset_type = 2 and status = 1 and is_delete = 0")
 		if err != nil {
 			log.Infoln("No mysql exists.")
 		}else{

@@ -85,21 +85,4 @@ func GetProcessWaits(db *sql.DB) int{
 	return count
 }
 
-/*
-def get_mysql_status(cursor):
-    data=cursor.execute('show global status;');
-    data_list=cursor.fetchall()
-    data_dict={}
-    for item in data_list:
-        data_dict[item[0]] = item[1]
-    return data_dict
-
-def get_mysql_variables(cursor):
-    data=cursor.execute('show global variables;');
-    data_list=cursor.fetchall()
-    data_dict={}
-    for item in data_list:
-        data_dict[item[0]] = item[1]
-	return data_dict
-*/
 

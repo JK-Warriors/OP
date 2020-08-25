@@ -47,11 +47,12 @@
                 <div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>资产类型</label>
                   <div class="col-sm-10">
-                    <select id="db_type" name="db_type" class="form-control">
+                    <select id="asset_type" name="asset_type" class="form-control">
                       <option value="">请选择类型</option>
                       <option value="1" {{if eq 1 .dbconf.Dbtype}}selected{{end}}>Oracle</option>
                       <option value="2" {{if eq 2 .dbconf.Dbtype}}selected{{end}}>MySQL</option>
                       <option value="3" {{if eq 3 .dbconf.Dbtype}}selected{{end}}>SQLServer</option>
+                      <option value="99" {{if eq 99 .dbconf.Dbtype}}selected{{end}}>OS</option>
                     </select>
                   </div>
                 </div>
@@ -59,6 +60,16 @@
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>主机IP</label>
                   <div class="col-sm-10">
                     <input type="text" id="host" name="host"  value="{{.dbconf.Host}}" class="form-control">
+                  </div>
+                </div>
+                <div id="div_protocol" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>协议</label>
+                  <div class="col-sm-10">
+                    <select id="protocol" name="protocol" class="form-control">
+                      <option value="">请选择协议</option>
+                      <option value="ssh" {{if eq "ssh" .dbconf.Protocol}}selected{{end}}>ssh</option>
+                      <option value="telnet" {{if eq "telnet" .dbconf.Protocol}}selected{{end}}>telnet</option>
+                    </select>
                   </div>
                 </div>
                 <div class="form-group">
@@ -132,21 +143,36 @@
 <script src="/static/js/jquery-ui-1.10.3.min.js"></script>
 <script>
     $(function() {// 初始化内容
-        db_type = {{.dbconf.Dbtype}};
-        if(db_type == "1"){         
+        asset_type = {{.dbconf.Dbtype}};
+        if(asset_type == "1"){      
             $("#div_inst_name").show();
+            $("#div_protocol").hide();   
+            $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-        }else if($("#db_type").val() == "2"){
+        }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
+            $("#div_protocol").hide();
+            $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
-        }else if($("#db_type").val() == "3"){
+        }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
-            $("#div_db_name").show();
+            $("#div_protocol").hide();   
+            $("#protocol").attr("value","");
+            $("#div_db_name").hide();
+            $("#db_name").attr("value","");
+        }else if($("#asset_type").val() == "99"){
+            $("#div_protocol").show();
+            $("#div_inst_name").hide();
+            $("#inst_name").attr("value","");
+            $("#div_db_name").hide();
+            $("#db_name").attr("value","");
         }else{
+            $("#div_protocol").hide();
             $("#div_inst_name").hide();
             $("#div_db_name").hide();
+            $("#div_protocol").attr("value","");
             $("#inst_name").attr("value","");
             $("#db_name").attr("value","");
         }
@@ -157,21 +183,36 @@
         }
     });  
 
-    $("#db_type").change(function(){
-        if($("#db_type").val() == "1"){         
+    $("#asset_type").change(function(){
+        if($("#asset_type").val() == "1"){
             $("#div_inst_name").show();
+            $("#div_protocol").hide();   
+            $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-        }else if($("#db_type").val() == "2"){
+        }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
+            $("#div_protocol").hide();
+            $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
-        }else if($("#db_type").val() == "3"){
+        }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
-            $("#div_db_name").show();
+            $("#div_protocol").hide();   
+            $("#protocol").attr("value","");
+            $("#div_db_name").hide();
+            $("#db_name").attr("value","");
+        }else if($("#asset_type").val() == "99"){
+            $("#div_protocol").show();
+            $("#div_inst_name").hide();
+            $("#inst_name").attr("value","");
+            $("#div_db_name").hide();
+            $("#db_name").attr("value","");
         }else{
+            $("#div_protocol").hide();
             $("#div_inst_name").hide();
             $("#div_db_name").hide();
+            $("#div_protocol").attr("value","");
             $("#inst_name").attr("value","");
             $("#db_name").attr("value","");
         }
@@ -179,8 +220,9 @@
 
     
     function checkConnect(){
-        var db_type = $("#db_type").val();
+        var asset_type = $("#asset_type").val();
         var host = $("#host").val();
+        var protocol = $("#protocol").val();
         var port = $("#port").val();
         var inst_name = $("#inst_name").val();
         var db_name = $("#db_name").val();
@@ -189,10 +231,10 @@
         
         $.ajax({url: "/config/db/ajax/connect",
                 type: "POST",
-								data: {"db_type":db_type, "host":host,"port":port,"inst_name":inst_name,"db_name":db_name,"username":username,"password":password,},
+								data: {"asset_type":asset_type, "host":host,"protocol":protocol, "port":port,"inst_name":inst_name,"db_name":db_name,"username":username,"password":password,},
                 success: function (data) {
                     dialogInfo(data.message)
-                    setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
+                    setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 5000);
                     if (data.code) {
                     }
                     else {

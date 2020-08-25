@@ -10,6 +10,7 @@ import (
 	"opms/controllers/oracle"
 	"opms/controllers/mssql"
 	"opms/controllers/mysql"
+	"opms/controllers/os"
 	"opms/controllers/config_alert"
 	"opms/controllers/config_global"
 	"opms/controllers/logs"
@@ -107,6 +108,10 @@ func init() {
 	beego.Router("/mysql/key/manage", &mysql.KeyMysqlController{})
 	
 	beego.Router("/mssql/status/manage", &mssql.ManageMssqlController{})
+
+	beego.Router("/os/status/manage", &os.ManageOSController{})
+	beego.Router("/os/disk/manage", &os.ManageOSDiskController{})
+	beego.Router("/os/io/manage", &os.ManageOSDiskIOController{})
 
 	
 

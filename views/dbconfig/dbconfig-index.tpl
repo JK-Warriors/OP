@@ -39,11 +39,11 @@
               <div class="form-inline">
                 <div class="form-group">
                   <form action="/config/db/manage" method="get">
-                    <select name="dbtype" class="form-control">
+                    <select name="asset_type" class="form-control">
                       <option value="">资产类型</option>
-                      <option value="1" {{if eq "1" .condArr.dbtype}}selected{{end}}>Oracle</option>
-                      <option value="2" {{if eq "2" .condArr.dbtype}}selected{{end}}>MySQL</option>
-                      <option value="3" {{if eq "3" .condArr.dbtype}}selected{{end}}>SQLServer</option>
+                      <option value="1" {{if eq "1" .condArr.asset_type}}selected{{end}}>Oracle</option>
+                      <option value="2" {{if eq "2" .condArr.asset_type}}selected{{end}}>MySQL</option>
+                      <option value="3" {{if eq "3" .condArr.asset_type}}selected{{end}}>SQLServer</option>
                     </select>
                     <input type="text" class="form-control" name="host" placeholder="请输入IP" value="{{.condArr.host}}"/>
                     <input type="text" class="form-control" name="alias" placeholder="请输入别名" value="{{.condArr.alias}}"/>
@@ -134,9 +134,9 @@
         <!-- layer content start -->
         <div class="form-horizontal adminex-form">
           <div class="form-group">
-            <a href="/config/db/add/?db_type=1" class="col-xs-2  control-label"><img src="/static/img/oracle.png" alt="Oracle"></a>
-            <a href="/config/db/add/?db_type=2" class="col-xs-2  control-label"><img src="/static/img/mysql.png" alt="MySQL"></a>
-            <a href="/config/db/add/?db_type=3" class="col-xs-2  control-label"><img src="/static/img/sqlserver.png" alt="SQLServer"></a>
+            <a href="/config/db/add/?asset_type=1" class="col-xs-2  control-label"><img src="/static/img/oracle.png" alt="Oracle"></a>
+            <a href="/config/db/add/?asset_type=2" class="col-xs-2  control-label"><img src="/static/img/mysql.png" alt="MySQL"></a>
+            <a href="/config/db/add/?asset_type=3" class="col-xs-2  control-label"><img src="/static/img/sqlserver.png" alt="SQLServer"></a>
           </div>
         </div>
         <!-- layer content end -->
@@ -150,7 +150,7 @@
     //layer
     $(function() {
       $('#add_db').click(function() {
-        $("#db_type").attr("value",'');
+        $("#asset_type").attr("value",'');
 
         layer.open({
           type: 1,

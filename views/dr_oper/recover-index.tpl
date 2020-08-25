@@ -144,7 +144,7 @@ function checkUser(e){
 								callback: function(){
 									$.ajax({url: target_url,
 											type: "POST",
-											data: {"bs_id":bs_id,"db_type":1},
+											data: {"bs_id":bs_id,"asset_type":1},
 											success: function (json) {
 												//回调函数，判断提交返回的数据执行相应逻辑
 												if (json.code == 0) {

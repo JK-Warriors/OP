@@ -68,7 +68,7 @@ func (this *AjaxDrStartSyncController) Post() {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := "STARTSYNC"
 
 	//灾备配置检查
@@ -87,7 +87,7 @@ func (this *AjaxDrStartSyncController) Post() {
 	}
 	utils.LogDebug("GetStandbyDBID successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -108,10 +108,10 @@ func (this *AjaxDrStartSyncController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始启动同步任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -130,11 +130,11 @@ func (this *AjaxDrStartSyncController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
@@ -165,7 +165,7 @@ func (this *AjaxDrStopSyncController) Post() {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := "STOPSYNC"
 
 	//灾备配置检查
@@ -183,7 +183,7 @@ func (this *AjaxDrStopSyncController) Post() {
 	}
 	utils.LogDebug("GetStandbyDBID successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -204,10 +204,10 @@ func (this *AjaxDrStopSyncController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始停止同步任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -226,11 +226,11 @@ func (this *AjaxDrStopSyncController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 

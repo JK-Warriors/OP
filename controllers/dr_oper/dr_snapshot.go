@@ -67,7 +67,7 @@ func (this *AjaxDrStartSnapshotController) Post() {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := "STARTSNAPSHOT"
 
 	//灾备配置检查
@@ -86,7 +86,7 @@ func (this *AjaxDrStartSnapshotController) Post() {
 	}
 	utils.LogDebug("GetStandbyDBID successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -107,10 +107,10 @@ func (this *AjaxDrStartSnapshotController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始进入快照任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -129,11 +129,11 @@ func (this *AjaxDrStartSnapshotController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
@@ -164,7 +164,7 @@ func (this *AjaxDrStopSnapshotController) Post() {
 	// 	this.Abort("401")
 	// }
 	bs_id, _ := this.GetInt("bs_id")
-	db_type, _ := this.GetInt("db_type")
+	asset_type, _ := this.GetInt("asset_type")
 	op_type := "STOPSNAPSHOT"
 
 	//灾备配置检查
@@ -182,7 +182,7 @@ func (this *AjaxDrStopSnapshotController) Post() {
 	}
 	utils.LogDebug("GetStandbyDBID successfully.")
 
-	dsn_s, err := GetDsn(sta_id, db_type)
+	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
 	}
@@ -203,10 +203,10 @@ func (this *AjaxDrStopSnapshotController) Post() {
 
 			utils.LogDebug("初始化切换实例")
 			op_id := utils.SnowFlakeId()
-			Init_OP_Instance(op_id, bs_id, db_type, op_type)
-			//db_type = 5
+			Init_OP_Instance(op_id, bs_id, asset_type, op_type)
+			//asset_type = 5
 			utils.LogDebug("正式开始退出快照任务")
-			if db_type == 1 { //oracle
+			if asset_type == 1 { //oracle
 				p_sta, err := godror.ParseConnString(dsn_s)
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
@@ -225,11 +225,11 @@ func (this *AjaxDrStopSnapshotController) Post() {
 				}
 
 				OperationUnlock(bs_id, op_type)
-			} else if db_type == 2 { //mysql
+			} else if asset_type == 2 { //mysql
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 
-			} else if db_type == 3 { //sqlserver
+			} else if asset_type == 3 { //sqlserver
 				//OraPrimaryToStandby
 				//OraStandbyToPrimary
 

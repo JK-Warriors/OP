@@ -248,21 +248,21 @@ func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_v
 	}
 }
 
-func GetDsn(db *xorm.Engine, db_id int, db_type int) (string, error) {
+func GetDsn(db *xorm.Engine, db_id int, asset_type int) (string, error) {
 	var dsn string
 	var sql string
-	if db_type == 1 {
+	if asset_type == 1 {
 		sql = `select concat("oracle://",username,":",password ,"@" , host , ":" , port , "/" , instance_name , "?sysdba=1") as dsn 
-				from pms_db_config where id = ? and db_type = ?`
-	} else if db_type == 2 {
-		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_db_config where id = ? and db_type = ?`
-	} else if db_type == 3 {
-		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_db_config where id = ? and db_type = ?`
+				from pms_asset_config where id = ? and asset_type = ?`
+	} else if asset_type == 2 {
+		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_asset_config where id = ? and asset_type = ?`
+	} else if asset_type == 3 {
+		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
 	} else {
-		sql = `select "" from pms_db_config where id = ? and db_type = ?`
+		sql = `select "" from pms_asset_config where id = ? and asset_type = ?`
 	}
 
-	_, err := db.SQL(sql, db_id, db_type).Get(&dsn)
+	_, err := db.SQL(sql, db_id, asset_type).Get(&dsn)
 	if err != nil {
 		log.Fatal(err)
 	}

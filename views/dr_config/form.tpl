@@ -42,11 +42,11 @@
                 <div class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>数据库类型</label>
                   <div class="col-sm-10">
-                    <select id="db_type" name="db_type" class="form-control">
+                    <select id="asset_type" name="asset_type" class="form-control">
                       <option value="">请选择主库</option>
-                      <option value="1" {{if eq 1 $.drconf.Db_Type}}selected{{end}}>Oracle</option>
-                      <option value="2" {{if eq 2 $.drconf.Db_Type}}selected{{end}}>MySQL</option>
-                      <option value="3" {{if eq 3 $.drconf.Db_Type}}selected{{end}}>SQLServer</option>
+                      <option value="1" {{if eq 1 $.drconf.Asset_Type}}selected{{end}}>Oracle</option>
+                      <option value="2" {{if eq 2 $.drconf.Asset_Type}}selected{{end}}>MySQL</option>
+                      <option value="3" {{if eq 3 $.drconf.Asset_Type}}selected{{end}}>SQLServer</option>
                     </select>
                   </div>
                 </div>
@@ -181,12 +181,12 @@
         }
 
         
-        if($("#db_type option:selected").val() == 3){
+        if($("#asset_type option:selected").val() == 3){
             $("#div_db_name").show();
         }else{
             $("#div_db_name").hide();
         }
-        if($("#db_type option:selected").val() == 1){
+        if($("#asset_type option:selected").val() == 1){
             $("#div_db_dest_p").show();
             $("#div_db_dest_s").show();
             $("#div_fb_retention").show();
@@ -198,14 +198,14 @@
 
     });  
 
-    $("#db_type").change(function(){
-        if($("#db_type option:selected").val() == 3){
+    $("#asset_type").change(function(){
+        if($("#asset_type option:selected").val() == 3){
             $("#div_db_name").show();
         }else{
             $("#div_db_name").hide();
         }
         
-        if($("#db_type option:selected").val() == 1){
+        if($("#asset_type option:selected").val() == 1){
             $("#div_db_dest_p").show();
             $("#div_db_dest_s").show();
             $("#div_fb_retention").show();

@@ -37,14 +37,14 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 	sql := `select b.id, 
 					b.bs_name,
 					d.db_id_p, 
-					pp.db_type as db_type_p,
+					pp.asset_type as db_type_p,
 					pp.host as host_p,
 					pp.port as port_p, 
 					pp.alias as alias_p, 
 					pp.instance_name as inst_name_p, 
 					pp.db_name as db_name_p, 
 					d.db_id_s, 
-					ps.db_type as db_type_s,
+					ps.asset_type as db_type_s,
 					ps.host as host_s,
 					ps.port as port_s, 
 					ps.alias as alias_s, 
@@ -53,8 +53,8 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 					d.is_shift
 				from pms_dr_business b 
 				left join pms_dr_config d on d.bs_id = b.id 
-				left join pms_db_config pp on d.db_id_p = pp.id
-				left join pms_db_config ps on d.db_id_s = ps.id
+				left join pms_asset_config pp on d.db_id_p = pp.id
+				left join pms_asset_config ps on d.db_id_s = ps.id
 				where b.is_delete = 0`
 
 	if condArr["search_name"] != "" {
@@ -115,21 +115,21 @@ func GetStandbyDBId(bs_id int) (int, error) {
 	return sta_dbid, err
 }
 
-func GetDsn(db_id int, db_type int) (string, error) {
+func GetDsn(db_id int, asset_type int) (string, error) {
 	var dsn string
 	var sql string
-	if db_type == 1 {
+	if asset_type == 1 {
 		sql = `select concat("oracle://",username,":",password ,"@" , host , ":" , port , "/" , instance_name , "?sysdba=1") as dsn 
-				from pms_db_config where id = ? and db_type = ?`
-	} else if db_type == 2 {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
-	} else if db_type == 3 {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
+				from pms_asset_config where id = ? and asset_type = ?`
+	} else if asset_type == 2 {
+		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
+	} else if asset_type == 3 {
+		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
 	} else {
-		sql = `select host from pms_db_config where id = ? and db_type = ?`
+		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
 	}
 	o := orm.NewOrm()
-	err := o.Raw(sql, db_id, db_type).QueryRow(&dsn)
+	err := o.Raw(sql, db_id, asset_type).QueryRow(&dsn)
 	return dsn, err
 }
 
@@ -235,7 +235,7 @@ func MoveOpRecordToHis(bs_id int, op_type string) error {
 	return err
 }
 
-func Init_OP_Instance(op_id int64, bs_id int, db_type int, op_type string) error {
+func Init_OP_Instance(op_id int64, bs_id int, asset_type int, op_type string) error {
 	o := orm.NewOrm()
 	var sql string
 	//将之前的操作记录移入his表
@@ -244,8 +244,8 @@ func Init_OP_Instance(op_id int64, bs_id int, db_type int, op_type string) error
 	//开始新的操作初始化
 	utils.LogDebugf("Initialize opration instance for business %d.", bs_id)
 
-	sql = `insert into pms_opration(id, bs_id, db_type, op_type, created) values(?, ?, ?, ?, ?)`
-	_, err := o.Raw(sql, op_id, bs_id, db_type, op_type, time.Now().Unix()).Exec()
+	sql = `insert into pms_opration(id, bs_id, asset_type, op_type, created) values(?, ?, ?, ?, ?)`
+	_, err := o.Raw(sql, op_id, bs_id, asset_type, op_type, time.Now().Unix()).Exec()
 	if err == nil {
 		utils.LogDebug("Init the opration successfully.")
 	} else {
@@ -254,12 +254,12 @@ func Init_OP_Instance(op_id int64, bs_id int, db_type int, op_type string) error
 	return err
 }
 
-func Log_OP_Process(op_id int64, bs_id int, db_type int, op_type string, process_desc string) error {
+func Log_OP_Process(op_id int64, bs_id int, asset_type int, op_type string, process_desc string) error {
 	o := orm.NewOrm()
 	var sql string
 
-	sql = `insert into pms_op_process(op_id, bs_id, db_type, process_type, process_desc, created) values (?, ?, ?, ?, ?, ?)`
-	_, err := o.Raw(sql, op_id, bs_id, db_type, op_type, process_desc, time.Now().Unix()).Exec()
+	sql = `insert into pms_op_process(op_id, bs_id, asset_type, process_type, process_desc, created) values (?, ?, ?, ?, ?, ?)`
+	_, err := o.Raw(sql, op_id, bs_id, asset_type, op_type, process_desc, time.Now().Unix()).Exec()
 
 	if err == nil {
 		utils.LogDebug("Log the process successfully.")
@@ -396,7 +396,7 @@ func GetOpResultById(op_id int64) (string, string, error) {
 
 type OracleInstance struct {
 	Id              int    `orm:"pk;column(id);"`
-	Db_Type         int    `orm:"column(db_type);"`
+	Asset_Type         int    `orm:"column(asset_type);"`
 	Connect         int    `orm:"column(connect);"`
 	Instance_name   string `orm:"column(instance_name);"`
 	Db_Name         string `orm:"column(db_name);"`
@@ -412,8 +412,8 @@ type OracleInstance struct {
 func GetOracleBasicInfo(db_id int) (OracleInstance, error) {
 	var ora_instance OracleInstance
 
-	sql := `select c.id, c.db_type, s.connect, c.instance_name, c.db_name, c.host, s.role, version, open_mode, flashback_on, flashback_usage, s.created 
-			from pms_db_config c, pms_db_status s 
+	sql := `select c.id, c.asset_type, s.connect, c.instance_name, c.db_name, c.host, s.role, version, open_mode, flashback_on, flashback_usage, s.created 
+			from pms_asset_config c, pms_db_status s 
 			where c.id = s.id and s.id = ?`
 	o := orm.NewOrm()
 	err := o.Raw(sql, db_id).QueryRow(&ora_instance)

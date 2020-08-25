@@ -15,7 +15,7 @@ import (
 type DrConfig struct {
 	Bs_Id        int    `orm:"pk;column(bs_id);"`
 	Bs_Name   	 string `orm:"column(bs_name);"`
-	Db_Type      int    `orm:"column(db_type);"`
+	Asset_Type      int    `orm:"column(asset_type);"`
 	Db_Id_P      int    `orm:"column(db_id_p);"`
 	Db_Dest_P    int    `orm:"column(db_dest_p);"`
 	Db_Id_S      int    `orm:"column(db_id_s);"`
@@ -47,7 +47,7 @@ func AddDrConfig(dc DrConfig) error {
 	drconf := new(DrConfig)
 
 	drconf.Bs_Name = dc.Bs_Name
-	drconf.Db_Type = dc.Db_Type
+	drconf.Asset_Type = dc.Asset_Type
 	drconf.Db_Id_P = dc.Db_Id_P
 	drconf.Db_Dest_P = dc.Db_Dest_P
 	drconf.Db_Id_S = dc.Db_Id_S
@@ -71,7 +71,7 @@ func UpdateDrConfig(id int, dc DrConfig) error {
 
 	drconf.Bs_Id = id
 	drconf.Bs_Name = dc.Bs_Name
-	drconf.Db_Type = dc.Db_Type
+	drconf.Asset_Type = dc.Asset_Type
 	drconf.Db_Id_P = dc.Db_Id_P
 	drconf.Db_Dest_P = dc.Db_Dest_P
 	drconf.Db_Id_S = dc.Db_Id_S
@@ -109,7 +109,7 @@ func GetDrConfig(id int) (DrConfig, error) {
 func ListDrConfig(condArr map[string]string, page int, offset int) (num int64, err error, drconf []DrConfig) {
 	o := orm.NewOrm()
 	o.Using("default")
-	sql := `select bs_id, bs_name, db_type, db_id_p, db_dest_p, db_id_s, db_dest_s, db_name, fb_retention, is_shift, shift_vips, network_p, network_s, is_switch, status, is_delete
+	sql := `select bs_id, bs_name, asset_type, db_id_p, db_dest_p, db_id_s, db_dest_s, db_name, fb_retention, is_shift, shift_vips, network_p, network_s, is_switch, status, is_delete
 			from pms_dr_config where 1=1`
 
 	if condArr["host"] != "" {
