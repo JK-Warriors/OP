@@ -28,6 +28,10 @@ type Dbconfigs struct {
 	Username     string `orm:"column(username);"`
 	Password     string `orm:"column(password);"`
 	Role         int    `orm:"column(role);"`
+	Ostype       int    `orm:"column(os_type);"`
+	OsProtocol   string `orm:"column(os_protocol);"`
+	OsUsername   string `orm:"column(os_username);"`
+	OsPassword   string `orm:"column(os_password);"`
 	Status       int    `orm:"column(status);"`
 	IsDelete     int    `orm:"column(is_delete);"`
 	Retention    int    `orm:"column(retention);"`
@@ -58,6 +62,10 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.Username = upd.Username
 	dbconf.Password = upd.Password
 	dbconf.Role = upd.Role
+	dbconf.Ostype = upd.Ostype
+	dbconf.OsProtocol = upd.OsProtocol
+	dbconf.OsUsername = upd.OsUsername
+	dbconf.OsPassword = upd.OsPassword
 	dbconf.Status = 1
 	dbconf.IsDelete = 0
 	dbconf.Created = time.Now().Unix()
@@ -81,6 +89,10 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		dbconf.Username = upd.Username
 		dbconf.Password = upd.Password
 		dbconf.Role = upd.Role
+		dbconf.Ostype = upd.Ostype
+		dbconf.OsProtocol = upd.OsProtocol
+		dbconf.OsUsername = upd.OsUsername
+		dbconf.OsPassword = upd.OsPassword
 		dbconf.Updated = time.Now().Unix()
 
 		_, err = o.Update(&dbconf)

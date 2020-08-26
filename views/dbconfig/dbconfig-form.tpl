@@ -67,8 +67,8 @@
                   <div class="col-sm-10">
                     <select id="protocol" name="protocol" class="form-control">
                       <option value="">请选择协议</option>
-                      <option value="ssh" {{if eq "ssh" .dbconf.Protocol}}selected{{end}}>ssh</option>
-                      <option value="telnet" {{if eq "telnet" .dbconf.Protocol}}selected{{end}}>telnet</option>
+                      <option value="snmp" {{if eq "snmp" .dbconf.Protocol}}selected{{end}}>snmp</option>
+                      <option value="winrm" {{if eq "winrm" .dbconf.Protocol}}selected{{end}}>winrm</option>
                     </select>
                   </div>
                 </div>
@@ -96,26 +96,61 @@
                     <input type="text" id="db_name" name="db_name"  value="{{.dbconf.Dbname}}" class="form-control">
                   </div>
                 </div>
-                <div class="form-group">
+                <div id="div_username" class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>用户名</label>
                   <div class="col-sm-10">
                     <input type="text" id="username" name="username"  value="{{.dbconf.Username}}" class="form-control" placeholder="请填写用户名">
                   </div>
                 </div>
-                <div class="form-group">
+                <div id="div_password" class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>密码</label>
                   <div class="col-sm-10">
                     <input type="password" id="password" name="password"  value="{{.dbconf.Password}}" class="form-control" placeholder="请填写密码">
                   </div>
                 </div>
-                <div class="form-group">
+                <div id="div_role" class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>角色</label>
                   <div class="col-sm-10">
                     <select name="role" class="form-control">
-                      <option value="">请选择角色</option>
                       <option value="1" {{if eq 1 .dbconf.Role}}selected{{end}}>主</option>
                       <option value="2" {{if eq 2 .dbconf.Role}}selected{{end}}>备</option>
                     </select>
+                  </div>
+                </div>
+
+                <div id="div_os_type" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主机类型</label>
+                  <div class="col-sm-10">
+                    <select id="os_type" name="os_type" class="form-control">
+                      <option value="">请选择主机类型</option>
+                      <option value="1" {{if eq 1 .dbconf.Ostype}}selected{{end}}>Linux</option>
+                      <option value="2" {{if eq 2 .dbconf.Ostype}}selected{{end}}>Windows</option>
+                      <option value="3" {{if eq 3 .dbconf.Ostype}}selected{{end}}>AIX</option>
+                      <option value="4" {{if eq 4 .dbconf.Ostype}}selected{{end}}>HP-Unix</option>
+                      <option value="5" {{if eq 5 .dbconf.Ostype}}selected{{end}}>Solaris</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="div_os_protocol" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主机协议</label>
+                  <div class="col-sm-10">
+                    <select id="os_protocol" name="os_protocol" class="form-control">
+                      <option value="">请选择主机协议</option>
+                      <option value="ssh" {{if eq "ssh" .dbconf.OsProtocol}}selected{{end}}>ssh</option>
+                      <option value="telnet" {{if eq "telnet" .dbconf.OsProtocol}}selected{{end}}>telnet</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="div_os_username" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主机用户名</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="os_username" name="os_username"  value="{{.dbconf.OsUsername}}" class="form-control" placeholder="请填写主机用户名">
+                  </div>
+                </div>
+                <div id="div_os_password" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主机密码</label>
+                  <div class="col-sm-10">
+                    <input type="password" id="os_password" name="os_password"  value="{{.dbconf.OsPassword}}" class="form-control" placeholder="请填写主机密码">
                   </div>
                 </div>
                 <div class="form-group">
@@ -146,18 +181,24 @@
         asset_type = {{.dbconf.Dbtype}};
         if(asset_type == "1"){      
             $("#div_inst_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();
             $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
@@ -168,56 +209,94 @@
             $("#inst_name").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-        }else{
-            $("#div_protocol").hide();
-            $("#div_inst_name").hide();
-            $("#div_db_name").hide();
-            $("#div_protocol").attr("value","");
-            $("#inst_name").attr("value","");
-            $("#db_name").attr("value","");
+            $("#div_username").hide();
+            $("#username").attr("value","");
+            $("#div_password").hide();
+            $("#password").attr("value","");
+            $("#div_os_type").hide();
+            $("#os_type").attr("value","");
+            $("#div_os_protocol").hide();
+            $("#os_os_protocol").attr("value","");
+            $("#div_os_username").hide();
+            $("#os_username").attr("value","");
+            $("#div_os_password").hide();
+            $("#os_password").attr("value","");
         }
 
         id =  {{.dbconf.Id}};
-        if(id && id > 0){
-            $('#bs_id').attr("disabled",true);
+        if (id && id > 0){
+        }else{
+          if(asset_type == "1"){
+            $("#port").attr("value","1521");
+          }else if($("#asset_type").val() == "2"){
+            $("#port").attr("value","3306");
+          }else if($("#asset_type").val() == "3"){
+            $("#port").attr("value","1433");
+          }
         }
     });  
 
     $("#asset_type").change(function(){
         if($("#asset_type").val() == "1"){
             $("#div_inst_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
+            
+            $("#port").attr("value","1521");
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();
             $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
+
+            $("#port").attr("value","3306");
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
+            $("#div_username").show();
+            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
+
+            $("#port").attr("value","1433");
+            $("#inst_name").attr("value","mssqlserver");
         }else if($("#asset_type").val() == "99"){
             $("#div_protocol").show();
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-        }else{
-            $("#div_protocol").hide();
-            $("#div_inst_name").hide();
-            $("#div_db_name").hide();
-            $("#div_protocol").attr("value","");
-            $("#inst_name").attr("value","");
-            $("#db_name").attr("value","");
+            $("#div_username").hide();
+            $("#username").attr("value","");
+            $("#div_password").hide();
+            $("#password").attr("value","");
+            $("#div_os_type").hide();
+            $("#os_type").attr("value","");
+            $("#div_os_protocol").hide();
+            $("#os_os_protocol").attr("value","");
+            $("#div_os_username").hide();
+            $("#os_username").attr("value","");
+            $("#div_os_password").hide();
+            $("#os_password").attr("value","");
         }
     });
 
+
+    $("#protocol").change(function(){
+        if($("#protocol").val() == "snmp"){
+            $("#port").attr("value","161");
+        }else if($("#protocol").val() == "winrm"){
+            $("#port").attr("value","443");
+        }
+    });
     
     function checkConnect(){
         var asset_type = $("#asset_type").val();
@@ -246,11 +325,11 @@
     $('#dbconfig-form').validate({
         ignore:'',        
 		    rules : {
-			      username:{required: true},
+			      //username:{required: true},
 			      role:{required: true},
         },
         messages : {
-			      username:{required: '请填写用户名'},
+			      //username:{required: '请填写用户名'},
 			      role:{required: '请选择角色'}, 
         },
         submitHandler:function(form) {

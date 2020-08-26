@@ -137,6 +137,7 @@
             <a href="/config/db/add/?asset_type=1" class="col-xs-2  control-label"><img src="/static/img/oracle.png" alt="Oracle"></a>
             <a href="/config/db/add/?asset_type=2" class="col-xs-2  control-label"><img src="/static/img/mysql.png" alt="MySQL"></a>
             <a href="/config/db/add/?asset_type=3" class="col-xs-2  control-label"><img src="/static/img/sqlserver.png" alt="SQLServer"></a>
+            <a href="/config/db/add/?asset_type=99" class="col-xs-2  control-label"><img src="/static/img/oracle.png" alt="OS"></a>
           </div>
         </div>
         <!-- layer content end -->

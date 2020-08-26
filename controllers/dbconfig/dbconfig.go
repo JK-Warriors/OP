@@ -86,7 +86,7 @@ func (this *AddDBConfigController) Post() {
 
 	asset_type, _ := this.GetInt("asset_type")
 	if asset_type <= 0 {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择数据库类型"}
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选资产类型"}
 		this.ServeJSON()
 		return
 	}
@@ -99,6 +99,11 @@ func (this *AddDBConfigController) Post() {
 	}
 
 	protocol := this.GetString("protocol")
+	if ("" == protocol && asset_type == 99) {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择协议"}
+		this.ServeJSON()
+		return
+	}
 
 	port, _ := this.GetInt("port")
 	if port <= 0 {
@@ -108,25 +113,30 @@ func (this *AddDBConfigController) Post() {
 	}
 
 	username := this.GetString("username")
-	if "" == username {
+	if ("" == username && asset_type != 99) {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写用户名"}
 		this.ServeJSON()
 		return
 	}
 
 	password := this.GetString("password")
-	if "" == password {
+	if ("" == password && asset_type != 99) {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写密码"}
 		this.ServeJSON()
 		return
 	}
 
 	role, _ := this.GetInt("role")
-	if role <= 0 {
+	if (role <= 0 && asset_type != 99) {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择角色"}
 		this.ServeJSON()
 		return
 	}
+
+	os_type, _ := this.GetInt("os_type")
+	os_protocol := this.GetString("os_protocol")
+	os_username := this.GetString("os_username")
+	os_password := this.GetString("os_password")
 
 	var dbconf Dbconfigs
 
@@ -140,6 +150,10 @@ func (this *AddDBConfigController) Post() {
 	dbconf.Username = username
 	dbconf.Password = password
 	dbconf.Role = role
+	dbconf.Ostype = os_type
+	dbconf.OsProtocol = os_protocol
+	dbconf.OsUsername = os_username
+	dbconf.OsPassword = os_password
 
 	err := AddDBconfig(dbconf)
 
@@ -205,6 +219,11 @@ func (this *EditDBConfigController) Post() {
 	}
 
 	protocol := this.GetString("protocol")
+	if ("" == protocol && asset_type == 99) {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择协议"}
+		this.ServeJSON()
+		return
+	}
 
 	port, _ := this.GetInt("port")
 	if port <= 0 {
@@ -214,14 +233,14 @@ func (this *EditDBConfigController) Post() {
 	}
 
 	username := this.GetString("username")
-	if "" == username {
+	if ("" == username && asset_type != 99)  {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写用户名"}
 		this.ServeJSON()
 		return
 	}
 
 	password := this.GetString("password")
-	if "" == password {
+	if ("" == password && asset_type != 99)  {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写密码"}
 		this.ServeJSON()
 		return
@@ -229,11 +248,17 @@ func (this *EditDBConfigController) Post() {
 
 
 	role, _ := this.GetInt("role")
-	if role <= 0 {
+	if (role <= 0 && asset_type != 99)  {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择角色"}
 		this.ServeJSON()
 		return
 	}
+
+	os_type, _ := this.GetInt("os_type")
+	os_protocol := this.GetString("os_protocol")
+	os_username := this.GetString("os_username")
+	os_password := this.GetString("os_password")
+
 
 	var dbconf Dbconfigs
 
@@ -247,6 +272,10 @@ func (this *EditDBConfigController) Post() {
 	dbconf.Username = username
 	dbconf.Password = password
 	dbconf.Role = role
+	dbconf.Ostype = os_type
+	dbconf.OsProtocol = os_protocol
+	dbconf.OsUsername = os_username
+	dbconf.OsPassword = os_password
 
 	err := UpdateDBconfig(id, dbconf)
 
