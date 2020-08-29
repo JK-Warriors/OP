@@ -316,9 +316,9 @@ func (this *AjaxStatusDBConfigController) Post() {
 	err := ChangeDBconfigStatus(id, status)
 
 	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 1, "message": "数据库状态更改成功"}
+		this.Data["json"] = map[string]interface{}{"code": 1, "message": "资产状态更改成功"}
 	} else {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "数据库状态更改失败"}
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "资产状态更改失败"}
 	}
 	this.ServeJSON()
 }

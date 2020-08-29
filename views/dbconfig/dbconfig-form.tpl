@@ -294,7 +294,7 @@
         if($("#protocol").val() == "snmp"){
             $("#port").attr("value","161");
         }else if($("#protocol").val() == "winrm"){
-            $("#port").attr("value","443");
+            $("#port").attr("value","5985");
         }
     });
     

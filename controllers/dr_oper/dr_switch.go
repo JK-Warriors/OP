@@ -216,12 +216,34 @@ func (this *AjaxDrSwitchoverController) Post() {
 				}
 				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 2 { //mysql
-				//OraPrimaryToStandby
-				//OraStandbyToPrimary
+				utils.LogDebug("主库开始切换成备库...")
+				p_result := SlaveToMaster(op_id, bs_id, dsn_p)
+				if p_result == 1 {
+					utils.LogDebug("主库切换成备库成功")
+					utils.LogDebug("备库开始切换成主库...")
+					s_result := RebuildReplication(op_id, bs_id, dsn_s)
+					if s_result == 1 {
+						utils.LogDebug("备库切换成主库成功")
+						utils.LogDebug("更新切换标识")
+						UpdateSwitchFlag(bs_id)
+						utils.LogDebug("更新切换标识结束")
+						Update_OP_Result(op_id, 1)
+					} else {
+						utils.LogDebug("备库切换主库失败，更新切换结果")
+						Update_OP_Result(op_id, -1)
+					}
+				} else {
+					utils.LogDebug("主库切换备库失败，更新切换结果")
+					Update_OP_Result(op_id, -1)
+				}
+				//MysqlPrimaryToStandby
+				//MysqlStandbyToPrimary
 
+				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 3 { //sqlserver
-				//OraPrimaryToStandby
-				//OraStandbyToPrimary
+				//MssqlPrimaryToStandby
+				//MssqlStandbyToPrimary
+				OperationUnlock(bs_id, op_type)
 			}
 
 		}).Catch(1, func(e exception.Exception) {

@@ -34,8 +34,8 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select b.id, 
-					b.bs_name,
+	sql := `select d.bs_id as id, 
+					d.bs_name,
 					d.db_id_p, 
 					pp.asset_type as db_type_p,
 					pp.host as host_p,
@@ -51,11 +51,11 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 					ps.instance_name as inst_name_s, 
 					ps.db_name as db_name_s, 
 					d.is_shift
-				from pms_dr_business b 
-				left join pms_dr_config d on d.bs_id = b.id 
+				from pms_dr_config d
 				left join pms_asset_config pp on d.db_id_p = pp.id
 				left join pms_asset_config ps on d.db_id_s = ps.id
-				where b.is_delete = 0`
+				where d.is_delete = 0
+				 and d.status = 1`
 
 	if condArr["search_name"] != "" {
 		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
@@ -122,12 +122,13 @@ func GetDsn(db_id int, asset_type int) (string, error) {
 		sql = `select concat("oracle://",username,":",password ,"@" , host , ":" , port , "/" , instance_name , "?sysdba=1") as dsn 
 				from pms_asset_config where id = ? and asset_type = ?`
 	} else if asset_type == 2 {
-		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
+		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_asset_config where id = ? and asset_type = ?`
 	} else if asset_type == 3 {
-		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
+		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
 	} else {
-		sql = `select host from pms_asset_config where id = ? and asset_type = ?`
+		sql = `select "" from pms_asset_config where id = ? and asset_type = ?`
 	}
+	
 	o := orm.NewOrm()
 	err := o.Raw(sql, db_id, asset_type).QueryRow(&dsn)
 	return dsn, err

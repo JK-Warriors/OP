@@ -28,6 +28,8 @@ func GetSystemDate(snmp *gs.GoSNMP) (string, error){
 		return "-1", err
 	}
 	
+	fmt.Println(result)
+
     for _, v := range result.Variables {
 		//fmt.Println(reflect.TypeOf(v.Value)) 
 		if(nil == v.Value){
@@ -312,4 +314,20 @@ func GetNetTime(mysql *xorm.Engine, os_id int, fdisk string) (int64){
 	}
 
 	return oldvalue
+}
+
+
+
+func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int){
+	sql := `insert into ` + table_name + `_his select * from ` + table_name + ` where ` + key_name + ` = ?`
+	_, err := mysql.Exec(sql, key_value)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+
+	sql = `delete from ` + table_name + ` where ` + key_name + ` = ?`
+	_, err = mysql.Exec(sql, key_value)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
 }

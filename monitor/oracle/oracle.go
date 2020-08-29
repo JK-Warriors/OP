@@ -13,7 +13,7 @@ import (
 	"github.com/xormplus/xorm"
 )
 
-func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port string, alias string) {
+func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 	//Get Dsn
 	dsn, err := GetDsn(mysql, db_id, 1)
 	P, err := godror.ParseConnString(dsn)
@@ -65,7 +65,7 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 
 }
 
-func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
+func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
 
 	connect := 1
 	//get instance info 
@@ -124,7 +124,7 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	err = session.Commit()
 }
 
-func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
+func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
 
 	session := mysql.NewSession()
 	defer session.Close()
@@ -191,7 +191,7 @@ func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, p
 
 }
 
-func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string){
+func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
 
 	session := mysql.NewSession()
 	defer session.Close()

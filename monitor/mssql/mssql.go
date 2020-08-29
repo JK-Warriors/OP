@@ -12,7 +12,7 @@ import (
 	"github.com/xormplus/xorm"
 )
 
-func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port string, alias string) {
+func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 	//Get Dsn
 
 	//连接字符串
@@ -60,7 +60,7 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 
 }
 
-func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port string, alias string) error{
+func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) error{
 
 	connect := 1
 	role := 1

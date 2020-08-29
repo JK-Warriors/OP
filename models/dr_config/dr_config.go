@@ -146,7 +146,7 @@ func DeleteDrConfig(ids string) error {
 	return err
 }
 
-//更改数据库状态
+//更改资产状态
 func ChangeDrconfigStatus(id int, status int) error {
 	o := orm.NewOrm()
 

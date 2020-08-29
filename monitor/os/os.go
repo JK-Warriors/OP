@@ -11,31 +11,34 @@ import (
 	"io"
 	"os/exec"
 	"strings"
-	//"fmt"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/xormplus/xorm"
-    gs "github.com/soniah/gosnmp"
+	gs "github.com/soniah/gosnmp"
+	
 )
 
-func GenerateOSStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port string, alias string) {
+func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string) {
 	//连接字符串
     snmp := &gs.GoSNMP{
         Target:    host,
-        Port:      161,
+        Port:      uint16(port),
         Community: "public",
         Version:   gs.Version2c,
         Timeout:   time.Duration(2) * time.Second,      
     }
     err := snmp.Connect()
 	defer snmp.Conn.Close()
-	log.Printf("%v", snmp)
+	//log.Printf("%v", snmp)
+	
+	_, err = GetSystemDate(snmp)
     if err != nil {
 		utils.LogDebugf("Connect %s failed: %s", alias, err.Error())
 		MoveToHistory(mysql, "pms_os_status", "os_id", os_id)
 
 		sql := `insert into pms_os_status(os_id, host, alias, connect, created) 
-		values(?,?,?,?,?,?)`
+		values(?,?,?,?,?)`
 		_, err = mysql.Exec(sql, os_id, host, alias, -1, time.Now().Unix())
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
@@ -44,10 +47,10 @@ func GenerateOSStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host str
 		log.Println("connect succeeded")
 		
 		//get os basic infomation
-		GatherOsDiskInfo(mysql , os_id, host, alias)
-		GatherOsDiskIOInfo(mysql , os_id, host, alias)
-		GatherOsNetInfo(snmp, mysql , os_id, host, alias)
-		GatherBasicInfo(snmp, mysql , os_id, host, alias)
+		GatherLinuxDiskInfo(mysql , os_id, host, alias)
+		//GatherLinuxDiskIOInfo(mysql , os_id, host, alias)
+		//GatherLinuxNetInfo(snmp, mysql , os_id, host, alias)
+		//GatherLinuxBasicInfo(snmp, mysql , os_id, host, alias)
 		
 	}
 
@@ -55,7 +58,7 @@ func GenerateOSStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host str
 
 }
 
-func GatherBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
+func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
 
 	connect := 1
 	oids := []string{".1.3.6.1.2.1.1.5.0",			//SNMPv2-MIB::sysName.0		hostname
@@ -204,9 +207,9 @@ func GatherBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string
 
 }
 
-func GatherOsDiskInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
+func GatherLinuxDiskInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
 	s_cmd := `/usr/bin/snmpdf -v1 -c public ` + host + `|grep -E "/"|grep -vE "/boot"|grep -vE "DVD"`
-
+	//fmt.Println(s_cmd)
 	cmd := exec.Command("/bin/bash", "-c", s_cmd)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -232,7 +235,7 @@ func GatherOsDiskInfo(mysql *xorm.Engine, os_id int, host string, alias string) 
 		}
 		
 		s := strings.Fields(line)
-		//fmt.Println(s, len(s))
+		fmt.Println(s, len(s))
 		mounted :=s[0]
 		total_size :=s[1]
 		used_size :=s[2]
@@ -255,7 +258,7 @@ func GatherOsDiskInfo(mysql *xorm.Engine, os_id int, host string, alias string) 
 	return nil
 }
 
-func GatherOsDiskIOInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
+func GatherLinuxDiskIOInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
 	s_cmd := `/usr/bin/snmptable -v1 -c public ` + host + ` diskIOTable |grep -ivE "ram|loop|md|SNMP table|diskIOIndex" | grep -v '^$'`
 
 	cmd := exec.Command("/bin/bash", "-c", s_cmd)
@@ -338,7 +341,7 @@ func GatherOsDiskIOInfo(mysql *xorm.Engine, os_id int, host string, alias string
 	return nil
 }
 
-func GatherOsNetInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
+func GatherLinuxNetInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
 	// storage result
 	session := mysql.NewSession()
 	defer session.Close()
@@ -408,19 +411,5 @@ func GatherOsNetInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string
 	return nil
 }
 
-
-func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int){
-	sql := `insert into ` + table_name + `_his select * from ` + table_name + ` where ` + key_name + ` = ?`
-	_, err := mysql.Exec(sql, key_value)
-	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
-	}
-
-	sql = `delete from ` + table_name + ` where ` + key_name + ` = ?`
-	_, err = mysql.Exec(sql, key_value)
-	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
-	}
-}
 
 

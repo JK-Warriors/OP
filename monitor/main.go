@@ -100,7 +100,8 @@ type Asset struct {
     Id 				int				`xorm:"int 'id'"`
     Asset_Type 		int		    	`xorm:"int 'asset_type'"`
     Host 			string		    `xorm:"int 'host'"`
-    Port 			string		    `xorm:"int 'port'"`
+    Protocol 		string		    `xorm:"int 'protocol'"`
+    Port 			int		    	`xorm:"int 'port'"`
     Alias 			string		    `xorm:"int 'alias'"`
     Inst_Name 		string		    `xorm:"int 'instance_name'"`
     Db_Name 		string		    `xorm:"int 'db_name'"`
@@ -110,7 +111,7 @@ type Asset struct {
 
 func GatherAssetStats(wg *sync.WaitGroup) int {
 	var assets []Asset
-	sql := `select id, asset_type, host, port, alias, instance_name, db_name, username, password from pms_asset_config where status = 1 and is_delete = 0`
+	sql := `select id, asset_type, host, protocol, port, alias, instance_name, db_name, username, password from pms_asset_config where status = 1 and is_delete = 0`
 	err := db.SQL(sql).Find(&assets)
 	if err != nil {
 		log.Fatal(err)
@@ -130,7 +131,11 @@ func GatherAssetStats(wg *sync.WaitGroup) int {
 			go mssql.GenerateMssqlStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
 		}else if v.Asset_Type == 99{
 			wga.Add(1)
-			go mos.GenerateOSStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			if v.Protocol == "snmp" {		
+				go mos.GenerateLinuxStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			}else if v.Protocol == "winrm" {
+				go mos.GenerateWinStats(&wga, db, v.Id, v.Host, v.Port, v.Alias, v.Username, v.Passwd)
+			}
 		}
 	}
 	wga.Wait()
