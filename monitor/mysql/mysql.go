@@ -175,7 +175,7 @@ func GetDsn(db *xorm.Engine, db_id int, asset_type int) (string, error) {
 	} else if asset_type == 2 {
 		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_asset_config where id = ? and asset_type = ?`
 	} else if asset_type == 3 {
-		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
+		sql = `select concat("server=",host,"\\",instance_name,";port",port,";database=",case db_name when "" then "master" end,";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
 	} else {
 		sql = `select "" from pms_asset_config where id = ? and asset_type = ?`
 	}

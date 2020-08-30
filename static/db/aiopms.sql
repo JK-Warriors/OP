@@ -346,8 +346,8 @@ CREATE TABLE `pms_asset_config` (
   `os_protocol` varchar(10) NOT NULL DEFAULT 0 COMMENT '主机协议',
   `os_username` varchar(30) DEFAULT '' COMMENT '主机用户名',
   `os_password` varchar(255) DEFAULT '' COMMENT '主机密码',
-  `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；0：禁用',
-  `is_delete` tinyint(2) DEFAULT 0 COMMENT '1: 删除；0：未删除',
+  `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；2：禁用',
+  `is_delete` tinyint(2) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
   `retention` int(10) NOT NULL DEFAULT 0 COMMENT '保留时间，默认单位为天',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   `updated` int(10) DEFAULT NULL COMMENT '更新时间',
@@ -391,8 +391,8 @@ CREATE TABLE `pms_dr_config` (
   `network_p` varchar(100) COMMENT 'primary network card',
   `network_s` varchar(100) COMMENT 'standby network card',
   `is_switch` tinyint(1) DEFAULT 0,
-  `status` tinyint(1) DEFAULT 1 COMMENT '1: 激活；0：禁用',
-  `is_delete` tinyint(1) DEFAULT 0 COMMENT '1: 删除；0：未删除',
+  `status` tinyint(1) DEFAULT 1 COMMENT '1: 激活；2：禁用',
+  `is_delete` tinyint(1) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
   `on_process` tinyint(1) DEFAULT 0,
   `on_switchover` tinyint(1) DEFAULT 0,
   `on_failover` tinyint(1) DEFAULT 0,
@@ -730,7 +730,7 @@ CREATE TABLE `pms_op_process` (
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_op_type` (`asset_type`, `bs_id`, `process_type`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for pms_op_process_his
@@ -747,7 +747,7 @@ CREATE TABLE `pms_op_process_his` (
   PRIMARY KEY (`id`),
   KEY `idx_op_type` (`asset_type`, `bs_id`, `process_type`,`created`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `pms_dr_pri_status`;

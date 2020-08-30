@@ -105,7 +105,7 @@ func (this *AddDrController) Post() {
 	idstr = this.GetString("fb_retention")
 	fb_retention, err := strconv.Atoi(idstr)
 	if err != nil {
-		fb_retention = 0
+		fb_retention = -1
 	}
 
 	var is_shift int

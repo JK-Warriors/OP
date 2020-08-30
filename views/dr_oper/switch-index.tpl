@@ -152,7 +152,7 @@ function checkUser(e){
 								callback: function(){
 									$.ajax({url: target_url,
 											type: "POST",
-											data: {"bs_id":bs_id,"asset_type":1,"op_type":op_type},
+											data: {"bs_id":bs_id,"op_type":op_type},
 											success: function (json) {
 												//回调函数，判断提交返回的数据执行相应逻辑
 												if (json.code == 0) {

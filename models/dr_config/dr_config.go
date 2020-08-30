@@ -15,7 +15,7 @@ import (
 type DrConfig struct {
 	Bs_Id        int    `orm:"pk;column(bs_id);"`
 	Bs_Name   	 string `orm:"column(bs_name);"`
-	Asset_Type      int    `orm:"column(asset_type);"`
+	Asset_Type   int    `orm:"column(asset_type);"`
 	Db_Id_P      int    `orm:"column(db_id_p);"`
 	Db_Dest_P    int    `orm:"column(db_dest_p);"`
 	Db_Id_S      int    `orm:"column(db_id_s);"`
@@ -58,6 +58,7 @@ func AddDrConfig(dc DrConfig) error {
 	drconf.Shift_Vips = dc.Shift_Vips
 	drconf.Network_P = dc.Network_P
 	drconf.Network_S = dc.Network_S
+	drconf.Status = 1
 	drconf.Created = time.Now().Unix()
 	_, err := o.Insert(drconf)
 	return err

@@ -97,13 +97,13 @@
                   </div>
                 </div>
                 <div id="div_username" class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>用户名</label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>用户名</label>
                   <div class="col-sm-10">
                     <input type="text" id="username" name="username"  value="{{.dbconf.Username}}" class="form-control" placeholder="请填写用户名">
                   </div>
                 </div>
                 <div id="div_password" class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>密码</label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>密码</label>
                   <div class="col-sm-10">
                     <input type="password" id="password" name="password"  value="{{.dbconf.Password}}" class="form-control" placeholder="请填写密码">
                   </div>
@@ -181,24 +181,18 @@
         asset_type = {{.dbconf.Dbtype}};
         if(asset_type == "1"){      
             $("#div_inst_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();
             $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
@@ -209,10 +203,6 @@
             $("#inst_name").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-            $("#div_username").hide();
-            $("#username").attr("value","");
-            $("#div_password").hide();
-            $("#password").attr("value","");
             $("#div_os_type").hide();
             $("#os_type").attr("value","");
             $("#div_os_protocol").hide();
@@ -239,8 +229,6 @@
     $("#asset_type").change(function(){
         if($("#asset_type").val() == "1"){
             $("#div_inst_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
@@ -249,8 +237,6 @@
             $("#port").attr("value","1521");
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();
             $("#protocol").attr("value","");
             $("#div_inst_name").hide();
@@ -259,8 +245,6 @@
             $("#port").attr("value","3306");
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
-            $("#div_username").show();
-            $("#div_password").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
@@ -274,10 +258,6 @@
             $("#inst_name").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
-            $("#div_username").hide();
-            $("#username").attr("value","");
-            $("#div_password").hide();
-            $("#password").attr("value","");
             $("#div_os_type").hide();
             $("#os_type").attr("value","");
             $("#div_os_protocol").hide();

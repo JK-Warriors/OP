@@ -4,6 +4,7 @@ import (
 	"opms/utils"
 	"strconv"
 	"time"
+	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -78,6 +79,27 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 	return nums, err, dr
 }
 
+//统计数量
+func CountDrconfig(condArr map[string]string) int64 {
+	o := orm.NewOrm()
+	qs := o.QueryTable("pms_dr_config")
+	cond := orm.NewCondition()
+
+	if condArr["asset_type"] != "" {
+		cond = cond.And("asset_type", condArr["asset_type"])
+	}
+	if condArr["host"] != "" {
+		cond = cond.And("host__icontains", condArr["host"])
+	}
+	if condArr["alias"] != "" {
+		cond = cond.And("alias__icontains", condArr["alias"])
+	}
+	cond = cond.And("status", 1)
+	cond = cond.And("is_delete", 0)
+	num, _ := qs.SetCond(cond).Count()
+	return num
+}
+
 func CheckDrConfig(bs_id int) (int, error) {
 	var cfg_count int
 
@@ -85,6 +107,15 @@ func CheckDrConfig(bs_id int) (int, error) {
 	o := orm.NewOrm()
 	err := o.Raw(sql, bs_id).QueryRow(&cfg_count)
 	return cfg_count, err
+}
+
+func GetAssetType(bs_id int) (int) {
+	var asset_type int =-1
+
+	sql := `select asset_type from pms_dr_config where bs_id = ?`
+	o := orm.NewOrm()
+	_ = o.Raw(sql, bs_id).QueryRow(&asset_type)
+	return asset_type 	 	
 }
 
 func GetPrimaryDBId(bs_id int) (int, error) {
@@ -124,7 +155,7 @@ func GetDsn(db_id int, asset_type int) (string, error) {
 	} else if asset_type == 2 {
 		sql = `select concat(username,":",password,"@tcp(",host,":",port,")/",db_name,"?charset=utf8") from pms_asset_config where id = ? and asset_type = ?`
 	} else if asset_type == 3 {
-		sql = `select concat("server=",host,";port",port,";database=master",";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
+		sql = `select concat("server=",host,"\\",instance_name,";port",port,";database=",case db_name when "" then "master" end,";user id=",username,";password=",password,";encrypt=disable") from pms_asset_config where id = ? and asset_type = ?`
 	} else {
 		sql = `select "" from pms_asset_config where id = ? and asset_type = ?`
 	}
@@ -133,6 +164,7 @@ func GetDsn(db_id int, asset_type int) (string, error) {
 	err := o.Raw(sql, db_id, asset_type).QueryRow(&dsn)
 	return dsn, err
 }
+
 
 func OperationLock(bs_id int, op_type string) error {
 	utils.LogDebug("Lock the process status in pms_dr_config.")
@@ -469,4 +501,25 @@ func GetStandbyDrInfo(db_id int) (DrStandby, error) {
 	err := o.Raw(sql, db_id).QueryRow(&dis_sta)
 
 	return dis_sta, err
+}
+
+
+func GetChangeMasterCmd(db_id int, log_file string, log_pos string) (string, error) {
+	var cmd string
+	sql := fmt.Sprintf(`select concat("change master to master_host='",host,"',master_port=",port,",master_user='",username, "',master_password='",password, "',master_log_file='","%s","',master_log_pos=","%s") as cmd 
+	from pms_asset_config where id = ?`, log_file, log_pos)
+
+	//utils.LogDebugf("[Info] GetChangeMasterCmd: %s", sql)
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&cmd)
+	return cmd, err
+}
+
+func GetMirrorDbname(dr_id int) (string, error) {
+	var dbname string
+	sql := `select db_name from pms_dr_config where bs_id = ?`
+
+	o := orm.NewOrm()
+	err := o.Raw(sql, dr_id).QueryRow(&dbname)
+	return dbname, err
 }

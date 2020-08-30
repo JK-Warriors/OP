@@ -331,7 +331,7 @@ func CheckSqlserverConnect(host string, port string, inst_name string, db_name s
 	//验证连接
 	err = db.Ping()
 	if err != nil {
-		utils.LogDebugf("Open Connection failed: %s", err.Error())
+		utils.LogDebugf("Ping sqlserver failed: %s", err.Error())
 	}
 
 	return err

@@ -7,7 +7,6 @@ import (
 	"opms/lib/exception"
 	"strconv"
 
-	. "opms/models/dr_business"
 	. "opms/models/dr_oper"
 	. "opms/models/users"
 	"opms/utils"
@@ -43,15 +42,15 @@ func (this *ManageDrSwitchController) Get() {
 	condArr := make(map[string]string)
 	condArr["search_name"] = search_name
 
-	countBs := CountBusiness(condArr)
+	countDr := CountDrconfig(condArr)
 
-	paginator := pagination.SetPaginator(this.Ctx, offset, countBs)
+	paginator := pagination.SetPaginator(this.Ctx, offset, countDr)
 	_, _, dr := ListDr(condArr, page, offset)
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
 	this.Data["dr"] = dr
-	this.Data["countBs"] = countBs
+	this.Data["countDr"] = countDr
 
 	userid, _ := this.GetSession("userId").(int64)
 	user, _ := GetUser(userid)
@@ -121,12 +120,9 @@ func (this *AjaxDrSwitchoverController) Post() {
 	// }
 
 	bs_id, _ := this.GetInt("bs_id")
-	asset_type, _ := this.GetInt("asset_type")
 	op_type := this.GetString("op_type")
 
 	utils.LogDebug(bs_id)
-	utils.LogDebug(asset_type)
-	utils.LogDebug(op_type)
 	utils.LogDebug(op_type)
 
 	//灾备配置检查
@@ -137,6 +133,7 @@ func (this *AjaxDrSwitchoverController) Post() {
 		this.ServeJSON()
 		return
 	}
+	asset_type := GetAssetType(bs_id)
 
 	pri_id, err := GetPrimaryDBId(bs_id)
 	if err != nil {
@@ -216,33 +213,50 @@ func (this *AjaxDrSwitchoverController) Post() {
 				}
 				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 2 { //mysql
-				utils.LogDebug("主库开始切换成备库...")
-				p_result := SlaveToMaster(op_id, bs_id, dsn_p)
-				if p_result == 1 {
-					utils.LogDebug("主库切换成备库成功")
-					utils.LogDebug("备库开始切换成主库...")
-					s_result := RebuildReplication(op_id, bs_id, dsn_s)
-					if s_result == 1 {
-						utils.LogDebug("备库切换成主库成功")
+				utils.LogDebug("从库开始切换成主库...")
+				p_result := SlaveToMaster(op_id, bs_id, dsn_p, dsn_s, sta_id)
+				if p_result == 0 {
+					utils.LogDebug("从库切换成主库成功")
+					utils.LogDebug("开始重建复制关系...")
+					s_result := RebuildReplication(bs_id, dsn_p, dsn_s, sta_id)
+					if s_result == 0 {
+						utils.LogDebug("重建复制关系成功")
 						utils.LogDebug("更新切换标识")
 						UpdateSwitchFlag(bs_id)
 						utils.LogDebug("更新切换标识结束")
 						Update_OP_Result(op_id, 1)
 					} else {
-						utils.LogDebug("备库切换主库失败，更新切换结果")
+						utils.LogDebug("重建复制关系失败，更新切换结果")
 						Update_OP_Result(op_id, -1)
 					}
 				} else {
-					utils.LogDebug("主库切换备库失败，更新切换结果")
+					utils.LogDebug("从库切换成主库失败，更新切换结果")
 					Update_OP_Result(op_id, -1)
 				}
-				//MysqlPrimaryToStandby
-				//MysqlStandbyToPrimary
 
 				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 3 { //sqlserver
-				//MssqlPrimaryToStandby
-				//MssqlStandbyToPrimary
+				utils.LogDebug("获取镜像库名称...")
+				db_name, err := GetMirrorDbname(bs_id)
+				if nil == err {
+					utils.LogDebugf("镜像库名为：%s", db_name)
+					utils.LogDebug("开始切换镜像库...")
+					result := SwitchMirror(op_id, bs_id, dsn_p, dsn_s, db_name)
+					if result == 0 {
+						utils.LogDebug("镜像库切换成功")
+						utils.LogDebug("更新切换标识")
+						UpdateSwitchFlag(bs_id)
+						utils.LogDebug("更新切换标识结束")
+						Update_OP_Result(op_id, 1)
+					} else {
+						utils.LogDebug("镜像库切换失败，更新切换结果")
+						Update_OP_Result(op_id, -1)
+					}
+				}else{
+					utils.LogDebug("获取镜像库名称失败")
+					Update_OP_Result(op_id, -1)
+				}
+
 				OperationUnlock(bs_id, op_type)
 			}
 
@@ -273,12 +287,9 @@ func (this *AjaxDrFailoverController) Post() {
 	// }
 
 	bs_id, _ := this.GetInt("bs_id")
-	asset_type, _ := this.GetInt("asset_type")
 	op_type := this.GetString("op_type")
 
 	utils.LogDebug(bs_id)
-	utils.LogDebug(asset_type)
-	utils.LogDebug(op_type)
 	utils.LogDebug(op_type)
 
 	//灾备配置检查
@@ -289,6 +300,7 @@ func (this *AjaxDrFailoverController) Post() {
 		this.ServeJSON()
 		return
 	}
+	asset_type := GetAssetType(bs_id)
 
 	sta_id, err := GetStandbyDBId(bs_id)
 	if err != nil {
@@ -344,12 +356,23 @@ func (this *AjaxDrFailoverController) Post() {
 
 				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 2 { //mysql
-				//OraPrimaryToStandby
-				//OraStandbyToPrimary
+				utils.LogDebug("从库开始切换成主库...")
+				p_result := FailoverToMaster(op_id, bs_id, dsn_s, sta_id)
+				if p_result == 0 {
+					utils.LogDebug("从库切换成主库成功")
+					utils.LogDebug("更新切换标识")
+					UpdateSwitchFlag(bs_id)
+					utils.LogDebug("更新切换标识结束")
+					Update_OP_Result(op_id, 1)
+				} else {
+					utils.LogDebug("从库切换成主库失败，更新切换结果")
+					Update_OP_Result(op_id, -1)
+				}
+
+				OperationUnlock(bs_id, op_type)
 
 			} else if asset_type == 3 { //sqlserver
-				//OraPrimaryToStandby
-				//OraStandbyToPrimary
+				//Skip
 
 			}
 
