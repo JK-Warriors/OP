@@ -5,7 +5,6 @@ import (
 	"opms/controllers"
 	"opms/lib/exception"
 
-	. "opms/models/dr_business"
 	. "opms/models/dr_oper"
 	. "opms/models/users"
 	"opms/utils"
@@ -23,7 +22,7 @@ type ManageDrSyncController struct {
 
 func (this *ManageDrSyncController) Get() {
 	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-sync") {
+	if !strings.Contains(this.GetSession("userPermission").(string), "oper-sync-manage") {
 		this.Abort("401")
 	}
 
@@ -41,15 +40,15 @@ func (this *ManageDrSyncController) Get() {
 	condArr := make(map[string]string)
 	condArr["search_name"] = search_name
 
-	countBs := CountBusiness(condArr)
+	countDr := CountOracleDrConfig(condArr)
 
-	paginator := pagination.SetPaginator(this.Ctx, offset, countBs)
-	_, _, dr := ListDr(condArr, page, offset)
+	paginator := pagination.SetPaginator(this.Ctx, offset, countDr)
+	_, _, dr := ListOracleDr(condArr, page, offset)
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
 	this.Data["dr"] = dr
-	this.Data["countBs"] = countBs
+	this.Data["countDr"] = countDr
 
 	userid, _ := this.GetSession("userId").(int64)
 	user, _ := GetUser(userid)

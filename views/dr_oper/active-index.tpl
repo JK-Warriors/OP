@@ -47,7 +47,7 @@
             </div>
 
             <section class="panel">
-              <header class="panel-heading"> 业务系统列表 / 总数：{{.countBs}}
+              <header class="panel-heading"> 容灾列表 / 总数：{{.countDr}}
                 <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
                 <!--a href="javascript:;" class="fa fa-times"></a-->
                 </span> 
@@ -58,7 +58,7 @@
                     <table class="table table-bordered table-striped table-condensed">
                       <thead>
                         <tr>
-                          <th>业务系统名称</th>
+                          <th>容灾组名称</th>
                           <th>主库</th>
                           <th>备库</th>
                           <th>操作</th>

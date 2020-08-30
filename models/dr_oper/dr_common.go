@@ -100,6 +100,79 @@ func CountDrconfig(condArr map[string]string) int64 {
 	return num
 }
 
+//获取Oracle容灾列表
+func ListOracleDr(condArr map[string]string, page int, offset int) (num int64, err error, dr []Dr) {
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select d.bs_id as id, 
+					d.bs_name,
+					d.db_id_p, 
+					pp.asset_type as db_type_p,
+					pp.host as host_p,
+					pp.port as port_p, 
+					pp.alias as alias_p, 
+					pp.instance_name as inst_name_p, 
+					pp.db_name as db_name_p, 
+					d.db_id_s, 
+					ps.asset_type as db_type_s,
+					ps.host as host_s,
+					ps.port as port_s, 
+					ps.alias as alias_s, 
+					ps.instance_name as inst_name_s, 
+					ps.db_name as db_name_s, 
+					d.is_shift
+				from pms_dr_config d
+				left join pms_asset_config pp on d.db_id_p = pp.id
+				left join pms_asset_config ps on d.db_id_s = ps.id
+				where d.is_delete = 0
+				 and d.asset_type = 1
+				 and d.status = 1`
+
+	if condArr["search_name"] != "" {
+		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if offset < 1 {
+		offset, _ = beego.AppConfig.Int("pageoffset")
+	}
+	start := (page - 1) * offset
+	sql = sql + " order by id"
+	sql = sql + " limit " + strconv.Itoa(offset) + " offset " + strconv.Itoa(start)
+	nums, err := o.Raw(sql).QueryRows(&dr)
+	if err != nil {
+		utils.LogDebug("Get ListDr failed:" + err.Error())
+	}
+	//utils.LogDebugf("%+v", dr)
+	return nums, err, dr
+}
+
+//统计oracle容灾数量
+func CountOracleDrConfig(condArr map[string]string) int64 {
+	o := orm.NewOrm()
+	qs := o.QueryTable("pms_dr_config")
+	cond := orm.NewCondition()
+
+	if condArr["asset_type"] != "" {
+		cond = cond.And("asset_type", condArr["asset_type"])
+	}
+	if condArr["host"] != "" {
+		cond = cond.And("host__icontains", condArr["host"])
+	}
+	if condArr["alias"] != "" {
+		cond = cond.And("alias__icontains", condArr["alias"])
+	}
+	cond = cond.And("asset_type", 1)
+	cond = cond.And("status", 1)
+	cond = cond.And("is_delete", 0)
+	num, _ := qs.SetCond(cond).Count()
+	return num
+}
+
+
 func CheckDrConfig(bs_id int) (int, error) {
 	var cfg_count int
 

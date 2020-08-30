@@ -24,7 +24,7 @@ type ManageDrSwitchController struct {
 
 func (this *ManageDrSwitchController) Get() {
 	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch") {
+	if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-manage") {
 		this.Abort("401")
 	}
 
