@@ -68,8 +68,8 @@
                       {{range $k,$v := .dr}}
                         <tr>
                           <td>{{$v.Bs_Name}}</td>
-                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
-                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Shift}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
+                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
                             <a name="screen" class="btn btn-primary" href="/operation/dr_switch/screen/{{$v.Id}}"> <i class="fa fa-reset"></i> 灾备大屏 </a>
                             <button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>

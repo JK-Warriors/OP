@@ -30,7 +30,7 @@ type Dr struct {
 	Alias_S     string `orm:"column(alias_s);"`
 	Inst_Name_S string `orm:"column(inst_name_s);"`
 	Db_Name_S   string `orm:"column(db_name_s);"`
-	Is_Shift    int    `orm:"column(is_shift);"`
+	Is_Switch   int    `orm:"column(is_switch);"`
 }
 
 //获取容灾列表
@@ -54,7 +54,7 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 					ps.alias as alias_s, 
 					ps.instance_name as inst_name_s, 
 					ps.db_name as db_name_s, 
-					d.is_shift
+					d.is_switch
 				from pms_dr_config d
 				left join pms_asset_config pp on d.db_id_p = pp.id
 				left join pms_asset_config ps on d.db_id_s = ps.id
