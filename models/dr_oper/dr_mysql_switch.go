@@ -13,14 +13,23 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 	result := -1
 	mdb, err := xorm.NewEngine("mysql", dsn_p)
 	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
 		utils.LogDebugf("%s: %s", dsn_p, err.Error())
+		return -1
 	}
 	defer mdb.Close()
+	err = mdb.Ping()
+	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
+		utils.LogDebugf("Ping database failed: %s", err.Error())
+		return -1
+	}
 
 	//lock tables
 	utils.LogDebugf("Lock tables for database first")
 	_, err = mdb.Exec("flush tables with read lock")
 	if err != nil {
+		Update_OP_Reason(op_id, "锁表失败")
 		utils.LogDebugf("Lock tables error: %s", err.Error())
 		return -1
 	}
@@ -28,13 +37,21 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 	
 	sdb, err := xorm.NewEngine("mysql", dsn_s)
 	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
 		utils.LogDebugf("%s: %s", dsn_s, err.Error())
+		return -1
 	}
 	defer sdb.Close()
+	err = sdb.Ping()
+	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
+		utils.LogDebugf("Ping database failed: %s", err.Error())
+		return -1
+	}
 
 	//get database role, 1: master; 2:slave
 	role := GetDatabaseRole(sdb)
-	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取数据库角色成功")
+	Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "获取数据库角色成功")
 	utils.LogDebugf("The current database role is: %d", role)
 
 	if role == 2{
@@ -43,15 +60,17 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 		if (check_result > 0){
 			// can switch now
 			utils.LogDebugf("Now we are going to switch database %d to master.", slave_id)
-			Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "正在将从库切换成主库...")
+			Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "正在将从库切换成主库...")
 			_, err = sdb.Exec("stop slave io_thread")
 			if err != nil {
+				Update_OP_Reason(op_id, "停止io_thread进程失败")
 				utils.LogDebugf("Stop slave io_thread error: %s", err.Error())
 				result = -1
 			}
 
 			_, err = sdb.Exec("stop slave")
 			if err != nil {
+				Update_OP_Reason(op_id, "停止slave进程失败")
 				utils.LogDebugf("Stop slave error: %s", err.Error())
 				result = -1
 			}
@@ -59,48 +78,66 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 			
 			_, err = sdb.Exec("reset slave all")
 			if err != nil {
+				Update_OP_Reason(op_id, "重置slave失败")
 				utils.LogDebugf("Reset slave all error: %s", err.Error())
 				result = -1
 			}
 	
 			utils.LogDebug("Switchover slave to master successfully.")
-			Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "从库已经成功切换成主库")
+			Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "从库已经成功切换成主库")
 			result=0
 		}else{
 			Update_OP_Reason(op_id, "校验切换条件失败")
-			Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "校验切换条件失败，取消切换")
+			Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "校验切换条件失败，取消切换")
 			utils.LogDebug("You can not switchover a master database to master!")
 			result = -1
 		}
 	} else {
 		Update_OP_Reason(op_id, "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
-		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
+		Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
 		utils.LogDebug("Check prerequisites failed!")
 		result = -1
 	}
 	return result
 }
 
-func RebuildReplication(bs_id int, dsn_p string, dsn_s string, slave_id int) int {
+func RebuildReplication(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id int) int {
 	utils.LogDebug("Rebuild replication in progress...")
 	var result int = -1
 
 	mdb, err := xorm.NewEngine("mysql", dsn_p)
 	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
 		utils.LogDebugf("%s: %s", dsn_p, err.Error())
+		return -1
 	}
 	defer mdb.Close()
+	err = mdb.Ping()
+	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
+		utils.LogDebugf("Ping database failed: %s", err.Error())
+		return -1
+	}
 
 	sdb, err := xorm.NewEngine("mysql", dsn_s)
 	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
 		utils.LogDebugf("%s: %s", dsn_s, err.Error())
+		return -1
 	}
 	defer sdb.Close()
+	err = sdb.Ping()
+	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
+		utils.LogDebugf("Ping database failed: %s", err.Error())
+		return -1
+	}
 
 	var master_file string
 	var master_pos string
 	masterstatus, err := sdb.QueryString("show master status")
 	if err != nil {
+		Update_OP_Reason(op_id, "获取master状态失败")
 		utils.LogDebugf("[Info] Get master status error: %s", err.Error())
 		return -1
 	}
@@ -119,22 +156,26 @@ func RebuildReplication(bs_id int, dsn_p string, dsn_s string, slave_id int) int
 	utils.LogDebugf("Unlock tables for database first")
 	_, err = mdb.Exec(`unlock tables`)
 	if err != nil {
+		Update_OP_Reason(op_id, "解锁tables失败")
 		utils.LogDebugf("Unlock tables error: %s", err.Error())
 		result = -1
 	}
 	
 	_, err = mdb.Exec("stop slave io_thread")
 	if err != nil {
+		Update_OP_Reason(op_id, "停止io_thread进程失败")
 		utils.LogDebugf("Stop slave io_thread error: %s", err.Error())
 		result = -1
 	}
 	_, err = mdb.Exec("stop slave")
 	if err != nil {
+		Update_OP_Reason(op_id, "停止slave失败")
 		utils.LogDebugf("Stop slave error: %s", err.Error())
 		result = -1
 	}
 	_, err = mdb.Exec("reset slave all")
 	if err != nil {
+		Update_OP_Reason(op_id, "重置slave失败")
 		utils.LogDebugf("Reset slave all error: %s", err.Error())
 		result = -1
 	}
@@ -145,12 +186,14 @@ func RebuildReplication(bs_id int, dsn_p string, dsn_s string, slave_id int) int
 	utils.LogDebugf("Change master command: %s", sql)
 	_, err = mdb.Exec(sql)
 	if err != nil {
+		Update_OP_Reason(op_id, "重建复制关系失败")
 		utils.LogDebugf("Rebuild replication error: %s", err.Error())
 		result = -1
 	}
 	
 	_, err = mdb.Exec("start slave")
 	if err != nil {
+		Update_OP_Reason(op_id, "开启slave进程失败")
 		utils.LogDebugf("Start slave error: %s", err.Error())
 		result = -1
 	}
@@ -160,6 +203,7 @@ func RebuildReplication(bs_id int, dsn_p string, dsn_s string, slave_id int) int
 	var sql_running string = "No"
 	slavestatus, err := mdb.QueryString("show slave status")
 	if err != nil {
+		Update_OP_Reason(op_id, "查看slave进程状态失败")
 		utils.LogDebugf("[Info] Get slave status error: %s", err.Error())
 		return -1
 	}
@@ -189,27 +233,37 @@ func FailoverToMaster(op_id int64, bs_id int, dsn string, slave_id int) int {
 	result := -1
 	sdb, err := xorm.NewEngine("mysql", dsn)
 	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
 		utils.LogDebugf("%s: %s", dsn, err.Error())
+		return -1
 	}
 	defer sdb.Close()
+	err = sdb.Ping()
+	if err != nil {
+		Update_OP_Reason(op_id, "连接数据库失败")
+		utils.LogDebugf("Ping database failed: %s", err.Error())
+		return -1
+	}
 
 	//get database role, 1: master; 2:slave
 	role := GetDatabaseRole(sdb)
-	Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "获取数据库角色成功")
+	Log_OP_Process(op_id, bs_id, 2, "FAILOVER", "获取数据库角色成功")
 	utils.LogDebugf("The current database role is: %d", role)
 
 	if role == 2{
 		// failover to master
 		utils.LogDebugf("Now we are going to switch database %d to master.", slave_id)
-		Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "正在将从库切换成主库...")
+		Log_OP_Process(op_id, bs_id, 2, "FAILOVER", "正在将从库切换成主库...")
 		_, err = sdb.Exec("stop slave io_thread")
 		if err != nil {
+			Update_OP_Reason(op_id, "停止io_thread进程失败")
 			utils.LogDebugf("Stop slave io_thread error: %s", err.Error())
 			result = -1
 		}
 
 		_, err = sdb.Exec("stop slave")
 		if err != nil {
+			Update_OP_Reason(op_id, "停止slave失败")
 			utils.LogDebugf("Stop slave error: %s", err.Error())
 			result = -1
 		}
@@ -217,16 +271,17 @@ func FailoverToMaster(op_id int64, bs_id int, dsn string, slave_id int) int {
 		
 		_, err = sdb.Exec("reset slave all")
 		if err != nil {
+			Update_OP_Reason(op_id, "重置slave失败")
 			utils.LogDebugf("Reset slave all error: %s", err.Error())
 			result = -1
 		}
 
 		utils.LogDebug("Failover slave to master successfully.")
-		Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "从库已经成功切换成主库")
+		Log_OP_Process(op_id, bs_id, 2, "FAILOVER", "从库已经成功切换成主库")
 		result=0
 	} else {
 		Update_OP_Reason(op_id, "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
-		Log_OP_Process(op_id, bs_id, 1, "FAILOVER", "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
+		Log_OP_Process(op_id, bs_id, 2, "FAILOVER", "验证数据库角色失败，当前数据库不是从库，不能切换到主库")
 		utils.LogDebug("You can not failover a master database to master!")
 		result = -1
 	}

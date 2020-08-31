@@ -30,6 +30,7 @@ type Dbconfigs struct {
 	Role         int    `orm:"column(role);"`
 	Ostype       int    `orm:"column(os_type);"`
 	OsProtocol   string `orm:"column(os_protocol);"`
+	OsPort   	 string `orm:"column(os_port);"`
 	OsUsername   string `orm:"column(os_username);"`
 	OsPassword   string `orm:"column(os_password);"`
 	Status       int    `orm:"column(status);"`
@@ -64,6 +65,7 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.Role = upd.Role
 	dbconf.Ostype = upd.Ostype
 	dbconf.OsProtocol = upd.OsProtocol
+	dbconf.OsPort = upd.OsPort
 	dbconf.OsUsername = upd.OsUsername
 	dbconf.OsPassword = upd.OsPassword
 	dbconf.Status = 1
@@ -91,6 +93,7 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		dbconf.Role = upd.Role
 		dbconf.Ostype = upd.Ostype
 		dbconf.OsProtocol = upd.OsProtocol
+		dbconf.OsPort = upd.OsPort
 		dbconf.OsUsername = upd.OsUsername
 		dbconf.OsPassword = upd.OsPassword
 		dbconf.Updated = time.Now().Unix()

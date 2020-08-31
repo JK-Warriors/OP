@@ -135,6 +135,7 @@ func (this *AddDBConfigController) Post() {
 
 	os_type, _ := this.GetInt("os_type")
 	os_protocol := this.GetString("os_protocol")
+	os_port := this.GetString("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 
@@ -152,6 +153,7 @@ func (this *AddDBConfigController) Post() {
 	dbconf.Role = role
 	dbconf.Ostype = os_type
 	dbconf.OsProtocol = os_protocol
+	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
 
@@ -256,6 +258,7 @@ func (this *EditDBConfigController) Post() {
 
 	os_type, _ := this.GetInt("os_type")
 	os_protocol := this.GetString("os_protocol")
+	os_port := this.GetString("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 
@@ -274,6 +277,7 @@ func (this *EditDBConfigController) Post() {
 	dbconf.Role = role
 	dbconf.Ostype = os_type
 	dbconf.OsProtocol = os_protocol
+	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
 

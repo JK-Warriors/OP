@@ -5,9 +5,12 @@ import (
 	"strconv"
 	"time"
 	"fmt"
+	"bytes"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+    "golang.org/x/crypto/ssh"
 )
 
 type Dr struct {
@@ -189,6 +192,15 @@ func GetAssetType(bs_id int) (int) {
 	o := orm.NewOrm()
 	_ = o.Raw(sql, bs_id).QueryRow(&asset_type)
 	return asset_type 	 	
+}
+
+func GetIsShiftIP(bs_id int) (int) {
+	var is_shift int =-1
+
+	sql := `select is_shift from pms_dr_config where bs_id = ?`
+	o := orm.NewOrm()
+	_ = o.Raw(sql, bs_id).QueryRow(&is_shift)
+	return is_shift 	 	
 }
 
 func GetPrimaryDBId(bs_id int) (int, error) {
@@ -434,37 +446,6 @@ func GetOnProcess(bs_id int) (int, error) {
 	return on_process, err
 }
 
-// func GetCurrentOpType(bs_id int) (string, error) {
-// 	var on_switchover int
-// 	var on_failover int
-// 	var on_startmrp int
-// 	var on_stopmrp int
-// 	var on_startsnapshot int
-// 	var on_stopsnapshot int
-// 	sql := `select on_switchover, on_failover, on_startmrp, on_stopmrp, on_startsnapshot, on_stopsnapshot
-// 			from pms_dr_config where bs_id =?`
-// 	o := orm.NewOrm()
-// 	err := o.Raw(sql, bs_id).QueryRow(&on_switchover, &on_failover, &on_startmrp, &on_stopmrp, &on_startsnapshot, &on_stopsnapshot)
-// 	if err != nil {
-// 		return "", err
-// 	} else {
-// 		if on_switchover == 1 {
-// 			return "SWITCHOVER", err
-// 		} else if on_failover == 1 {
-// 			return "FAILOVER", err
-// 		} else if on_startmrp == 1 {
-// 			return "MRP_START", err
-// 		} else if on_stopmrp == 1 {
-// 			return "MRP_STOP", err
-// 		} else if on_startsnapshot == 1 {
-// 			return "SNAPSHOT_START", err
-// 		} else if on_stopsnapshot == 1 {
-// 			return "SNAPSHOT_STOP", err
-// 		} else {
-// 			return "", err
-// 		}
-// 	}
-// }
 
 func GetCurrentOpId(bs_id int, op_type string) (int64, error) {
 	var op_id int64
@@ -595,4 +576,348 @@ func GetMirrorDbname(dr_id int) (string, error) {
 	o := orm.NewOrm()
 	err := o.Raw(sql, dr_id).QueryRow(&dbname)
 	return dbname, err
+}
+
+
+
+
+
+//切换IP
+func SwitchIPs(op_id int64, dr_id int, asset_type int, pri_id int, sta_id int) int{
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "切换IP开始")
+
+	//Get switch ips
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取需要切换的IP")
+	ips,err := GetIps(dr_id)
+	if err != nil || ips == ""{
+		Update_OP_Reason(op_id, "获取需要切换的IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取需要切换的IP失败")
+		utils.LogDebug("GetIps failed: " + err.Error())
+		return -1
+	}
+
+	//get network card
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取绑定的目标端网卡")
+	s_card,err := GetStaNetcard(dr_id)
+	if err != nil || s_card == ""{
+		Update_OP_Reason(op_id, "获取绑定的目标端网卡失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取绑定的目标端网卡失败")
+		utils.LogDebug("Get network card failed: " + err.Error())
+		return -1
+	}
+
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始源端解绑IP")
+	result := Unbind_IPs(pri_id, ips)
+	if result == -1{
+		Update_OP_Reason(op_id, "源端解绑IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "源端解绑IP失败")
+		utils.LogDebug("Unbind ips failed")
+		return -1
+	}
+	
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始目标端绑定IP")
+	result = Bind_IPs(sta_id, ips, s_card)
+	if result == -1{
+		Update_OP_Reason(op_id, "目标端绑定IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "目标端绑定IP失败")
+		utils.LogDebug("Bind ips failed")
+		return -1
+	}
+
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "切换IP成功")
+	return 1
+}
+
+//切换IP
+func FailoverIPs(op_id int64, dr_id int, asset_type int, sta_id int) int{
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "绑定IP开始")
+
+	//Get switch ips
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取需要绑定的IP")
+	ips,err := GetIps(dr_id)
+	if err != nil || ips == ""{
+		Update_OP_Reason(op_id, "获取需要绑定的IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取需要绑定的IP失败")
+		utils.LogDebug("GetIps failed: " + err.Error())
+		return -1
+	}
+
+	//get network card
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取绑定的目标端网卡")
+	s_card,err := GetStaNetcard(dr_id)
+	if err != nil || s_card == ""{
+		Update_OP_Reason(op_id, "获取绑定的目标端网卡失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取绑定的目标端网卡失败")
+		utils.LogDebug("Get network card failed: " + err.Error())
+		return -1
+	}
+
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始目标端绑定IP")
+	result := Bind_IPs(sta_id, ips, s_card)
+	if result == -1{
+		Update_OP_Reason(op_id, "目标端绑定IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "目标端绑定IP失败")
+		utils.LogDebug("Bind ips failed")
+		return -1
+	}
+
+	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "绑定IP成功")
+	return 1
+}
+
+func GetIps(dr_id int) (string, error){
+	var ips string
+	sql := `select shift_vips from pms_dr_config where bs_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, dr_id).QueryRow(&ips)
+	if err != nil {
+		utils.LogDebug("GetIps failed: " + err.Error())
+		return ips, err
+	}
+	return ips, nil
+}
+
+func GetStaNetcard(dr_id int) (string, error){
+	var netcard string
+	sql := `select trim(CASE is_switch
+				WHEN 0 THEN network_s
+				ELSE network_p
+			END) as netcard
+			from pms_dr_config
+			where bs_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, dr_id).QueryRow(&netcard)
+	if err != nil {
+		utils.LogDebug("GetStaNetcard failed: " + err.Error())
+		return netcard, err
+	}
+	return netcard, nil
+}
+
+
+type OsInfo struct {
+	DB_Id        	int    	`orm:"pk;column(db_id);"`
+	Host       	 	string 	`orm:"column(host);"`
+	Port       	 	string 	`orm:"column(os_port);"`
+	Os_Type     	string  `orm:"column(os_type);"`
+	Os_Protocol     string 	`orm:"column(os_protocol);"`
+	Os_Username   	string  `orm:"column(os_username);"`
+	Os_Password   	string 	`orm:"column(os_password);"`
+}
+
+func Unbind_IPs(db_id int, ips string) int{
+	var result int =1
+	var osinfo OsInfo
+	sql := `select id, host, os_port, os_type, os_protocol, os_username, os_password  from pms_asset_config where id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&osinfo)
+
+	utils.LogDebugf("pri_id: %d", db_id)
+	utils.LogDebugf("Host: %s", osinfo.Host)
+	
+	// 建立SSH客户端连接
+	host := fmt.Sprintf("%s:%s", osinfo.Host, osinfo.Port)
+	utils.LogDebugf("SSH host: %s", host)
+    client, err := ssh.Dial("tcp", host, &ssh.ClientConfig{
+        User:            osinfo.Os_Username,
+        Auth:            []ssh.AuthMethod{ssh.Password(osinfo.Os_Password)},
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    })
+    if err != nil {
+        utils.LogDebugf("SSH dial error: %s", err.Error())
+		result = -1
+    }
+
+	iplist := strings.Split(ips, ",")
+	if len(iplist) > 0{
+		for _, ip := range iplist {
+			//ip := "192.168.153.79"
+			//get netcard
+			//ifconfig | awk '/192.168.153.79/{print a;}{a=$0}' | awk '{print $1}' | awk -F':' '{print $1":"$2}'
+			command := fmt.Sprintf(`ifconfig | awk '/%s/{print a;}{a=$0}' | awk '{print $1}' | awk -F':' '{print $1":"$2}'`,ip)
+			utils.LogDebugf("command: %s", command)
+
+			out, err := runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("runCommand error: %s", err.Error())
+				result = -1
+				continue
+			}else{
+				netcard := strings.Replace(out, "\n", "", -1)
+				utils.LogDebugf("netcard: %s", netcard)
+				if netcard == ""{
+					utils.LogDebugf("IP %s was not bind, skip", ip)
+					result = -1
+					continue
+				}else{
+					//ip_cmd = "ifconfig ens33:1 down"
+					command = fmt.Sprintf(`ifconfig %s down`, netcard)
+					utils.LogDebugf("command: %s", command)
+
+					out, err = runCommand(client, command)
+					if err != nil {
+						utils.LogDebugf("runCommand error: %s", err.Error())
+					}
+					utils.LogDebugf("out: %s", out)
+
+					//check ip down
+					command = fmt.Sprintf(`ifconfig | grep %s | wc -l`, ip)
+					utils.LogDebugf("command: %s", command)
+
+					out, err = runCommand(client, command)
+					if err != nil {
+						utils.LogDebugf("Check ip down error: %s", err.Error())
+					}else{
+						checkvalue := strings.Replace(out, "\n", "", -1)
+						utils.LogDebugf("checkvalue: %s", checkvalue)
+						if checkvalue != "0"{
+							utils.LogDebugf("Check ip down failed")
+							result = -1
+							continue
+						}
+					}
+				}
+			}
+		}
+	}else{
+		utils.LogDebug("No switch ip exists")
+		return -1
+	}
+	return result
+}
+
+func Bind_IPs(db_id int, ips string, netcard string) int{
+	var result int = 1
+
+	var osinfo OsInfo
+	sql := `select id, host, os_port, os_type, os_protocol, os_username, os_password  from pms_asset_config where id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&osinfo)
+
+	utils.LogDebugf("pri_id: %d", db_id)
+	utils.LogDebugf("Host: %s", osinfo.Host)
+	
+	// 建立SSH客户端连接
+	host := fmt.Sprintf("%s:%s", osinfo.Host, osinfo.Port)
+	utils.LogDebugf("SSH host: %s", host)
+    client, err := ssh.Dial("tcp", host, &ssh.ClientConfig{
+        User:            osinfo.Os_Username,
+        Auth:            []ssh.AuthMethod{ssh.Password(osinfo.Os_Password)},
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    })
+    if err != nil {
+        utils.LogDebugf("SSH dial error: %s", err.Error())
+		result = -1
+    }
+
+	iplist := strings.Split(ips, ",")
+	if len(iplist) > 0{
+		for _, ip := range iplist {
+			//get netmask
+			command := fmt.Sprintf(`ifconfig -a %s | grep 'netmask' | awk '{print $4}'`, netcard)
+			utils.LogDebugf("command: %s", command)
+			out, err := runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("get netmask error: %s", err.Error())
+				result = -1
+				continue
+			}
+			netmask := strings.Replace(out, "\n", "", -1)
+
+			//get gateway
+			command = fmt.Sprintf(`route -n | grep %s | awk '{print $2}' | grep -v '0.0.0.0'`, netcard)
+			utils.LogDebugf("command: %s", command)
+			out, err = runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("get gateway error: %s", err.Error())
+				result = -1
+				continue
+			}
+			gateway := strings.Replace(out, "\n", "", -1)
+
+			//get netcard bind ip count
+			//ifconfig | grep ens33 | wc -l
+			command = fmt.Sprintf(`ifconfig | grep %s | wc -l`, netcard)
+			utils.LogDebugf("command: %s", command)
+
+			out, err = runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("runCommand error: %s", err.Error())
+				result = -1
+				continue
+			}
+			
+			bindcount,err := strconv.Atoi(strings.Replace(out, "\n", "", -1))
+			if err != nil {
+				utils.LogDebugf("Get netcard bind ip count error: %s", err.Error())
+				result = -1
+				continue
+			}
+			utils.LogDebugf("bindcount: %s", bindcount)
+			
+			//bind ip
+			command = fmt.Sprintf(`ifconfig %s:%d %s netmask %s`, netcard, bindcount, ip, netmask)
+			utils.LogDebugf("command: %s", command)
+
+			out, err = runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("runCommand error: %s", err.Error())
+				result = -1
+				continue
+			}
+
+			//arp
+			command = fmt.Sprintf(`arping -U -c 1 -I %s -s %s %s`, netcard, ip, gateway)
+			utils.LogDebugf("command: %s", command)
+
+			out, err = runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("runCommand error: %s", err.Error())
+				result = -1
+				continue
+			}
+
+			//check ip bind
+			command = fmt.Sprintf(`ifconfig | grep %s | wc -l`, ip)
+			utils.LogDebugf("command: %s", command)
+
+			out, err = runCommand(client, command)
+			if err != nil {
+				utils.LogDebugf("Check ip bind error: %s", err.Error())
+			}else{
+				checkvalue := strings.Replace(out, "\n", "", -1)
+				utils.LogDebugf("checkvalue: %s", checkvalue)
+				if checkvalue == "0"{
+					utils.LogDebugf("Check ip bind failed")
+					result = -1
+					continue
+				}
+			}
+		}
+	}else{
+		utils.LogDebug("No switch ip exists")
+		return -1
+	}
+	
+	return result
+}
+
+func runCommand(client *ssh.Client, command string) (stdout string, err error) {
+	session, err := client.NewSession()
+	if err != nil {
+		//log.Print(err)
+		return
+	}
+	defer session.Close()
+
+	var buf bytes.Buffer
+	session.Stdout = &buf
+	err = session.Run(command)
+	if err != nil {
+		//log.Print(err)
+		return
+	}
+	stdout = string(buf.Bytes())
+
+	return
 }

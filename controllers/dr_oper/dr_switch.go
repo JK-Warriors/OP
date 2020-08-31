@@ -134,6 +134,7 @@ func (this *AjaxDrSwitchoverController) Post() {
 		return
 	}
 	asset_type := GetAssetType(bs_id)
+	is_shift_ip := GetIsShiftIP(bs_id)
 
 	pri_id, err := GetPrimaryDBId(bs_id)
 	if err != nil {
@@ -202,7 +203,21 @@ func (this *AjaxDrSwitchoverController) Post() {
 						utils.LogDebug("更新切换标识")
 						UpdateSwitchFlag(bs_id)
 						utils.LogDebug("更新切换结束")
-						Update_OP_Result(op_id, 1)
+						
+						//切换IP
+						if is_shift_ip == 1{
+							utils.LogDebug("开始切换IP")
+							result :=SwitchIPs(op_id, bs_id, asset_type, pri_id, sta_id)
+							if result < 0 {
+								utils.LogDebug("切换IP失败")
+								Update_OP_Result(op_id, -1)
+							}else{
+								utils.LogDebug("切换IP成功")
+								Update_OP_Result(op_id, 1)
+							}
+						}else{
+							Update_OP_Result(op_id, 1)
+						}
 					} else {
 						utils.LogDebug("备库切换主库失败，更新切换结果")
 						Update_OP_Result(op_id, -1)
@@ -218,13 +233,28 @@ func (this *AjaxDrSwitchoverController) Post() {
 				if p_result == 0 {
 					utils.LogDebug("从库切换成主库成功")
 					utils.LogDebug("开始重建复制关系...")
-					s_result := RebuildReplication(bs_id, dsn_p, dsn_s, sta_id)
+					s_result := RebuildReplication(op_id, bs_id, dsn_p, dsn_s, sta_id)
 					if s_result == 0 {
 						utils.LogDebug("重建复制关系成功")
 						utils.LogDebug("更新切换标识")
 						UpdateSwitchFlag(bs_id)
 						utils.LogDebug("更新切换标识结束")
-						Update_OP_Result(op_id, 1)
+
+						//切换IP
+						if is_shift_ip == 1{
+							utils.LogDebug("开始切换IP")
+							result :=SwitchIPs(op_id, bs_id, asset_type, pri_id, sta_id)
+							if result < 0 {
+								utils.LogDebug("切换IP失败")
+								Update_OP_Result(op_id, -1)
+							}else{
+								utils.LogDebug("切换IP成功")
+								Update_OP_Result(op_id, 1)
+							}
+						}else{
+							Update_OP_Result(op_id, 1)
+						}
+
 					} else {
 						utils.LogDebug("重建复制关系失败，更新切换结果")
 						Update_OP_Result(op_id, -1)
@@ -233,7 +263,6 @@ func (this *AjaxDrSwitchoverController) Post() {
 					utils.LogDebug("从库切换成主库失败，更新切换结果")
 					Update_OP_Result(op_id, -1)
 				}
-
 				OperationUnlock(bs_id, op_type)
 			} else if asset_type == 3 { //sqlserver
 				utils.LogDebug("获取镜像库名称...")
@@ -301,6 +330,7 @@ func (this *AjaxDrFailoverController) Post() {
 		return
 	}
 	asset_type := GetAssetType(bs_id)
+	is_shift_ip := GetIsShiftIP(bs_id)
 
 	sta_id, err := GetStandbyDBId(bs_id)
 	if err != nil {
@@ -348,7 +378,20 @@ func (this *AjaxDrFailoverController) Post() {
 					utils.LogDebug("更新切换标识")
 					UpdateSwitchFlag(bs_id)
 					utils.LogDebug("更新切换结束")
-					Update_OP_Result(op_id, 1)
+					//绑定IP
+					if is_shift_ip == 1{
+						utils.LogDebug("开始切换IP")
+						result :=FailoverIPs(op_id, bs_id, asset_type, sta_id)
+						if result < 0 {
+							utils.LogDebug("切换IP失败")
+							Update_OP_Result(op_id, -1)
+						}else{
+							utils.LogDebug("切换IP成功")
+							Update_OP_Result(op_id, 1)
+						}
+					}else{
+						Update_OP_Result(op_id, 1)
+					}
 				} else {
 					utils.LogDebug("备库切换主库失败，更新切换结果")
 					Update_OP_Result(op_id, -1)
@@ -363,7 +406,21 @@ func (this *AjaxDrFailoverController) Post() {
 					utils.LogDebug("更新切换标识")
 					UpdateSwitchFlag(bs_id)
 					utils.LogDebug("更新切换标识结束")
-					Update_OP_Result(op_id, 1)
+
+					//绑定IP
+					if is_shift_ip == 1{
+						utils.LogDebug("开始切换IP")
+						result :=FailoverIPs(op_id, bs_id, asset_type, sta_id)
+						if result < 0 {
+							utils.LogDebug("切换IP失败")
+							Update_OP_Result(op_id, -1)
+						}else{
+							utils.LogDebug("切换IP成功")
+							Update_OP_Result(op_id, 1)
+						}
+					}else{
+						Update_OP_Result(op_id, 1)
+					}
 				} else {
 					utils.LogDebug("从库切换成主库失败，更新切换结果")
 					Update_OP_Result(op_id, -1)
@@ -446,3 +503,5 @@ func (this *AjaxDrProcessController) Post() {
 	this.ServeJSON()
 
 }
+
+

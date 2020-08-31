@@ -137,8 +137,14 @@
                     <select id="os_protocol" name="os_protocol" class="form-control">
                       <option value="">请选择主机协议</option>
                       <option value="ssh" {{if eq "ssh" .dbconf.OsProtocol}}selected{{end}}>ssh</option>
-                      <option value="telnet" {{if eq "telnet" .dbconf.OsProtocol}}selected{{end}}>telnet</option>
+                      <!--<option value="telnet" {{if eq "telnet" .dbconf.OsProtocol}}selected{{end}}>telnet</option>-->
                     </select>
+                  </div>
+                </div>
+                <div id="div_os_port" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>主机端口</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="os_port" name="os_port"  value="{{.dbconf.OsPort}}" class="form-control" placeholder="请填写主机端口">
                   </div>
                 </div>
                 <div id="div_os_username" class="form-group">
@@ -185,18 +191,36 @@
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
+            
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
             $("#div_protocol").hide();
             $("#protocol").attr("value","");
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
+            
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
             $("#div_protocol").hide();   
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
+            
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
         }else if($("#asset_type").val() == "99"){
             $("#div_protocol").show();
             $("#div_inst_name").hide();
@@ -207,6 +231,8 @@
             $("#os_type").attr("value","");
             $("#div_os_protocol").hide();
             $("#os_os_protocol").attr("value","");
+            $("#div_os_port").hide();
+            $("#os_port").attr("value","");
             $("#div_os_username").hide();
             $("#os_username").attr("value","");
             $("#div_os_password").hide();
@@ -234,6 +260,12 @@
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
             
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
+
             $("#port").attr("value","1521");
         }else if($("#asset_type").val() == "2"){
             $("#div_db_name").show();
@@ -242,6 +274,12 @@
             $("#div_inst_name").hide();
             $("#inst_name").attr("value","");
 
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
+
             $("#port").attr("value","3306");
         }else if($("#asset_type").val() == "3"){
             $("#div_inst_name").show();
@@ -249,6 +287,12 @@
             $("#protocol").attr("value","");
             $("#div_db_name").hide();
             $("#db_name").attr("value","");
+            
+            $("#div_os_type").show();
+            $("#div_os_protocol").show();
+            $("#div_os_port").show();
+            $("#div_os_username").show();
+            $("#div_os_password").show();
 
             $("#port").attr("value","1433");
             $("#inst_name").attr("value","mssqlserver");
@@ -262,6 +306,8 @@
             $("#os_type").attr("value","");
             $("#div_os_protocol").hide();
             $("#os_os_protocol").attr("value","");
+            $("#div_os_port").hide();
+            $("#os_port").attr("value","");
             $("#div_os_username").hide();
             $("#os_username").attr("value","");
             $("#div_os_password").hide();
