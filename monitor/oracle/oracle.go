@@ -46,6 +46,8 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
+		
+		AlertConnect(mysql, db_id)
 	} else {
 		log.Println("ping succeeded")
 		//if !ok {
@@ -53,12 +55,15 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		//}
 		//get oracle basic infomation
 		GatherBasicInfo(db, mysql , db_id, host, port, alias)
-		
+		AlertBasicInfo(mysql, db_id)
+
 		//get tablespace
 		GatherTablespaces(db, mysql , db_id, host, port, alias)
-	
+		AlertTablespaces(mysql, db_id)
+
 		//get asm diskgroup
 		GatherDiskgroups(db, mysql , db_id, host, port, alias)
+		AlertDiskgroups(mysql, db_id)
 	}
 
 	(*wg).Done()

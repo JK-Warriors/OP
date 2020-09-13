@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"opms/models"
+	"opms/models/cfg_trigger"
 	"opms/utils"
 	"strings"
 	"time"
@@ -71,7 +72,10 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.Status = 1
 	dbconf.IsDelete = 0
 	dbconf.Created = time.Now().Unix()
-	_, err := o.Insert(dbconf)
+	id, err := o.Insert(dbconf)
+
+	cfg_trigger.AddAssetTriggers(id, upd.Dbtype)
+
 	return err
 }
 
@@ -248,6 +252,8 @@ func CountDBconfig(condArr map[string]string) int64 {
 func DeleteDBconfig(ids string) error {
 	o := orm.NewOrm()
 	_, err := o.Raw("DELETE FROM " + models.TableName("asset_config") + " WHERE id IN(" + ids + ")").Exec()
+	_, err = o.Raw("DELETE FROM pms_triggers WHERE asset_id IN(" + ids + ")").Exec()
+	
 	return err
 }
 

@@ -87,7 +87,7 @@ INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-globa
 
 -- INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
 
-INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-alert-manage', '/config/config_alert/manage', '', '1', '1', '5');
+INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-alarm-manage', '/config/cfg_trigger/manage', '', '1', '1', '5');
 
 INSERT INTO `pms_permissions` VALUES ('3100', '3', '实例状态', 'oracle-status-manage', '/oracle/status/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('3110', '3', '表空间', 'oracle-tbs-manage', '/oracle/tbs/manage', '', '1', '1', '2');
@@ -113,6 +113,8 @@ INSERT INTO `pms_permissions` VALUES ('9103', '9', '容灾同步', 'oper-sync-ma
 INSERT INTO `pms_permissions` VALUES ('9104', '9', '容灾快照', 'oper-snapshot-manage', '/operation/dr_snapshot/manage', '', '1', '1', '4');
 INSERT INTO `pms_permissions` VALUES ('9105', '9', '误删除恢复', 'oper-recover-manage', '/operation/dr_recover/manage', '', '1', '1', '5');
 
+
+INSERT INTO `pms_permissions` VALUES ('9810', '98', '告警管理', 'alarm-manage', '/alarm/alarm/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('9910', '99', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9911', '99', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
@@ -192,6 +194,7 @@ INSERT INTO `pms_role_permission` VALUES ('9102', '1', '9102');
 INSERT INTO `pms_role_permission` VALUES ('9103', '1', '9103');
 INSERT INTO `pms_role_permission` VALUES ('9104', '1', '9104');
 INSERT INTO `pms_role_permission` VALUES ('9105', '1', '9105');
+INSERT INTO `pms_role_permission` VALUES ('9810', '1', '9810');
 INSERT INTO `pms_role_permission` VALUES ('9910', '1', '9910');
 INSERT INTO `pms_role_permission` VALUES ('9911', '1', '9911');
 INSERT INTO `pms_role_permission` VALUES ('9912', '1', '9912');
@@ -427,14 +430,14 @@ alter table pms_dr_config modify column on_stopflashback tinyint(1) DEFAULT 0 co
 -- -----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `pms_template`;
 CREATE TABLE `pms_template` (
-  `template_id` int(10) NOT NULL AUTO_INCREMENT,
+  `templateid` int(10) NOT NULL AUTO_INCREMENT,
   `asset_type`     varchar(50) DEFAULT NULL,
   `scraper_name` varchar(255)  DEFAULT NULL,
   `subsystem` varchar(255)  DEFAULT NULL,
   `metrix_name` varchar(255)  DEFAULT NULL,
   `label` varchar(255)  DEFAULT NULL,
   `value_type` tinyint(2) DEFAULT 0 COMMENT '1: Counter；2: Gauge；3：Histogram；4：Summary；5：Untyped',
-  PRIMARY KEY (`template_id`)
+  PRIMARY KEY (`templateid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='模板表';
 
 
@@ -443,9 +446,9 @@ CREATE TABLE `pms_template` (
 -- -----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `pms_items`;
 CREATE TABLE `pms_items` (
-	`item_id`                bigint unsigned                           NOT NULL         AUTO_INCREMENT,
+	`itemid`                bigint unsigned                           NOT NULL         AUTO_INCREMENT,
 	`type`                   integer         DEFAULT '0'               NOT NULL,
-	`template_id`            bigint unsigned                           NULL,
+	`templateid`            bigint unsigned                           NULL,
 	`obj_type`               varchar(50)                               NOT NULL,
 	`obj_id`                 bigint unsigned                           NOT NULL,
 	`name`                   varchar(255)    DEFAULT ''                NOT NULL,
@@ -1407,6 +1410,96 @@ CREATE TABLE `pms_os_net_his` (
   KEY `idx_os_id` (`os_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+
+
+DROP TABLE IF EXISTS `pms_trigger_template`;
+CREATE TABLE `pms_trigger_template` (
+  `id`                  int(10) NOT NULL,
+  `asset_type`          int(10)         DEFAULT '0' NOT NULL,
+  `name`                varchar(100)    DEFAULT ''  NOT NULL,
+  `trigger_type`        varchar(50)     DEFAULT ''  NOT NULL,
+	`severity`            varchar(50)     DEFAULT ''                NOT NULL,
+	`expression`          varchar(1000)   DEFAULT ''                NOT NULL,
+	`description`         varchar(2000)   DEFAULT ''                NOT NULL,
+	`status`              integer         DEFAULT '1'               NOT NULL,
+	`recovery_mode`          integer         DEFAULT '0'               NOT NULL,
+	`recovery_expression`    varchar(1000)   DEFAULT ''                NOT NULL,
+	`recovery_description`   varchar(2000)   DEFAULT ''                NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `asset_type` (`asset_type`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of pms_trigger_template
+-- ----------------------------
+INSERT INTO `pms_trigger_template` VALUES (1000, 1, 'Oracle: Service is down', 'connect', 'Critical', '{ItemValue}== -1', 'Oracle: Service is down', 1, 1, '{ItemValue}==1', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (1001, 1, 'Oracle: Instance has been restarted', 'restart', 'Critical', '{ItemValue}==0', 'Oracle: Instance has been restarted', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (1002, 1, 'Oracle: MRP is not running', 'mrp_status', 'Warning', '{ItemValue}==0', 'Oracle: MRP is not running', 1, 1, '{ItemValue}==1', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (1003, 1, 'Oracle: Replication lag is too high', 'repli_delay', 'Critical', '{ItemValue}>3600', 'Oracle: Replication lag is too high', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (1004, 1, 'Oracle: Replication lag is high', 'repli_delay', 'Warning', '{ItemValue}>600', 'Oracle: Replication lag is high', 1, 1, '{ItemValue} < 60', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (1005, 1, 'Oracle: Tablespace usage rate is too high', 'tablespace', 'Critical', '{ItemValue}>95', 'Oracle: Tablespace usage rate is too high', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (1006, 1, 'Oracle: Tablespace usage rate is high', 'tablespace', 'Warning', '{ItemValue}>85', 'Oracle: Tablespace usage rate is high', 1, 1, '{ItemValue} < 75', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (1007, 1, 'Oracle: Flashback space usage rate is too high', 'flashback_space', 'Critical', '{ItemValue}>95', 'Oracle: Flashback space usage rate is too high', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (1008, 1, 'Oracle: Flashback space usage rate is high', 'flashback_space', 'Warning', '{ItemValue}>85', 'Oracle: Flashback space usage rate is high', 1, 1, '{ItemValue} < 75', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (1009, 1, 'Oracle: ASM diskgroup usage rate is too high', 'asm_diskgroup', 'Critical', '{ItemValue}>95', 'Oracle: ASM diskgroup usage rate is too high', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (1010, 1, 'Oracle: ASM diskgroup usage rate is high', 'asm_diskgroup', 'Warning', '{ItemValue}>85', 'Oracle: ASM diskgroup usage rate is high', 1, 1, '{ItemValue} < 75', 'recovery');
+
+INSERT INTO `pms_trigger_template` VALUES (2000, 2, 'MySQL: Service is down', 'connect', 'Critical', '{ItemValue}== -1', 'MySQL: Service is down', 1, 1, '{ItemValue}==1', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (2002, 2, 'MySQL: Replication is not running', 'repl_status', 'Warning', '{ItemValue}==0', 'MySQL: Replication is not running', 1, 1, '{ItemValue}==1', 'recovery');
+INSERT INTO `pms_trigger_template` VALUES (2003, 2, 'MySQL: Replication lag is too high', 'repl_delay', 'Critical', '{ItemValue}>3600', 'MySQL: Replication lag is too high', 1, 0, '', '');
+INSERT INTO `pms_trigger_template` VALUES (2004, 2, 'MySQL: Replication lag is high', 'repli_repl_delaydelay', 'Warning', '{ItemValue}>600', 'MySQL: Replication lag is high', 1, 1, '{ItemValue} < 60', 'recovery');
+
+INSERT INTO `pms_trigger_template` VALUES (3000, 3, 'MSSQL: Service is down', 'connect', 'Critical', '{ItemValue}== -1', 'MSSQL: Service is down', 1, 1, '{ItemValue}==1', 'recovery');
+
+INSERT INTO `pms_trigger_template` VALUES (4000, 99, 'OS: Service is down', 'connect', 'Critical', '{ItemValue}== -1', 'OS: Service is down', 1, 1, '{ItemValue}==1', 'recovery');
+
+
+
+
+DROP TABLE IF EXISTS `pms_triggers`;
+CREATE TABLE `pms_triggers` (
+  `id`                  int(10)         NOT NULL AUTO_INCREMENT,
+	`asset_id`            int(10)         NOT NULL,
+  `asset_type`          int(10)         NOT NULL,
+  `name`                varchar(100)    DEFAULT ''  NOT NULL,
+	`templateid`          int(10)         NOT NULL,
+  `trigger_type`        varchar(50)     DEFAULT ''  NOT NULL,
+	`severity`            varchar(50)     DEFAULT ''                NOT NULL,
+	`expression`          varchar(1000)   DEFAULT ''                NOT NULL,
+	`description`         varchar(2000)    DEFAULT ''                NOT NULL,
+	`status`              integer         DEFAULT '1'               NOT NULL,
+	`recovery_mode`          integer         DEFAULT '0'            NOT NULL,
+	`recovery_expression`    varchar(1000)   DEFAULT ''             NOT NULL,
+	`recovery_description`   varchar(2000)   DEFAULT ''             NOT NULL,
+  `created`                int(10)         DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `asset_type` (`asset_type`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `pms_alerts`;
+CREATE TABLE `pms_alerts` (
+  `id`                     int(10)         AUTO_INCREMENT            NOT NULL ,
+	`asset_id`               int(10)         DEFAULT '0'               NOT NULL,
+	`name`                   varchar(200)    DEFAULT ''                NOT NULL,
+	`severity`               varchar(50)     DEFAULT '0'               NOT NULL,
+	`templateid`             int(10)         DEFAULT '0'               NOT NULL,
+	`mediatypeid`            bigint unsigned                           NULL,
+	`sendto`                 varchar(1024)   DEFAULT ''                NOT NULL,
+	`subject`                varchar(255)    DEFAULT ''                NOT NULL,
+	`message`                text                                      NOT NULL,
+	`status`                 integer         DEFAULT '0'               NOT NULL,
+	`retries`                integer         DEFAULT '0'               NOT NULL,
+	`error`                  varchar(2048)   DEFAULT ''                NOT NULL,
+	`alerttype`              integer         DEFAULT '0'               NOT NULL,
+  `created`                int(10)         DEFAULT NULL COMMENT '操作时间',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE INDEX `pms_alerts_1` ON `pms_alerts` (`id`);
+CREATE INDEX `pms_alerts_2` ON `pms_alerts` (`asset_id`);
+CREATE INDEX `pms_alerts_4` ON `pms_alerts` (`status`);
+CREATE INDEX `pms_alerts_5` ON `pms_alerts` (`created`);
 
 -- ----------------------------
 -- Table structure for pms_global_options

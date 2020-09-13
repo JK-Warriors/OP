@@ -43,14 +43,17 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
+
+		AlertConnect(mysql, os_id)
     }else {
 		log.Println("connect succeeded")
 		
 		//get os basic infomation
 		GatherLinuxDiskInfo(mysql , os_id, host, alias)
-		//GatherLinuxDiskIOInfo(mysql , os_id, host, alias)
-		//GatherLinuxNetInfo(snmp, mysql , os_id, host, alias)
-		//GatherLinuxBasicInfo(snmp, mysql , os_id, host, alias)
+		GatherLinuxDiskIOInfo(mysql , os_id, host, alias)
+		GatherLinuxNetInfo(snmp, mysql , os_id, host, alias)
+		GatherLinuxBasicInfo(snmp, mysql , os_id, host, alias)
+		AlertConnect(mysql, os_id)
 		
 	}
 

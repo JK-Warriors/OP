@@ -22,8 +22,8 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/asset/status/manage">资产状态</a></li>
-        <li class="active">资产列表</li>
+        <li><a href="/config/cfg_trigger/manage">配置中心</a></li>
+        <li class="active">告警列表</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -36,10 +36,10 @@
               <div class="search-form">
                 <div class="form-inline">
                   <div class="form-group">
-                    <form action="/asset/status/manage" method="get">
+                    <form action="/config/cfg_trigger/manage" method="get">
                     <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/asset/status/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/config/cfg_trigger/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -47,7 +47,7 @@
             </div>
 
             <section class="panel">
-              <header class="panel-heading"> 资产列表 / 总数：{{.countAssets}}
+              <header class="panel-heading"> 告警列表 / 总数：{{.countTriggers}}
                 <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
                 <!--a href="javascript:;" class="fa fa-times"></a-->
                 </span> 
@@ -58,25 +58,38 @@
                     <table class="table table-bordered table-striped table-condensed">
                       <thead>
                         <tr>
-                          <th>资产名称</th>
+                          <th>资产ID</th>
+                          <th>资产类型</th>
+                          <th>告警类型</th>
+                          <th>级别</th>
+                          <th>表达式</th>
+                          <th>描述</th>
+                          <th>状态</th>
                           <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {{range $k,$v := .asset}}
+                      {{range $k,$v := .triggers}}
                         <tr>
-                          <td>{{$v.Db_Name}}</td>
-                          <td>
-                            <a href="javascript:;" class="table_btn table_btn_icon" onclick="edit_bs(this)" data-id="{{$v.Id}}" data-name="{{$v.BsName}}">
-                              <i class="iconfont icon-btn_edit"></i>编辑
-                            </a>
-                            <a href="/config/dr_config/edit/{{$v.Id}}" class="table_btn">
-                              <i class="iconfont icon-xianghujiaohuan"></i>容灾配置
-                            </a>
-                            <a href="javascript:;" class="table_btn table_btn_icon" onclick="delete_bs(this)" data-id="{{$v.Id}}">
-                              <i class="iconfont icon-iconfontshanchu"></i>
-                            </a>
-                          </td>
+                          <td>{{$v.Asset_Id}}</td>
+                          <td>{{getDBtype $v.Asset_Type}}</td>
+                          <td>{{$v.Trigger_Type}}</td>
+                          <td>{{$v.Severity}}</td>
+                          <td>{{$v.Expression}}</td>
+                          <td>{{$v.Description}}</td>
+                          <td>{{if eq 1 $v.Status}}激活{{else}}禁用{{end}}</td>
+                          <td><div class="btn-group">
+                              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
+                              <ul class="dropdown-menu">
+                                <li><a href="/config/cfg_trigger/edit/{{$v.Id}}">编辑</a></li>
+                                <li role="separator" class="divider"></li>
+                                {{if eq 1 $v.Status}}
+                                <li><a href="javascript:;" class="js-dbconfig-single" data-id="{{$v.Id}}" data-status="2">禁用</a></li>
+                                {{else}}
+                                <li><a href="javascript:;" class="js-dbconfig-single" data-id="{{$v.Id}}" data-status="1">激活</a></li>
+                                {{end}}
+                              </ul>
+                            </div></td>
                         </tr>
                       {{end}}
                       </tbody>
@@ -96,73 +109,12 @@
     <!--footer section end-->
   </div>
   <!-- main content end-->
-      
-  <form id="business-form">
-    <div id="business_box" class="layui_drm">
-      <div class="layercontent">
-        <!-- layer content start -->
-        <div class="form-horizontal adminex-form">
-          <div class="form-group">
-            <label class="col-xs-2  control-label">业务系统名称</label>
-            <div class="col-xs-10">
-              <input type="hidden" id="bs_id" name="bs_id" value="" class="form-control"/>
-              <input type="text" id="bs_name" name="bs_name" value="" class="form-control" placeholder="请填写业务系统名称"/>
-            </div>
-          </div>
-        </div>
-        <!-- layer content end -->
-      </div>
-      <!-- layer foot start -->
-      <div class="layerfoot">
-        <button type="submit" class="btn btn-primary">提 交</button>
-      </div>
-      <!-- layer content end -->
-    </div>
-  </form>
+
 </section>
 
 {{template "inc/foot.tpl" .}}    
 <script>
     //layer
-    $(function() {
-      $('#add_business').click(function() {
-        $("#bs_id").attr("value",'');
-        $("#bs_name").attr("value",'');
-
-        layer.open({
-          type: 1,
-          closeBtn: true,
-          shift: 2,
-          title: '新增业务系统',
-          area: ['600px', '30%'],
-          offset: ['180px'],
-          shadeClose: true,
-          content: $('#business_box')
-        })
-      })
-    })
-
-    
-    function edit_bs(e){
-      var id = e.getAttribute("data-id");
-      var bs_name = e.getAttribute("data-name");
-
-      $("#bs_id").attr("value",id);
-      $("#bs_name").attr("value",bs_name);
-
-      layer.open({
-        type: 1,
-        closeBtn: true,
-        shift: 2,
-        title: '编辑业务系统',
-        area: ['600px', '30%'],
-        offset: ['180px'],
-        shadeClose: true,
-        content: $('#business_box')
-      })
-    }
-
-
     function delete_bs(e){
       var id = e.getAttribute("data-id");
       

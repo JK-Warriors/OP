@@ -7,11 +7,12 @@ import (
 	"opms/controllers/dr_config"
 	"opms/controllers/dr_oper"
 	"opms/controllers/asset"
+	"opms/controllers/alarm"
 	"opms/controllers/oracle"
 	"opms/controllers/mssql"
 	"opms/controllers/mysql"
 	"opms/controllers/os"
-	"opms/controllers/config_alert"
+	"opms/controllers/cfg_trigger"
 	"opms/controllers/config_global"
 	"opms/controllers/logs"
 	"opms/controllers/messages"
@@ -41,6 +42,9 @@ func init() {
 	beego.Router("/system/user/ajax/reset_passwd", &users.AjaxResetPasswordController{})
 
 	beego.Router("/system/my/manage", &users.ShowUserController{})
+
+	//告警
+	beego.Router("/alarm/alarm/manage", &alarm.ManageAlarmController{})
 
 	//消息
 	beego.Router("/system/message/manage", &messages.ManageMessageController{})
@@ -95,7 +99,8 @@ func init() {
 	//全局配置
 	beego.Router("/config/config_global/manage", &config_global.ManageGlobalController{})
 	beego.Router("/config/config_global/ajax/save", &config_global.AjaxSaveGlobalController{})
-	beego.Router("/config/config_alert/manage", &config_alert.ManageAlertController{})
+	beego.Router("/config/cfg_trigger/manage", &cfg_trigger.ManageTriggerController{})
+	beego.Router("/config/cfg_trigger/edit/:id", &cfg_trigger.EditTriggerController{})
 
 	//资产状态
 	beego.Router("/asset/status/manage", &asset.ManageAssetController{})

@@ -45,11 +45,14 @@ func GenerateMySQLStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
+
+		AlertConnect(mysql, db_id)
 	} else {
 		log.Println("ping succeeded")
 		
 		//get sqlserver basic infomation
 		GatherBasicInfo(db, mysql , db_id, host, port, alias)
+		AlertBasicInfo(mysql, db_id)
 		//GetGlobalStatus(db)
 		
 	}

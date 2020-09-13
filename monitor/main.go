@@ -83,8 +83,8 @@ func DoTasks(x int) {
 		wg.Add(1)
 		GatherAssetStats(&wg)
 		
-		//wg.Add(1)
-		//GatherDisasterRecoveryStats(&wg)
+		wg.Add(1)
+		GatherDisasterRecoveryStats(&wg)
 
 		log.Println("循环结束！")
 
