@@ -12,6 +12,9 @@ import (
 type Asset struct {
 	Id       			int `orm:"pk;column(id);"`
 	Asset_Type   		int `orm:"column(asset_type);"`
+	Host   				string `orm:"column(host);"`
+	Port   				string `orm:"column(port);"`
+	Alias   			string `orm:"column(alias);"`
 	Connect   			int `orm:"column(connect);"`
 	Db_Name   			string `orm:"column(db_name);"`
 	Inst_Name   		string `orm:"column(inst_name);"`
@@ -84,3 +87,13 @@ func CountAsset(condArr map[string]string) int64 {
 	return num
 }
 
+
+func ListAllDBStatus() (num int64, err error, asset []Asset) {
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select * from pms_asset_status where asset_type < 99 order by connect`
+	nums, errs := o.Raw(sql).QueryRows(&asset)
+
+	return nums, errs, asset
+}

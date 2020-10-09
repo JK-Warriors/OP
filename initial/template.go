@@ -19,6 +19,8 @@ func InitTemplate() {
 	beego.AddFuncMap("getPermissionname", roles.GetPermissiontName)
 
 	beego.AddFuncMap("getDBtype", dbconfig.GetDBtype)
+	beego.AddFuncMap("getDBDesc", dbconfig.GetDBDesc)
+	beego.AddFuncMap("getDBAlias", dbconfig.GetDBAlias)
 	beego.AddFuncMap("getBsName", dr_business.GetBusinessName)
 	/*
 		beego.AddFuncMap("getNeedsname", projects.GetProjectNeedsName)

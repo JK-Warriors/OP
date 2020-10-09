@@ -37,7 +37,7 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 
 		sql := `insert into pms_asset_status(asset_id, asset_type, host, port, alias, connect, created) 
 				values(?,?,?,?,?,?,?)`
-		_, err = mysql.Exec(sql, db_id, 1, host, port, alias, -1, time.Now().Unix())
+		_, err = mysql.Exec(sql, db_id, 3, host, port, alias, -1, time.Now().Unix())
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}

@@ -307,7 +307,7 @@ func (this *AjaxDeleteDrConfigController) Post() {
 		return
 	}
 
-	err := DeleteDBconfig(ids)
+	err := DeleteDrConfig(ids)
 
 	if err == nil {
 		this.Data["json"] = map[string]interface{}{"code": 1, "message": "删除成功"}

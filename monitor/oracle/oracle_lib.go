@@ -57,6 +57,29 @@ func GetFlashbackUsage(db *sql.DB) string{
 	return flashback_usage
 }
 
+func GetCurrentInstanceNumber(db *sql.DB) int{
+	var inst_num int
+	sql := `select instance_number from v$instance`
+	err := db.QueryRow(sql).Scan(&inst_num)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		return 0
+	}
+	return inst_num
+}
+
+func GetLastSnapId(db *sql.DB) int{
+	var snap_id int
+	sql := `select max(snap_id) from wrm$_snapshot`
+	err := db.QueryRow(sql).Scan(&snap_id)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		return 0
+	}
+	return snap_id
+}
+
+
 func Get_Instance(db *sql.DB, matrix_name string) string{
 	var matrix_value string
 	sql := `select ` + matrix_name + ` from v$instance`

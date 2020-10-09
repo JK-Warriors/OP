@@ -37,7 +37,7 @@
                 <div class="form-inline">
                   <div class="form-group">
                     <form action="/config/cfg_trigger/manage" method="get">
-                    <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
+                    <input type="text" name="search_name" placeholder="请输入告警类型" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
                     <a href="/config/cfg_trigger/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
@@ -58,7 +58,8 @@
                     <table class="table table-bordered table-striped table-condensed">
                       <thead>
                         <tr>
-                          <th>资产ID</th>
+                          <th>资产主机</th>
+                          <th>资产别名</th>
                           <th>资产类型</th>
                           <th>告警类型</th>
                           <th>级别</th>
@@ -71,7 +72,8 @@
                       <tbody>
                       {{range $k,$v := .triggers}}
                         <tr>
-                          <td>{{$v.Asset_Id}}</td>
+                          <td>{{$v.Asset_Host}}:{{$v.Asset_Port}}</td>
+                          <td>{{$v.Asset_Alias}}</td>
                           <td>{{getDBtype $v.Asset_Type}}</td>
                           <td>{{$v.Trigger_Type}}</td>
                           <td>{{$v.Severity}}</td>

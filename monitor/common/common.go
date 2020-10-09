@@ -54,14 +54,24 @@ func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string
 		log.Printf("%s: %s", sql, err.Error())
 	}
 
+	send_mail, send_wechat, send_sms := 0, 0, 0
+	_, err = mysql.SQL(`select alert_mail from pms_asset_config where id = ?`, db_id).Get(&send_mail)
+	_, err = mysql.SQL(`select alert_wechat from pms_asset_config where id = ?`, db_id).Get(&send_wechat)
+	_, err = mysql.SQL(`select alert_sms from pms_asset_config where id = ?`, db_id).Get(&send_sms)
+
+	var send_mail_list, send_sms_list string
+	_, err = mysql.SQL(`select value from pms_global_options where id = 'send_mail_to_list'`).Get(&send_mail_list)
+	_, err = mysql.SQL(`select value from pms_global_options where id = 'send_sms_to_list'`).Get(&send_sms_list)
+
+
 	if count == 0 {
 		description := strings.Replace(tri.Description, "{ItemName}", item_name, -1)
 		description = strings.Replace(description, "{ItemValue}", item_value, -1)
 
-		sql := `insert into pms_alerts(asset_id, name, severity, templateid, message, created)
-				values(?,?,?,?,?,?)`
+		sql := `insert into pms_alerts(asset_id, name, severity, templateid, subject, message, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, created)
+				values(?,?,?,?,?,?,?,?,?,?,?,?)`
 	
-		_, err := mysql.Exec(sql, db_id, tri.Name, tri.Severity, tri.TemplateId, description, time.Now().Unix())
+		_, err := mysql.Exec(sql, db_id, tri.Name, tri.Severity, tri.TemplateId, tri.Name, description, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, time.Now().Unix())
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}

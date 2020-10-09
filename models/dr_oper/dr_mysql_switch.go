@@ -29,12 +29,39 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 	utils.LogDebugf("Lock tables for database first")
 	_, err = mdb.Exec("flush tables with read lock")
 	if err != nil {
-		Update_OP_Reason(op_id, "锁表失败")
+		Update_OP_Reason(op_id, "主库锁表失败")
 		utils.LogDebugf("Lock tables error: %s", err.Error())
 		return -1
 	}
-
 	
+	//set global read_only on
+	utils.LogDebugf("set global read_only=on")
+	_, err = mdb.Exec("set global read_only=on")
+	if err != nil {
+		Update_OP_Reason(op_id, "主库设置只读失败")
+		utils.LogDebugf("Set global read_only error: %s", err.Error())
+		return -1
+	}
+	
+	//set global super_read_only=on
+	utils.LogDebugf("set global super_read_only=on")
+	_, err = mdb.Exec("set global super_read_only=on")
+	if err != nil {
+		Update_OP_Reason(op_id, "主库设置只读失败")
+		utils.LogDebugf("set global super_read_only error: %s", err.Error())
+		return -1
+	}
+
+	//unlock tables
+	utils.LogDebugf("unlock tables")
+	_, err = mdb.Exec("unlock tables")
+	if err != nil {
+		Update_OP_Reason(op_id, "主库解锁失败")
+		utils.LogDebugf("unlock tables error: %s", err.Error())
+		return -1
+	}
+	
+	//连接从库
 	sdb, err := xorm.NewEngine("mysql", dsn_s)
 	if err != nil {
 		Update_OP_Reason(op_id, "连接数据库失败")
@@ -83,6 +110,49 @@ func SlaveToMaster(op_id int64, bs_id int, dsn_p string, dsn_s string, slave_id 
 				result = -1
 			}
 	
+			_, err = sdb.Exec("reset master")
+			if err != nil {
+				Update_OP_Reason(op_id, "重置master失败")
+				utils.LogDebugf("Reset master error: %s", err.Error())
+				result = -1
+			}
+
+			//lock tables
+			utils.LogDebugf("Lock tables for database first")
+			_, err = sdb.Exec("flush tables with read lock")
+			if err != nil {
+				Update_OP_Reason(op_id, "从库锁表失败")
+				utils.LogDebugf("Lock tables error: %s", err.Error())
+				return -1
+			}
+			
+			//set global read_only off
+			utils.LogDebugf("set global read_only=off")
+			_, err = sdb.Exec("set global read_only=off")
+			if err != nil {
+				Update_OP_Reason(op_id, "从库取消只读失败")
+				utils.LogDebugf("Set global read_only error: %s", err.Error())
+				return -1
+			}
+			
+			//set global super_read_only=off
+			utils.LogDebugf("set global super_read_only=off")
+			_, err = sdb.Exec("set global super_read_only=off")
+			if err != nil {
+				Update_OP_Reason(op_id, "从库取消只读失败")
+				utils.LogDebugf("set global super_read_only error: %s", err.Error())
+				return -1
+			}
+
+			//unlock tables
+			utils.LogDebugf("unlock tables")
+			_, err = sdb.Exec("unlock tables")
+			if err != nil {
+				Update_OP_Reason(op_id, "从库解锁失败")
+				utils.LogDebugf("unlock tables error: %s", err.Error())
+				return -1
+			}
+
 			utils.LogDebug("Switchover slave to master successfully.")
 			Log_OP_Process(op_id, bs_id, 2, "SWITCHOVER", "从库已经成功切换成主库")
 			result=0
@@ -276,6 +346,42 @@ func FailoverToMaster(op_id int64, bs_id int, dsn string, slave_id int) int {
 			result = -1
 		}
 
+		//lock tables
+		utils.LogDebugf("Lock tables for database first")
+		_, err = sdb.Exec("flush tables with read lock")
+		if err != nil {
+			Update_OP_Reason(op_id, "从库锁表失败")
+			utils.LogDebugf("Lock tables error: %s", err.Error())
+			return -1
+		}
+		
+		//set global read_only off
+		utils.LogDebugf("set global read_only=off")
+		_, err = sdb.Exec("set global read_only=off")
+		if err != nil {
+			Update_OP_Reason(op_id, "从库取消只读失败")
+			utils.LogDebugf("Set global read_only error: %s", err.Error())
+			return -1
+		}
+		
+		//set global super_read_only=off
+		utils.LogDebugf("set global super_read_only=off")
+		_, err = sdb.Exec("set global super_read_only=off")
+		if err != nil {
+			Update_OP_Reason(op_id, "从库取消只读失败")
+			utils.LogDebugf("set global super_read_only error: %s", err.Error())
+			return -1
+		}
+
+		//unlock tables
+		utils.LogDebugf("unlock tables")
+		_, err = sdb.Exec("unlock tables")
+		if err != nil {
+			Update_OP_Reason(op_id, "从库解锁失败")
+			utils.LogDebugf("unlock tables error: %s", err.Error())
+			return -1
+		}
+		
 		utils.LogDebug("Failover slave to master successfully.")
 		Log_OP_Process(op_id, bs_id, 2, "FAILOVER", "从库已经成功切换成主库")
 		result=0

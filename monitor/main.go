@@ -7,6 +7,7 @@ import (
 	mssql "opms/monitor/mssql"
 	mysql "opms/monitor/mysql"
 	mos "opms/monitor/os"
+	alert "opms/monitor/alert"
 
 	"os"
 	"runtime"
@@ -86,7 +87,9 @@ func DoTasks(x int) {
 		wg.Add(1)
 		GatherDisasterRecoveryStats(&wg)
 
-		log.Println("循环结束！")
+		wg.Add(1)
+		AlertMedia(&wg)
+		//log.Println("循环结束！")
 
 		time.Sleep(1 * time.Minute)
 	}
@@ -99,14 +102,14 @@ func DoTasks(x int) {
 type Asset struct {
     Id 				int				`xorm:"int 'id'"`
     Asset_Type 		int		    	`xorm:"int 'asset_type'"`
-    Host 			string		    `xorm:"int 'host'"`
-    Protocol 		string		    `xorm:"int 'protocol'"`
+    Host 			string		    `xorm:"varchar 'host'"`
+    Protocol 		string		    `xorm:"varchar 'protocol'"`
     Port 			int		    	`xorm:"int 'port'"`
-    Alias 			string		    `xorm:"int 'alias'"`
-    Inst_Name 		string		    `xorm:"int 'instance_name'"`
-    Db_Name 		string		    `xorm:"int 'db_name'"`
-    Username 		string			`xorm:"int 'username'"`
-    Passwd 			string			`xorm:"int 'password'"`
+    Alias 			string		    `xorm:"varchar 'alias'"`
+    Inst_Name 		string		    `xorm:"varchar 'instance_name'"`
+    Db_Name 		string		    `xorm:"varchar 'db_name'"`
+    Username 		string			`xorm:"varchar 'username'"`
+    Passwd 			string			`xorm:"varchar 'password'"`
 }
 
 func GatherAssetStats(wg *sync.WaitGroup) int {
@@ -196,5 +199,63 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 	
 	(*wg).Done()
 
+	return 0
+}
+
+
+type Alert struct {
+    Id 				int				`xorm:"int 'id'"`
+    Asset_Id 		int		    	`xorm:"int 'asset_id'"`
+    Name 			string		    `xorm:"varchar 'name'"`
+    Severity 		string		    `xorm:"varchar 'severity'"`
+    Templateid 		int		    	`xorm:"int 'templateid'"`
+    Subject 		string		    `xorm:"varchar 'subject'"`
+    Message 		string		    `xorm:"varchar 'message'"`
+    Status 			int				`xorm:"int 'status'"`
+    Send_Mail 					int				`xorm:"int 'send_mail'"`
+    Send_Mail_List 				string			`xorm:"varchar 'send_mail_list'"`
+    Send_Mail_Status 			int				`xorm:"int 'send_mail_status'"`
+    Send_Mail_Retries 			int				`xorm:"int 'send_mail_retries'"`
+    Send_Mail_Error 			string			`xorm:"varchar 'send_mail_error'"`
+    Send_WeChat 				int				`xorm:"int 'send_wechat'"`
+    Send_WeChat_Status 			int				`xorm:"int 'send_wechat_status'"`
+    Send_WeChat_Retries 		int				`xorm:"int 'send_wechat_retries'"`
+    Send_WeChat_Error 			string			`xorm:"varchar 'send_wechat_error'"`
+    Send_SMS 					int				`xorm:"int 'send_sms'"`
+    Send_SMS_List 				string			`xorm:"varchar 'send_sms_list'"`
+    Send_SMS_Status 			int				`xorm:"int 'send_sms_status'"`
+    Send_SMS_Retries 			int				`xorm:"int 'send_sms_retries'"`
+    Send_SMS_Error 				string			`xorm:"varchar 'send_sms_error'"`
+    Created 					int				`xorm:"int 'created'"`
+}
+
+func AlertMedia(wg *sync.WaitGroup) int {
+	var alerts []Alert
+	sql := `select * from pms_alerts where status = 1`
+	err := db.SQL(sql).Find(&alerts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    //log.Print("AlertMedia start.")
+	var wga sync.WaitGroup
+	for _, v := range alerts {
+		if v.Send_Mail == 1 && v.Send_Mail_Status == 0 {
+			wga.Add(1)
+			go alert.AlertEMail(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
+		}else if v.Send_WeChat == 1 && v.Send_WeChat_Status == 0 {
+			wga.Add(1)
+			go alert.AlertWeChat(&wga, db, v.Id, v.Send_Mail_Retries, v.Subject, v.Created)
+		}else if v.Send_SMS == 1 && v.Send_SMS_Status == 0 {
+			wga.Add(1)
+			go alert.AlertSMS(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
+		}
+	}
+	wga.Wait()
+
+	(*wg).Done()
+
+	//log.Print("AlertMedia finished.")
+	
 	return 0
 }

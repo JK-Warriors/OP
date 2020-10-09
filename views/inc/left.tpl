@@ -45,6 +45,10 @@
           <i class="fa fa-home"></i> <b>首页 </b>
         </a>
       </li>
+      <li>
+        <a href="/screen/manage"><i class="fa fa-home"></i> <b>大屏 </b>
+        </a>
+      </li>
       {{range $index, $elem := .leftNavLevel1}}
         {{if eq 1 $elem.IsShow}}
         <li {{if eq 1 $elem.IsActive}}class="mm-active"{{end}}>

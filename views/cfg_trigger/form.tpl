@@ -79,9 +79,8 @@
                   <label class="col-sm-2 col-sm-2 control-label"><span>*</span>恢复</label>
                   <div class="col-sm-10">
                     <select id="recovery_mode" name="recovery_mode" class="form-control">
-                      <option value="">请选择协议</option>
-                      <option value="1" {{if eq 1 .triconf.Recovery_Mode}}selected{{end}}>是</option>
                       <option value="0" {{if eq 0 .triconf.Recovery_Mode}}selected{{end}}>否</option>
+                      <option value="1" {{if eq 1 .triconf.Recovery_Mode}}selected{{end}}>是</option>
                     </select>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import (
 	. "opms/models/dbconfig"
 	"strconv"
 	"strings"
+	//"log"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/utils/pagination"
@@ -138,6 +139,10 @@ func (this *AddDBConfigController) Post() {
 	os_port := this.GetString("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
+	
+	alert_mail,_ := this.GetInt("alert_mail")
+	alert_wechat,_  := this.GetInt("alert_wechat")
+	alert_sms,_  := this.GetInt("alert_sms")
 
 	var dbconf Dbconfigs
 
@@ -156,6 +161,9 @@ func (this *AddDBConfigController) Post() {
 	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
+	dbconf.Alert_Mail = alert_mail
+	dbconf.Alert_WeChat = alert_wechat
+	dbconf.Alert_SMS = alert_sms
 
 	err := AddDBconfig(dbconf)
 
@@ -261,7 +269,10 @@ func (this *EditDBConfigController) Post() {
 	os_port := this.GetString("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
-
+	
+	alert_mail,_ := this.GetInt("alert_mail")
+	alert_wechat,_ := this.GetInt("alert_wechat")
+	alert_sms,_ := this.GetInt("alert_sms")
 
 	var dbconf Dbconfigs
 
@@ -280,6 +291,10 @@ func (this *EditDBConfigController) Post() {
 	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
+	dbconf.Alert_Mail = alert_mail
+	dbconf.Alert_WeChat = alert_wechat
+	dbconf.Alert_SMS = alert_sms
+
 
 	err := UpdateDBconfig(id, dbconf)
 

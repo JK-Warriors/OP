@@ -32,7 +32,9 @@ func (this *ManageTriggerController) Get() {
 		offset = 15
 	}
 
+	search_name := this.GetString("search_name")
 	condArr := make(map[string]string)
+	condArr["search_name"] = search_name
 
 	countTriggers := CountTriggers(condArr)
 

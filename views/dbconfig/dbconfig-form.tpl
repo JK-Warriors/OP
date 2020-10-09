@@ -85,7 +85,7 @@
                   </div>
                 </div>
                 <div id="div_inst_name" class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>实例名</label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span>*</span>服务名/实例名</label>
                   <div class="col-sm-10">
                     <input type="text" id="inst_name" name="instance_name"  value="{{.dbconf.InstanceName}}" class="form-control">
                   </div>
@@ -159,11 +159,21 @@
                     <input type="password" id="os_password" name="os_password"  value="{{.dbconf.OsPassword}}" class="form-control" placeholder="请填写主机密码">
                   </div>
                 </div>
+
+                
+                <div id="div_alarm" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>告警发送 </label>
+                  <div>
+                    <input type="checkbox" value="1" name="alert_mail" {{if eq 1 .dbconf.Alert_Mail}}checked="checked"{{end}}>邮件
+                    <input type="checkbox" value="1" name="alert_wechat" {{if eq 1 .dbconf.Alert_WeChat}}checked="checked"{{end}}>微信
+                    <input type="checkbox" value="1" name="alert_sms" {{if eq 1 .dbconf.Alert_SMS}}checked="checked"{{end}}>短信
+                  </div>
+                </div>
                 <div class="form-group">
                   <label class="col-lg-2 col-sm-2 control-label"></label>
                   <div class="col-lg-10">
                     <input type="hidden" id="id" name="id" value="{{.dbconf.Id}}">
-                    <button type="button" onclick="checkConnect()" class="btn btn-primary">连接测试</button>
+                    <button type="button" onclick="checkConnect()" class="btn btn-primary">数据库连接测试</button>
                     <button type="submit" class="btn btn-primary">提 交</button>
                   </div>
                 </div>

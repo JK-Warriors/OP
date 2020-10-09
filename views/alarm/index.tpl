@@ -59,22 +59,32 @@
                       <thead>
                         <tr>
                           <th>级别</th>
+                          <th>告警对象</th>
                           <th>名称</th>
                           <th>描述</th>
-                          <th>操作</th>
+                          <th>是否发送邮件</th>
+                          <th>发送邮件状态</th>
+                          <th>是否发送微信</th>
+                          <th>发送微信状态</th>
+                          <th>是否发送短信</th>
+                          <th>发送短信状态</th>
+                          <th>时间</th>
                         </tr>
                       </thead>
                       <tbody>
                       {{range $k,$v := .alerts}}
                         <tr>
                           <td>{{$v.Severity}}</td>
+                          <td>{{getDBDesc $v.Asset_Id}}</td>
                           <td>{{$v.Name}}</td>
                           <td>{{$v.Message}}</td>
-                          <td>
-                            <a href="javascript:;" class="table_btn table_btn_icon" data-id="{{$v.Id}}">
-                              <i class="iconfont icon-btn_edit"></i>确认
-                            </a>
-                          </td>
+                          <td>{{$v.Send_Mail}}</td>
+                          <td>{{$v.Send_Mail_Status}}</td>
+                          <td>{{$v.Send_WeChat}}</td>
+                          <td>{{$v.Send_WeChat_Status}}</td>
+                          <td>{{$v.Send_SMS}}</td>
+                          <td>{{$v.Send_SMS_Status}}</td>
+                          <td>{{GetDateMHS $v.Created}}</td>
                         </tr>
                       {{end}}
                       </tbody>

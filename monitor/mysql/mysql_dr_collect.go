@@ -14,7 +14,6 @@ import (
 
 func GenerateMySQLDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr) {
 	dr_id := dis.Id
-	db_name := dis.Db_Name
 
 	var pri_id int
 	var sta_id int
@@ -26,18 +25,18 @@ func GenerateMySQLDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr)
 		sta_id = dis.Db_Id_P
 	}
 
-	dsn_p, err := GetDsn(mysql, pri_id, 3)
+	dsn_p, err := GetDsn(mysql, pri_id, 2)
 	if err != nil {
 		log.Printf("GetDsn failed: %s", err.Error())
 	}
 
-	dsn_s, err := GetDsn(mysql, sta_id, 3)
+	dsn_s, err := GetDsn(mysql, sta_id, 2)
 	if err != nil {
 		log.Printf("GetDsn failed: %s", err.Error())
 	}
 
-	GeneratePrimary(mysql, dr_id, pri_id, dsn_p, db_name)
-	GenerateStandby(mysql, dr_id, sta_id, dsn_s, db_name)
+	GenerateMaster(mysql, dr_id, pri_id, dsn_p)
+	GenerateSlave(mysql, dr_id, sta_id, dsn_s)
 	
 
 	log.Println("获取MySQL容灾数据结束！")
@@ -46,7 +45,7 @@ func GenerateMySQLDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr)
 }
 
 
-func GeneratePrimary(mysql *xorm.Engine, dr_id int, db_id int, connStr string, db_name string) {
+func GenerateMaster(mysql *xorm.Engine, dr_id int, db_id int, connStr string) {
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		utils.LogDebugf("%s: %s", connStr, err.Error())
@@ -58,31 +57,14 @@ func GeneratePrimary(mysql *xorm.Engine, dr_id int, db_id int, connStr string, d
 		utils.LogDebugf("DB Ping failed: %s", err.Error())
 		return 
 	}
-	
-	var database_id, role, state, safety_level, connection_timeout int
-	var name, state_desc, partner_name, partner_instance, redo_queue string
-	var failover_lsn , end_of_log_lsn, replication_lsn int64
 
-	sql := `select m.database_id,
-					d.name,
-					m.mirroring_role,
-					m.mirroring_state,
-					m.mirroring_state_desc,
-					m.mirroring_safety_level,
-					m.mirroring_partner_name,
-					m.mirroring_partner_instance,
-					m.mirroring_failover_lsn,
-					m.mirroring_connection_timeout,
-					isnull(m.mirroring_redo_queue, -1) as mirroring_redo_queue,
-					m.mirroring_end_of_log_lsn,
-					m.mirroring_replication_lsn
-				from sys.database_mirroring m, sys.databases d
-				where m.mirroring_guid is NOT NULL
-				AND m.database_id = d.database_id
-				and d.name = ?`
-	err = db.QueryRow(sql, db_name).Scan(&database_id, &name, &role, &state, &state_desc, &safety_level, &partner_name, &partner_instance, &failover_lsn, &connection_timeout, &redo_queue, &end_of_log_lsn, &replication_lsn)
+	read_only,_ := GetGlobalVariable(db, "read_only")
+	gtid_mode,_ := GetGlobalVariable(db, "gtid_mode")
+	binlog_space, _ := GetMasterLogSpace(db)
+
+	file, position, err := GetMasterStatus(db)
 	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
+		log.Printf("GetMasterStatus error: %s", err.Error())
 		return
 	}else{
 		// storage result
@@ -91,12 +73,12 @@ func GeneratePrimary(mysql *xorm.Engine, dr_id int, db_id int, connStr string, d
 		// add Begin() before any action
 		err := session.Begin()
 		//move old data to history table
-		MoveToHistory(mysql, "pms_dr_mysql_p", "db_id", db_id)
+		MoveToHistory(mysql, "pms_dr_mysql_p", "dr_id", dr_id)
 
-		sql = `insert into pms_dr_mysql_p(dr_id, db_id, database_id, db_name, role, state, state_desc, safety_level, partner_name, partner_instance, failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, created) 
-						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+		sql := `insert into pms_dr_mysql_p(dr_id, db_id, read_only, gtid_mode, master_binlog_file, master_binlog_pos, master_binlog_space, created) 
+						values(?,?,?,?,?,?,?,?)`
 
-		_, err = mysql.Exec(sql, dr_id, db_id, database_id, name, role, state, state_desc, safety_level, partner_name, partner_instance, failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, time.Now().Unix())
+		_, err = mysql.Exec(sql, dr_id, db_id, read_only, gtid_mode, file, position, binlog_space, time.Now().Unix())
 
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
@@ -111,7 +93,8 @@ func GeneratePrimary(mysql *xorm.Engine, dr_id int, db_id int, connStr string, d
 
 }
 
-func GenerateStandby(mysql *xorm.Engine, dr_id int, db_id int, connStr string, db_name string) {
+
+func GenerateSlave(mysql *xorm.Engine, dr_id int, db_id int, connStr string) {
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		utils.LogDebugf("%s: %s", connStr, err.Error())
@@ -123,31 +106,15 @@ func GenerateStandby(mysql *xorm.Engine, dr_id int, db_id int, connStr string, d
 		utils.LogDebugf("DB Ping failed: %s", err.Error())
 		return 
 	}
-
 	
-	var database_id, role, state, safety_level, connection_timeout int
-	var name, master_server, master_port, state_desc, partner_name, redo_queue, partner_instance string
-	var failover_lsn , end_of_log_lsn, replication_lsn int64
-	sql := `select m.database_id,
-					d.name,
-					substring(mirroring_partner_name, 7, charindex(':',mirroring_partner_name,7)-7) as master_server,
-					right(mirroring_partner_name, len(mirroring_partner_name) - charindex(':',mirroring_partner_name,7)) as master_port,
-					m.mirroring_role,
-					m.mirroring_state,
-					m.mirroring_state_desc,
-					m.mirroring_safety_level,
-					m.mirroring_partner_name,
-					m.mirroring_partner_instance,
-					m.mirroring_failover_lsn,
-					m.mirroring_connection_timeout,
-					isnull(m.mirroring_redo_queue, -1) as mirroring_redo_queue,
-					m.mirroring_end_of_log_lsn,
-					m.mirroring_replication_lsn
-				from sys.database_mirroring m, sys.databases d
-				where m.mirroring_guid is NOT NULL
-				AND m.database_id = d.database_id
-				and d.name = ?`
-	err = db.QueryRow(sql, db_name).Scan(&database_id, &name, &master_server, &master_port, &role, &state, &state_desc, &safety_level, &partner_name, &partner_instance, &failover_lsn, &connection_timeout, &redo_queue, &end_of_log_lsn, &replication_lsn)
+	read_only,_ := GetGlobalVariable(db, "read_only")
+	gtid_mode,_ := GetGlobalVariable(db, "gtid_mode")
+
+	var a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30 sql.NullString
+	var a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57 sql.NullString
+	sql := `show slave status`
+	err = db.QueryRow(sql).Scan(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8,&a9,&a10,&a11,&a12,&a13,&a14,&a15,&a16,&a17,&a18,&a19,&a20,&a21,&a22,&a23,&a24,&a25,&a26,&a27,&a28,&a29,&a30,
+								&a31,&a32,&a33,&a34,&a35,&a36,&a37,&a38,&a39,&a40,&a41,&a42,&a43,&a44,&a45,&a46,&a47,&a48,&a49,&a50,&a51,&a52,&a53,&a54,&a55,&a56,&a57)
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		return
@@ -158,12 +125,12 @@ func GenerateStandby(mysql *xorm.Engine, dr_id int, db_id int, connStr string, d
 		// add Begin() before any action
 		err = session.Begin()
 		//move old data to history table
-		MoveToHistory(mysql, "pms_dr_mysql_s", "db_id", db_id)
+		MoveToHistory(mysql, "pms_dr_mysql_s", "dr_id", dr_id)
 
-		sql = `insert into pms_dr_mysql_s(dr_id, db_id, database_id, db_name, master_server, master_port, role, state, state_desc, safety_level, partner_name, partner_instance, failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, created) 
-						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+		sql = `insert into pms_dr_mysql_s(dr_id, db_id, read_only, gtid_mode, master_server, master_port, slave_io_run, slave_sql_run, delay, current_binlog_file, current_binlog_pos, master_binlog_file, master_binlog_pos, master_binlog_space, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
-		_, err = mysql.Exec(sql, dr_id, db_id, database_id, name, master_server, master_port, role, state, state_desc, safety_level, partner_name, partner_instance, failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, time.Now().Unix())
+		_, err = mysql.Exec(sql, dr_id, db_id, read_only, gtid_mode, a2.String, a4.String, a11.String, a12.String, a33.String, a10.String, a22.String, a6.String, a7.String, 0, time.Now().Unix())
 
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())

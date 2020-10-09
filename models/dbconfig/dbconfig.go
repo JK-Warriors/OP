@@ -37,6 +37,9 @@ type Dbconfigs struct {
 	Status       int    `orm:"column(status);"`
 	IsDelete     int    `orm:"column(is_delete);"`
 	Retention    int    `orm:"column(retention);"`
+	Alert_Mail   int    `orm:"column(alert_mail);"`
+	Alert_WeChat int    `orm:"column(alert_wechat);"`
+	Alert_SMS    int    `orm:"column(alert_sms);"`
 	Created      int64  `orm:"column(created);"`
 	Updated      int64  `orm:"column(updated);"`
 }
@@ -69,6 +72,9 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.OsPort = upd.OsPort
 	dbconf.OsUsername = upd.OsUsername
 	dbconf.OsPassword = upd.OsPassword
+	dbconf.Alert_Mail = upd.Alert_Mail
+	dbconf.Alert_WeChat = upd.Alert_WeChat
+	dbconf.Alert_SMS = upd.Alert_SMS
 	dbconf.Status = 1
 	dbconf.IsDelete = 0
 	dbconf.Created = time.Now().Unix()
@@ -100,6 +106,9 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		dbconf.OsPort = upd.OsPort
 		dbconf.OsUsername = upd.OsUsername
 		dbconf.OsPassword = upd.OsPassword
+		dbconf.Alert_Mail = upd.Alert_Mail
+		dbconf.Alert_WeChat = upd.Alert_WeChat
+		dbconf.Alert_SMS = upd.Alert_SMS
 		dbconf.Updated = time.Now().Unix()
 
 		_, err = o.Update(&dbconf)
@@ -152,6 +161,38 @@ func GetDBtype(id int) string {
 		asset_type = "OS"
 	}
 	return asset_type
+}
+
+//根据资产ID获取资产描述
+func GetDBDesc(id int) string {
+	o := orm.NewOrm()
+	o.Using("default")
+	var db_desc string
+
+	sql := `select concat(host, ':', port, ' (' , alias, ')') from pms_asset_config where id = ?`
+	err := o.Raw(sql, id).QueryRow(&db_desc)
+	if err != nil {
+		utils.LogDebug("GetDBDesc failed: " + err.Error())
+		return ""
+	}
+	
+	return db_desc
+}
+
+//根据资产ID获取资产别名
+func GetDBAlias(id int) string {
+	o := orm.NewOrm()
+	o.Using("default")
+	var db_alias string
+
+	sql := `select alias from pms_asset_config where id = ?`
+	err := o.Raw(sql, id).QueryRow(&db_alias)
+	if err != nil {
+		utils.LogDebug("GetDBAlias failed: " + err.Error())
+		return ""
+	}
+	
+	return db_alias
 }
 
 //获取数据库配置列表

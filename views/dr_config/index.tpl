@@ -79,8 +79,8 @@
                     {{range $k,$v := .drconf}}
                     <tr>
                       <td>{{$v.Bs_Name}}</td>
-                      <td>{{$v.Db_Id_P}}</td>
-                      <td>{{$v.Db_Id_S}}</td>
+                      <td>{{getDBDesc $v.Db_Id_P}}</td>
+                      <td>{{getDBDesc $v.Db_Id_S}}</td>
                       <td>{{$v.Fb_Retention}}</td>
                       <td>{{$v.Shift_Vips}}</td>
                       <td>{{$v.Network_P}}</td>

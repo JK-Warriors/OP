@@ -5,6 +5,7 @@ import (
 	"opms/models"
 	//"opms/utils"
 	"time"
+	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -13,6 +14,9 @@ import (
 type Trigger struct {
 	Id       			int `orm:"pk;column(id);"`
 	Asset_Id   			int `orm:"column(asset_id);"`
+	Asset_Host   		string `orm:"column(host);"`
+	Asset_Port   		string `orm:"column(port);"`
+	Asset_Alias   		string `orm:"column(alias);"`
 	Asset_Type   		int `orm:"column(asset_type);"`
 	Name   				string `orm:"column(name);"`
 	TemplateId   		int `orm:"column(templateid);"`
@@ -53,11 +57,14 @@ func AddAssetTriggers(asset_id int64, asset_type int) error {
 
 func GetTriggerConfig(id int) (Trigger, error) {
 	var triconf Trigger
-	var err error
 	o := orm.NewOrm()
 
-	triconf = Trigger{Id: id}
-	err = o.Read(&triconf)
+	sql := `select s.*,a.host, a.port, a.alias 
+			from pms_triggers s, pms_asset_config a 
+			where s.asset_id = a.id 
+			  and s.id = ?`
+
+	err := o.Raw(sql, id).QueryRow(&triconf)
 
 	if err == orm.ErrNoRows {
 		return triconf, nil
@@ -66,18 +73,18 @@ func GetTriggerConfig(id int) (Trigger, error) {
 }
 
 
-//获取资产状态列表
+//获取告警配置列表
 func ListTriggers(condArr map[string]string, page int, offset int) (num int64, err error, trigger []Trigger) {
 	o := orm.NewOrm()
 	o.Using("default")
-	qs := o.QueryTable(models.TableName("triggers"))
-	cond := orm.NewCondition()
+	sql := `select s.*,a.host, a.port, a.alias 
+			from pms_triggers s, pms_asset_config a 
+			where s.asset_id = a.id`
 
 	if condArr["search_name"] != "" {
-		cond = cond.And("name__icontains", condArr["search_name"])
+		sql = sql + " and (s.trigger_type like '%" + condArr["search_name"] + "%')"
 	}
 
-	qs = qs.SetCond(cond)
 	if page < 1 {
 		page = 1
 	}
@@ -86,8 +93,11 @@ func ListTriggers(condArr map[string]string, page int, offset int) (num int64, e
 	}
 	start := (page - 1) * offset
 
-	qs = qs.OrderBy("id")
-	nums, errs := qs.Limit(offset, start).All(&trigger)
+	
+	sql = sql + " order by s.id"
+	sql = sql + " limit " + strconv.Itoa(offset) + " offset " + strconv.Itoa(start)
+	nums, errs := o.Raw(sql).QueryRows(&trigger)
+
 	return nums, errs, trigger
 }
 
@@ -99,7 +109,7 @@ func CountTriggers(condArr map[string]string) int64 {
 	cond := orm.NewCondition()
 
 	if condArr["search_name"] != "" {
-		cond = cond.And("name__icontains", condArr["search_name"])
+		cond = cond.And("trigger_type__icontains", condArr["search_name"])
 	}
 	
 	num, _ := qs.SetCond(cond).Count()
@@ -109,22 +119,21 @@ func CountTriggers(condArr map[string]string) int64 {
 
 //修改告警配置
 func UpdateTriggerConfig(id int, tri Trigger) error {
-	var triconf Trigger
 	o := orm.NewOrm()
-	triconf = Trigger{Id: id}
 
-	triconf.Id = id
-	triconf.Asset_Type = tri.Asset_Type
-	triconf.Trigger_Type = tri.Trigger_Type
-	triconf.Severity = tri.Severity
-	triconf.Expression = tri.Expression
-	triconf.Description = tri.Description
+	sql:=`update pms_triggers set asset_type = ?, 
+			trigger_type = ?, 
+			severity = ?, 
+			expression = ?, 
+			description = ?, 
+			recovery_mode = ?,  
+			recovery_expression = ?, 
+			recovery_description = ?, 
+			created = ?
+		  where id = ?`
 	
-	triconf.Recovery_Mode = tri.Recovery_Mode
-	triconf.Recovery_Expression = tri.Recovery_Expression
-	triconf.Recovery_Description = tri.Recovery_Description
-
-	_, err := o.Update(&triconf, "Asset_Type", "Trigger_Type", "Severity", "Expression", "Description", "Recovery_Mode", "Recovery_Expression", "Recovery_Description")
+	_, err := o.Raw(sql, tri.Asset_Type, tri.Trigger_Type, tri.Severity, tri.Expression, tri.Description, tri.Recovery_Mode, tri.Recovery_Expression, tri.Recovery_Description, time.Now().Unix(), id).Exec()
+	
 	return err
 }
 

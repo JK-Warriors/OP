@@ -62,7 +62,7 @@ CREATE TABLE `pms_permissions` (
 -- Records of pms_permissions
 -- ----------------------------
 INSERT INTO `pms_permissions` VALUES ('0', '0', '根节点', 'root', '/root', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/config', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/config', '', '1', '1', '2');
 INSERT INTO `pms_permissions` VALUES ('3', '0', 'Oracle', 'Oracle', '/oracle', '', '1', '1', '3');
 INSERT INTO `pms_permissions` VALUES ('4', '0', 'MySQL', 'MySQL', '/mysql', '', '1', '1', '4');
 INSERT INTO `pms_permissions` VALUES ('5', '0', 'SQLServer', 'SQLServer', '/mssql', '', '1', '1', '5');
@@ -70,6 +70,7 @@ INSERT INTO `pms_permissions` VALUES ('6', '0', 'OS', 'OS', '/os', '', '1', '1',
 INSERT INTO `pms_permissions` VALUES ('9', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '9');
 INSERT INTO `pms_permissions` VALUES ('98', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '98');
 INSERT INTO `pms_permissions` VALUES ('99', '0', '系统管理', 'system', '/system', '', '1', '1', '99');
+
 
 INSERT INTO `pms_permissions` VALUES ('2100', '2', '资产配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-add', '/config/db/add', '', '0', '0', '0');
@@ -353,6 +354,9 @@ CREATE TABLE `pms_asset_config` (
   `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；2：禁用',
   `is_delete` tinyint(2) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
   `retention` int(10) NOT NULL DEFAULT 0 COMMENT '保留时间，默认单位为天',
+  `alert_mail` tinyint(1) DEFAULT 0 COMMENT '告警发送到邮件：0：不发送; 1: 发送',
+  `alert_wechat` tinyint(1) DEFAULT 0 COMMENT '告警发送到微信：0：不发送; 1: 发送',
+  `alert_sms` tinyint(1) DEFAULT 0 COMMENT '告警发送到短信：0：不发送; 1: 发送',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   `updated` int(10) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -457,9 +461,9 @@ CREATE TABLE `pms_items` (
 	`value_type`             integer         DEFAULT '1'               NOT NULL,
 	`units`                  varchar(255)    DEFAULT ''                NOT NULL,
 	`status`                 integer         DEFAULT '1'               NOT NULL,
-  PRIMARY KEY (`item_id`),
+  PRIMARY KEY (`itemid`),
   KEY `idx_items_1` (`obj_id`,`key_`,`label`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8 COMMENT='items表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='items表';
 
 -- -----------------------------------------------------------------------------
 -- Table structure for pms_item_data
@@ -492,6 +496,7 @@ CREATE TABLE `pms_asset_status` (
   `repl` tinyint(2) NOT NULL DEFAULT '-1',
   `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
+  `score`      int(10) NOT NULL DEFAULT 100,
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -517,6 +522,7 @@ CREATE TABLE `pms_asset_status_his` (
   `repl` tinyint(2) NOT NULL DEFAULT '-1',
   `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
+  `score`      int(10) NOT NULL DEFAULT 100,
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
   KEY `idx_asset_id` (`asset_id`) USING BTREE,
@@ -683,6 +689,31 @@ CREATE TABLE `pms_oracle_diskgroup_his` (
   KEY `idx_db_id` (`db_id`) USING BTREE,
   KEY `idx_created` (`created`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `pms_oracle_redo`;
+CREATE TABLE `pms_oracle_redo` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `key_time` varchar(20) DEFAULT NULL,
+  `redo_log` bigint(20) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `pms_oracle_db_time`;
+CREATE TABLE `pms_oracle_db_time` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `db_id` int(10) NOT NULL,
+  `snap_id` bigint(20) DEFAULT NULL,
+  `end_time` varchar(20) DEFAULT NULL,
+  `db_time` bigint(20) DEFAULT NULL,
+  `elapsed` bigint(20) DEFAULT NULL,
+  `rate` float(10,2) DEFAULT NULL,
+  `created` int(10) DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 -- ----------------------------
@@ -1192,6 +1223,94 @@ CREATE TABLE `pms_mysql_status_his` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+
+-- ----------------------------
+-- Table structure for pms_dr_mysql_p
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mysql_p`;
+CREATE TABLE `pms_dr_mysql_p` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `read_only` varchar(10) DEFAULT NULL,
+  `gtid_mode` varchar(10) DEFAULT NULL,
+  `master_binlog_file` varchar(30) DEFAULT NULL,
+  `master_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_space` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_dr_mysql_p_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mysql_p_his`;
+CREATE TABLE `pms_dr_mysql_p_his` (
+  `id` int(10) NOT NULL,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `read_only` varchar(10) DEFAULT NULL,
+  `gtid_mode` varchar(10) DEFAULT NULL,
+  `master_binlog_file` varchar(30) DEFAULT NULL,
+  `master_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_space` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_dr_id` (`dr_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for pms_dr_mysql_s
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mysql_s`;
+CREATE TABLE `pms_dr_mysql_s` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `read_only` varchar(10) DEFAULT NULL,
+  `gtid_mode` varchar(10) DEFAULT NULL,
+  `master_server` varchar(30) DEFAULT NULL,
+  `master_port` varchar(20) DEFAULT NULL,
+  `slave_io_run` varchar(20) DEFAULT NULL,
+  `slave_sql_run` varchar(20) DEFAULT NULL,
+  `delay` varchar(20) DEFAULT NULL,
+  `current_binlog_file` varchar(30) DEFAULT NULL,
+  `current_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_file` varchar(30) DEFAULT NULL,
+  `master_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_space` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for pms_dr_mysql_s_his
+-- ----------------------------
+DROP TABLE IF EXISTS `pms_dr_mysql_s_his`;
+CREATE TABLE `pms_dr_mysql_s_his` (
+  `id` int(10) NOT NULL,
+  `dr_id` int(10) NOT NULL DEFAULT '-1',
+  `db_id` int(10) NOT NULL DEFAULT '-1',
+  `read_only` varchar(10) DEFAULT NULL,
+  `gtid_mode` varchar(10) DEFAULT NULL,
+  `master_server` varchar(30) DEFAULT NULL,
+  `master_port` varchar(20) DEFAULT NULL,
+  `slave_io_run` varchar(20) DEFAULT NULL,
+  `slave_sql_run` varchar(20) DEFAULT NULL,
+  `delay` varchar(20) DEFAULT NULL,
+  `current_binlog_file` varchar(30) DEFAULT NULL,
+  `current_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_file` varchar(30) DEFAULT NULL,
+  `master_binlog_pos` varchar(30) DEFAULT NULL,
+  `master_binlog_space` bigint(18) NOT NULL DEFAULT '0',
+  `created` int(10) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_dr_id` (`dr_id`) USING BTREE,
+  KEY `idx_created` (`created`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- ----------------------------
 -- Table structure for pms_os_status
 -- ----------------------------
@@ -1485,14 +1604,23 @@ CREATE TABLE `pms_alerts` (
 	`name`                   varchar(200)    DEFAULT ''                NOT NULL,
 	`severity`               varchar(50)     DEFAULT '0'               NOT NULL,
 	`templateid`             int(10)         DEFAULT '0'               NOT NULL,
-	`mediatypeid`            bigint unsigned                           NULL,
-	`sendto`                 varchar(1024)   DEFAULT ''                NOT NULL,
-	`subject`                varchar(255)    DEFAULT ''                NOT NULL,
+	`subject`                varchar(255)    DEFAULT ''                NULL,
 	`message`                text                                      NOT NULL,
-	`status`                 integer         DEFAULT '0'               NOT NULL,
-	`retries`                integer         DEFAULT '0'               NOT NULL,
-	`error`                  varchar(2048)   DEFAULT ''                NOT NULL,
-	`alerttype`              integer         DEFAULT '0'               NOT NULL,
+	`status`                 integer         DEFAULT '1'               NOT NULL,
+  `send_mail`              tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_mail_list`         varchar(1024)   DEFAULT 0                 NOT NULL,
+  `send_mail_status`       tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_mail_retries`      integer         DEFAULT 0                 NOT NULL,
+  `send_mail_error`        varchar(1024)   DEFAULT '',
+  `send_wechat`            tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_wechat_status`     tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_wechat_retries`    integer         DEFAULT 0                 NOT NULL,
+  `send_wechat_error`      varchar(1024)   DEFAULT '',
+  `send_sms`               tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_sms_list`          varchar(1024)   DEFAULT 0                 NOT NULL,
+  `send_sms_status`        tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_sms_retries`       integer         DEFAULT 0                 NOT NULL,
+  `send_sms_error`         varchar(1024)   DEFAULT '',
   `created`                int(10)         DEFAULT NULL COMMENT '操作时间',
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1528,12 +1656,12 @@ INSERT INTO `pms_global_options` VALUES ('send_mail_to_list', '告警邮件收�
 INSERT INTO `pms_global_options` VALUES ('send_mail_sleep_time', '发送邮件休眠时间', '300', '告警休眠时间(秒)');
 INSERT INTO `pms_global_options` VALUES ('mailtype', '邮件类型', 'html', '邮件发送配置:邮件类型');
 INSERT INTO `pms_global_options` VALUES ('mailprotocol', '邮件协议', 'smtp', '邮件发送配置:邮件协议');
-INSERT INTO `pms_global_options` VALUES ('smtp_host', 'SMTP主机', 'smtp.163.com', '邮件发送配置:邮件主机');
-INSERT INTO `pms_global_options` VALUES ('smtp_port', 'SMTP端口', '25', '邮件发送配置:邮件端口');
-INSERT INTO `pms_global_options` VALUES ('smtp_user', 'SMTP账号', 'wlblazers', '邮件发送配置:用户');
+INSERT INTO `pms_global_options` VALUES ('smtp_host', 'SMTP主机', 'smtp.exmail.qq.com', '邮件发送配置:邮件主机');
+INSERT INTO `pms_global_options` VALUES ('smtp_port', 'SMTP端口', '465', '邮件发送配置:邮件端口');
+INSERT INTO `pms_global_options` VALUES ('smtp_user', 'SMTP账号', 'xiangqh@hzywy.cn', '邮件发送配置:用户');
 INSERT INTO `pms_global_options` VALUES ('smtp_pass', 'SMTP密码', '', '邮件发送配置:密码');
 INSERT INTO `pms_global_options` VALUES ('smtp_timeout', 'SMTP超时时间', '10', '邮件发送配置:超时时间');
-INSERT INTO `pms_global_options` VALUES ('mailfrom', '邮件发件人', 'wlblazers@163.com', '邮件发送配置:发件人');
+INSERT INTO `pms_global_options` VALUES ('mailfrom', '邮件发件人', 'xiangqh@hzywy.cn', '邮件发送配置:发件人');
 INSERT INTO `pms_global_options` VALUES ('send_alert_sms', '发送告警短信', '0', '是否发送短信');
 INSERT INTO `pms_global_options` VALUES ('send_sms_to_list', '告警短信收件人', '', '短信收件人列表');
 INSERT INTO `pms_global_options` VALUES ('send_sms_sleep_time', '发送短信休眠时间', '300', '发送短信休眠时间(分钟)');

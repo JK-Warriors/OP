@@ -7,6 +7,7 @@ import (
 	"time"
 	"sync"
 	"context"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/godror/godror"
@@ -56,6 +57,9 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		//get oracle basic infomation
 		GatherBasicInfo(db, mysql , db_id, host, port, alias)
 		AlertBasicInfo(mysql, db_id)
+
+		GatherRedo(db, mysql , db_id, host, port, alias)
+		GatherDbTime(db, mysql , db_id, host, port, alias)
 
 		//get tablespace
 		GatherTablespaces(db, mysql , db_id, host, port, alias)
@@ -127,6 +131,107 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 
 	// add Commit() after all actions
 	err = session.Commit()
+}
+
+func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+	log.Printf("GatherRedo begin for %d", db_id)
+	session := mysql.NewSession()
+	defer session.Close()
+	err := session.Begin()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	sql := `select to_char(first_time, 'yyyy-mm-dd hh24')||':00' key_time,
+						trunc(sum(blocks * block_size) / 1024 / 1024) redo
+			from v$archived_log
+			where to_char(first_time, 'yyyymmddhh24') > to_char(sysdate-7, 'yyyymmddhh24')
+			and standby_dest = 'NO'
+			group by to_char(first_time, 'yyyy-mm-dd hh24')`
+	rows, err := db.QueryContext(ctx, sql)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+		err = session.Rollback()
+	}else{
+		defer rows.Close()
+		for rows.Next() {
+			var key_time string
+			var redo int
+			err = rows.Scan(&key_time, &redo)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			
+			sql = `insert into pms_oracle_redo(db_id, key_time, redo_log, created) 
+							values(?,?,?,?)`
+			_, err = mysql.Exec(sql, db_id, key_time, redo, time.Now().Unix())
+			if err != nil {
+				log.Printf("%s: %w", sql, err)
+			}
+		}
+		err = session.Commit()
+		log.Printf("GatherRedo end for %d", db_id)
+	}
+}
+
+func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+	inst_id := GetCurrentInstanceNumber(db)
+	snap_id := GetLastSnapId(db)
+
+	// check snap id exists
+	var is_exists int
+	sql := `select count(1) from pms_oracle_db_time where db_id = ? and snap_id = ?`
+	_,_ = mysql.SQL(sql, db_id, snap_id).Get(&is_exists)
+	if is_exists > 0 {
+		return
+	}
+
+	session := mysql.NewSession()
+	defer session.Close()
+	err := session.Begin()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	sql = fmt.Sprintf(`select snap_id, end_time, dbtime, elapsed, round(dbtime/elapsed, 2) as rate 
+			from ( select n.stat_name as name,
+					e.snap_id,
+					to_char(te.end_interval_time,'yyyy-mm-dd hh24:mi:ss') as end_time,
+						round((case when (e.value - b.value) > 0 then e.value - b.value else e.value end) / 1000 / 1000, 2) as dbtime,
+						ceil((to_date(to_char(te.end_interval_time,'yyyy-mm-dd hh24:mi:ss'),'yyyy-mm-dd hh24:mi:ss') - 
+						to_date(to_char(tb.end_interval_time,'yyyy-mm-dd hh24:mi:ss'),'yyyy-mm-dd hh24:mi:ss'))*86400) as elapsed
+					from wrh$_sys_time_model e, wrh$_sys_time_model b, wrh$_stat_name n, wrm$_snapshot tb, wrm$_snapshot te
+					where e.stat_id = n.stat_id
+					and b.stat_id = n.stat_id
+					and b.snap_id = e.snap_id - 1
+					and e.snap_id = %d
+					and e.snap_id = te.snap_id and e.instance_number = te.instance_number
+					and b.snap_id = tb.snap_id and b.instance_number = tb.instance_number
+					and e.instance_number=b.instance_number
+					and e.instance_number= %d
+					and n.stat_name = 'DB time') tmp`, snap_id, inst_id)
+	rows, err := db.QueryContext(ctx, sql)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+		err = session.Rollback()
+	}else{
+		defer rows.Close()
+		for rows.Next() {
+			var snap_id, elapsed int
+			var end_time string
+			var db_time, rate float64
+			err = rows.Scan(&snap_id, &end_time, &db_time, &elapsed, &rate)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			
+			sql = `insert into pms_oracle_db_time(db_id, snap_id, end_time, db_time, elapsed, rate, created) 
+							values(?,?,?,?,?,?,?)`
+			_, err = mysql.Exec(sql, db_id, snap_id, end_time, db_time, elapsed, rate, time.Now().Unix())
+			if err != nil {
+				log.Printf("%s: %w", sql, err)
+			}
+		}
+		err = session.Commit()
+	}
 }
 
 func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
