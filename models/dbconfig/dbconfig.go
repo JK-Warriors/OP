@@ -3,18 +3,18 @@ package dbconfig
 import (
 	"database/sql"
 	"fmt"
+	"net"
 	"opms/models"
 	"opms/models/cfg_trigger"
 	"opms/utils"
 	"strings"
 	"time"
-	"net"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/mattn/go-oci8"
-    "golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh"
 )
 
 type Dbconfigs struct {
@@ -31,7 +31,7 @@ type Dbconfigs struct {
 	Role         int    `orm:"column(role);"`
 	Ostype       int    `orm:"column(os_type);"`
 	OsProtocol   string `orm:"column(os_protocol);"`
-	OsPort   	 string `orm:"column(os_port);"`
+	OsPort       string `orm:"column(os_port);"`
 	OsUsername   string `orm:"column(os_username);"`
 	OsPassword   string `orm:"column(os_password);"`
 	Status       int    `orm:"column(status);"`
@@ -157,7 +157,7 @@ func GetDBtype(id int) string {
 		asset_type = "MySQL"
 	} else if id == 3 {
 		asset_type = "SQLServer"
-	}else if id == 99 {
+	} else if id == 99 {
 		asset_type = "OS"
 	}
 	return asset_type
@@ -175,7 +175,7 @@ func GetDBDesc(id int) string {
 		utils.LogDebug("GetDBDesc failed: " + err.Error())
 		return ""
 	}
-	
+
 	return db_desc
 }
 
@@ -191,7 +191,7 @@ func GetDBAlias(id int) string {
 		utils.LogDebug("GetDBAlias failed: " + err.Error())
 		return ""
 	}
-	
+
 	return db_alias
 }
 
@@ -238,6 +238,16 @@ func ListAllDBconfig() (dbconf []Dbconfigs) {
 	qs = qs.SetCond(cond)
 
 	_, _ = qs.OrderBy("id").All(&dbconf)
+	return dbconf
+}
+
+func ListScreenDBconfig() (dbconf []Dbconfigs) {
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select * from pms_asset_config where is_delete = 0 and id in(101,102)`
+	_, _ = o.Raw(sql).QueryRows(&dbconf)
+
 	return dbconf
 }
 
@@ -294,7 +304,7 @@ func DeleteDBconfig(ids string) error {
 	o := orm.NewOrm()
 	_, err := o.Raw("DELETE FROM " + models.TableName("asset_config") + " WHERE id IN(" + ids + ")").Exec()
 	_, err = o.Raw("DELETE FROM pms_triggers WHERE asset_id IN(" + ids + ")").Exec()
-	
+
 	return err
 }
 
@@ -313,7 +323,6 @@ func ChangeDBconfigStatus(id int, status int) error {
 	}
 }
 
-
 func CheckOracleConnect(host string, port string, inst_name string, username string, password string) error {
 	con_str := username + "/" + password + "@" + host + ":" + port + "/" + inst_name + "?timeout=3s"
 	//db, err := sql.Open("oci8", "sys/oracle@192.168.133.40:1521/orcl?as=sysdba")
@@ -321,7 +330,6 @@ func CheckOracleConnect(host string, port string, inst_name string, username str
 	defer db.Close()
 
 	err = db.Ping()
-
 
 	//ORA-28009: connection as SYS should be as SYSDBA or SYSOPER
 	if err != nil {
@@ -336,7 +344,7 @@ func CheckOracleConnect(host string, port string, inst_name string, username str
 
 			if err != nil {
 				utils.LogDebugf("Open connection as sysdba failed: %s", err.Error())
-			}else{
+			} else {
 				utils.LogDebug("Open connection as sysdba successfully.")
 
 			}
@@ -362,9 +370,9 @@ func CheckMysqlConnect(host string, port string, db_name string, username string
 
 func CheckSqlserverConnect(host string, port string, inst_name string, db_name string, username string, password string) error {
 	var dbname string
-	if(db_name ==""){
+	if db_name == "" {
 		dbname = "master"
-	}else{
+	} else {
 		dbname = db_name
 	}
 	//连接字符串
@@ -394,6 +402,7 @@ type TelnetClient struct {
 	UserName         string
 	Password         string
 }
+
 const (
 	//经过测试，嵌入式设备下，延时大概需要大于300ms
 	TIME_DELAY_AFTER_WRITE = 300 //300ms
@@ -402,23 +411,23 @@ const (
 func CheckOSConnect(host string, port string, protocol string, username string, password string) error {
 	var err error
 
-	if(protocol == "ssh"){
+	if protocol == "ssh" {
 		//dial 获取ssh client
 		config := &ssh.ClientConfig{
-			Timeout:         time.Second,		//ssh 连接time out 时间一秒钟, 如果ssh验证错误 会在一秒内返回
+			Timeout:         time.Second, //ssh 连接time out 时间一秒钟, 如果ssh验证错误 会在一秒内返回
 			User:            username,
 			Auth:            []ssh.AuthMethod{ssh.Password(password)},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(), 		//不够安全
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(), //不够安全
 		}
-	
+
 		addr := fmt.Sprintf("%s:%s", host, port)
 		_, err := ssh.Dial("tcp", addr, config)
 		if err != nil {
 			utils.LogDebugf("SSH dial failed: %s", err.Error())
 		}
 		return err
-	}else{
-		
+	} else {
+
 		telnetClientObj := new(TelnetClient)
 		telnetClientObj.Host = host
 		telnetClientObj.Port = port
@@ -432,7 +441,7 @@ func CheckOSConnect(host string, port string, protocol string, username string, 
 	return err
 }
 
-func (this *TelnetClient) Telnet(timeout int) error{
+func (this *TelnetClient) Telnet(timeout int) error {
 	addr := fmt.Sprintf("%s:%s", this.Host, this.Port)
 	conn, err := net.DialTimeout("tcp", addr, time.Duration(timeout)*time.Second)
 	if nil != err {
@@ -446,7 +455,7 @@ func (this *TelnetClient) Telnet(timeout int) error{
 		utils.LogDebugf("telnetProtocolHandshake failed: %s", err.Error())
 		return err
 	}
-	
+
 	return err
 }
 

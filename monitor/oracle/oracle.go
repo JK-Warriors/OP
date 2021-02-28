@@ -1,13 +1,13 @@
 package oracle
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"opms/monitor/utils"
-	"time"
 	"sync"
-	"context"
-	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/godror/godror"
@@ -47,7 +47,7 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
-		
+
 		AlertConnect(mysql, db_id)
 	} else {
 		log.Println("ping succeeded")
@@ -55,18 +55,19 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		//	log.Println("ping succeeded after deadline!")
 		//}
 		//get oracle basic infomation
-		GatherBasicInfo(db, mysql , db_id, host, port, alias)
+		GatherBasicInfo(db, mysql, db_id, host, port, alias)
 		AlertBasicInfo(mysql, db_id)
 
-		GatherRedo(db, mysql , db_id, host, port, alias)
-		GatherDbTime(db, mysql , db_id, host, port, alias)
+		GatherRedo(db, mysql, db_id, host, port, alias)
+		GatherDbTime(db, mysql, db_id, host, port, alias)
+		GatherMetricValue(db, mysql, db_id, host, port, alias)
 
 		//get tablespace
-		GatherTablespaces(db, mysql , db_id, host, port, alias)
+		GatherTablespaces(db, mysql, db_id, host, port, alias)
 		AlertTablespaces(mysql, db_id)
 
 		//get asm diskgroup
-		GatherDiskgroups(db, mysql , db_id, host, port, alias)
+		GatherDiskgroups(db, mysql, db_id, host, port, alias)
 		AlertDiskgroups(mysql, db_id)
 	}
 
@@ -74,10 +75,10 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 
 }
 
-func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 
 	connect := 1
-	//get instance info 
+	//get instance info
 	inst_num := Get_Instance(db, "instance_number")
 	inst_name := Get_Instance(db, "instance_name")
 	inst_role := Get_Instance(db, "instance_role")
@@ -94,7 +95,6 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	protection_mode := Get_Database(db, "protection_mode")
 	flashback_on := Get_Database(db, "flashback_on")
 
-	
 	//get sessions
 	session_total := GetSessionTotal(db)
 	session_actives := GetSessionActive(db)
@@ -133,7 +133,34 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	err = session.Commit()
 }
 
-func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+func GatherMetricValue(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
+
+	key_time := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
+	sql := `insert into pms_item_data(db_id, metric_name, key_time, value, ns) values(?,?,?,?,?)`
+
+	//get QPS
+	qps := GetQPS(db)
+	_, err := mysql.Exec(sql, db_id, "Queries Per Second", key_time, qps, time.Now().Unix())
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+
+	//get TPS
+	tps := GetTPS(db)
+	_, err = mysql.Exec(sql, db_id, "Transactions Per Second", key_time, tps, time.Now().Unix())
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+
+	//get Buffer Cache Hit
+	bchit := GetBufferCacheHit(db)
+	_, err = mysql.Exec(sql, db_id, "Buffer Cache Hit", key_time, bchit, time.Now().Unix())
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+}
+
+func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 	log.Printf("GatherRedo begin for %d", db_id)
 	session := mysql.NewSession()
 	defer session.Close()
@@ -151,7 +178,7 @@ func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()
-	}else{
+	} else {
 		defer rows.Close()
 		for rows.Next() {
 			var key_time string
@@ -160,7 +187,7 @@ func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int
 			if err != nil {
 				log.Println(err.Error())
 			}
-			
+
 			sql = `insert into pms_oracle_redo(db_id, key_time, redo_log, created) 
 							values(?,?,?,?)`
 			_, err = mysql.Exec(sql, db_id, key_time, redo, time.Now().Unix())
@@ -173,14 +200,14 @@ func GatherRedo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int
 	}
 }
 
-func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 	inst_id := GetCurrentInstanceNumber(db)
 	snap_id := GetLastSnapId(db)
 
 	// check snap id exists
 	var is_exists int
 	sql := `select count(1) from pms_oracle_db_time where db_id = ? and snap_id = ?`
-	_,_ = mysql.SQL(sql, db_id, snap_id).Get(&is_exists)
+	_, _ = mysql.SQL(sql, db_id, snap_id).Get(&is_exists)
 	if is_exists > 0 {
 		return
 	}
@@ -212,7 +239,7 @@ func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port i
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()
-	}else{
+	} else {
 		defer rows.Close()
 		for rows.Next() {
 			var snap_id, elapsed int
@@ -222,7 +249,7 @@ func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port i
 			if err != nil {
 				log.Println(err.Error())
 			}
-			
+
 			sql = `insert into pms_oracle_db_time(db_id, snap_id, end_time, db_time, elapsed, rate, created) 
 							values(?,?,?,?,?,?,?)`
 			_, err = mysql.Exec(sql, db_id, snap_id, end_time, db_time, elapsed, rate, time.Now().Unix())
@@ -234,14 +261,13 @@ func GatherDbTime(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port i
 	}
 }
 
-func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 
 	session := mysql.NewSession()
 	defer session.Close()
 	err := session.Begin()
 	//move old data to history table
 	MoveToHistory(mysql, "pms_oracle_tablespace", "db_id", db_id)
-
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -280,7 +306,7 @@ func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, p
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()
-	}else{
+	} else {
 		defer rows.Close()
 		for rows.Next() {
 			var tbsname, status, mgr, max_size, curr_size, max_used string
@@ -288,7 +314,7 @@ func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, p
 			if err != nil {
 				log.Println(err.Error())
 			}
-			
+
 			sql = `insert into pms_oracle_tablespace(db_id, host, port, alias, tablespace_name, status, management, total_size, used_size, max_rate, created) 
 							values(?,?,?,?,?,?,?,?,?,?,?)`
 			_, err = mysql.Exec(sql, db_id, host, port, alias, tbsname, status, mgr, max_size, curr_size, max_used, time.Now().Unix())
@@ -301,14 +327,13 @@ func GatherTablespaces(db *sql.DB, mysql *xorm.Engine, db_id int, host string, p
 
 }
 
-func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string){
+func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
 
 	session := mysql.NewSession()
 	defer session.Close()
 	err := session.Begin()
 	//move old data to history table
 	MoveToHistory(mysql, "pms_oracle_diskgroup", "db_id", db_id)
-
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -323,7 +348,7 @@ func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, po
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()
-	}else{
+	} else {
 		defer rows.Close()
 		for rows.Next() {
 			var group_name, state, group_type, total_mb, free_mb, used_rate string
@@ -331,7 +356,7 @@ func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, po
 			if err != nil {
 				log.Println(err.Error())
 			}
-			
+
 			sql = `insert into pms_oracle_diskgroup(db_id, host, port, alias, diskgroup_name, state, type, total_mb, free_mb, used_rate, created) 
 							values(?,?,?,?,?,?,?,?,?,?,?)`
 			_, err = mysql.Exec(sql, db_id, host, port, alias, group_name, state, group_type, total_mb, free_mb, used_rate, time.Now().Unix())
@@ -344,7 +369,7 @@ func GatherDiskgroups(db *sql.DB, mysql *xorm.Engine, db_id int, host string, po
 
 }
 
-func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int){
+func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int) {
 	sql := `insert into ` + table_name + `_his select * from ` + table_name + ` where ` + key_name + ` = ?`
 	_, err := mysql.Exec(sql, key_value)
 	if err != nil {

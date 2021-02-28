@@ -70,7 +70,6 @@
                           <th>块使用百分率</th>
                           <th>读缓存百分率</th>
                           <th>写缓存百分率</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -87,8 +86,6 @@
                           <td>{{$v.Key_Blocks_Used_Rate}}</td>
                           <td>{{$v.Key_Buffer_Read_Rate}}</td>
                           <td>{{$v.Key_Buffer_Write_Rate}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

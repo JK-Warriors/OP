@@ -1,0 +1,147 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	alert "opms/monitor/alert"
+
+	"os"
+	"runtime"
+	"sync"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/pythonsite/yamlConfig"
+	"github.com/xormplus/xorm"
+)
+
+var db *xorm.Engine
+
+type ServerConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	Dbname   string
+	Timeout  int
+}
+
+func InitSql() {
+	currdir, _ := os.Getwd()
+	yamlFile := currdir + "/etc/config.yml"
+
+	config := yamlConfig.ConfigEngine{}
+	err := config.Load(yamlFile)
+	if err != nil {
+		log.Fatalln("Config load error:", err)
+	}
+
+	serverconf := ServerConfig{}
+	config.GetStruct("mysql", &serverconf)
+	//fmt.Printf("%v", res)
+	//utils.LogInfof("%v", res)
+
+	host := serverconf.Host
+	port := serverconf.Port
+	user := serverconf.Username
+	passwd := serverconf.Password
+	dbname := serverconf.Dbname
+
+	//引入xorm引擎
+	db, err = xorm.NewEngine("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, passwd, host, port, dbname))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.ShowSQL(true)
+
+	log.Println(db)
+	//	db.NewSession().SqlMapClient().Execute()
+	//log.Println(db.GetSqlMap("json_category-16-17"))
+}
+
+func main() {
+	InitSql()
+
+	num := runtime.NumCPU()
+	DoTasks(num)
+
+}
+
+func DoTasks(x int) {
+	runtime.GOMAXPROCS(x)
+	var wg sync.WaitGroup
+	//start := time.Now().UnixNano()
+
+	for {
+		log.Println("循环开始！")
+
+		wg.Add(1)
+		AlertMedia(&wg)
+		//log.Println("循环结束！")
+
+		time.Sleep(1 * time.Minute)
+	}
+	wg.Wait()
+
+	//fmt.Println("cpu", x, time.Now().UnixNano()-start, "ns")
+}
+
+
+type Alert struct {
+    Id 				int				`xorm:"int 'id'"`
+    Asset_Id 		int		    	`xorm:"int 'asset_id'"`
+    Name 			string		    `xorm:"varchar 'name'"`
+    Severity 		string		    `xorm:"varchar 'severity'"`
+    Templateid 		int		    	`xorm:"int 'templateid'"`
+    Subject 		string		    `xorm:"varchar 'subject'"`
+    Message 		string		    `xorm:"varchar 'message'"`
+    Status 			int				`xorm:"int 'status'"`
+    Send_Mail 					int				`xorm:"int 'send_mail'"`
+    Send_Mail_List 				string			`xorm:"varchar 'send_mail_list'"`
+    Send_Mail_Status 			int				`xorm:"int 'send_mail_status'"`
+    Send_Mail_Retries 			int				`xorm:"int 'send_mail_retries'"`
+    Send_Mail_Error 			string			`xorm:"varchar 'send_mail_error'"`
+    Send_WeChat 				int				`xorm:"int 'send_wechat'"`
+    Send_WeChat_Status 			int				`xorm:"int 'send_wechat_status'"`
+    Send_WeChat_Retries 		int				`xorm:"int 'send_wechat_retries'"`
+    Send_WeChat_Error 			string			`xorm:"varchar 'send_wechat_error'"`
+    Send_SMS 					int				`xorm:"int 'send_sms'"`
+    Send_SMS_List 				string			`xorm:"varchar 'send_sms_list'"`
+    Send_SMS_Status 			int				`xorm:"int 'send_sms_status'"`
+    Send_SMS_Retries 			int				`xorm:"int 'send_sms_retries'"`
+    Send_SMS_Error 				string			`xorm:"varchar 'send_sms_error'"`
+    Created 					int				`xorm:"int 'created'"`
+}
+
+func AlertMedia(wg *sync.WaitGroup) int {
+	var alerts []Alert
+	sql := `select * from pms_alerts where status = 1`
+	err := db.SQL(sql).Find(&alerts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    //log.Print("AlertMedia start.")
+	var wga sync.WaitGroup
+	for _, v := range alerts {
+		if v.Send_Mail == 1 && v.Send_Mail_Status == 0 {
+			wga.Add(1)
+			go alert.AlertEMail(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
+		}else if v.Send_WeChat == 1 && v.Send_WeChat_Status == 0 {
+			wga.Add(1)
+			go alert.AlertWeChat(&wga, db, v.Id, v.Send_Mail_Retries, v.Subject, v.Created)
+		}else if v.Send_SMS == 1 && v.Send_SMS_Status == 0 {
+			wga.Add(1)
+			go alert.AlertSMS(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
+		}
+	}
+	wga.Wait()
+
+	(*wg).Done()
+
+	//log.Print("AlertMedia finished.")
+	
+	return 0
+}

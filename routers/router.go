@@ -1,21 +1,22 @@
 package routers
 
 import (
+	"opms/controllers/alarm"
+	"opms/controllers/asset"
+	"opms/controllers/cfg_screen"
+	"opms/controllers/cfg_trigger"
+	"opms/controllers/config_global"
 	"opms/controllers/dbconfig"
 	"opms/controllers/demo"
 	"opms/controllers/dr_business"
 	"opms/controllers/dr_config"
 	"opms/controllers/dr_oper"
-	"opms/controllers/asset"
-	"opms/controllers/alarm"
-	"opms/controllers/oracle"
-	"opms/controllers/mssql"
-	"opms/controllers/mysql"
-	"opms/controllers/os"
-	"opms/controllers/cfg_trigger"
-	"opms/controllers/config_global"
 	"opms/controllers/logs"
 	"opms/controllers/messages"
+	"opms/controllers/mssql"
+	"opms/controllers/mysql"
+	"opms/controllers/oracle"
+	"opms/controllers/os"
 	"opms/controllers/roles"
 	"opms/controllers/screen"
 	"opms/controllers/users"
@@ -102,6 +103,9 @@ func init() {
 	beego.Router("/config/cfg_trigger/manage", &cfg_trigger.ManageTriggerController{})
 	beego.Router("/config/cfg_trigger/edit/:id", &cfg_trigger.EditTriggerController{})
 
+	beego.Router("/config/screen/manage", &cfg_screen.ManageScreenController{})
+	beego.Router("/config/screen/edit", &cfg_screen.EditScreenController{})
+
 	//资产状态
 	beego.Router("/asset/status/manage", &asset.ManageAssetController{})
 	beego.Router("/oracle/status/manage", &oracle.ManageOracleController{})
@@ -111,16 +115,12 @@ func init() {
 	beego.Router("/mysql/status/manage", &mysql.ManageMysqlController{})
 	beego.Router("/mysql/resource/manage", &mysql.ResourceMysqlController{})
 	beego.Router("/mysql/key/manage", &mysql.KeyMysqlController{})
-	
+
 	beego.Router("/mssql/status/manage", &mssql.ManageMssqlController{})
 
 	beego.Router("/os/status/manage", &os.ManageOSController{})
 	beego.Router("/os/disk/manage", &os.ManageOSDiskController{})
 	beego.Router("/os/io/manage", &os.ManageOSDiskIOController{})
-
-	
-
-
 
 	//操作
 	beego.Router("/operation/dr_switch/manage", &dr_oper.ManageDrSwitchController{})

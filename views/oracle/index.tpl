@@ -70,7 +70,6 @@
                           <th>会话数</th>
                           <th>活动会话数</th>
                           <th>等待会话数</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -79,7 +78,7 @@
                           <td>{{$v.Alias}}</td>
                           <td>{{$v.Host}}</td>
                           <td>{{$v.Inst_Name}}</td>
-                          <td>{{$v.Connect}}</td>
+                          <td>{{if eq 1 $v.Connect}}连接{{else}}未连接{{end}}</td>
                           <td>{{$v.Db_Role}}</td>
                           <td>{{$v.Open_Mode}}</td>
                           <td>{{$v.Startup_Time}}</td>
@@ -87,8 +86,6 @@
                           <td>{{$v.Session_Total}}</td>
                           <td>{{$v.Session_Actives}}</td>
                           <td>{{$v.Session_Waits}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

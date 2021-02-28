@@ -68,7 +68,6 @@
                           <th>已打开文件数</th>
                           <th>表缓存数</th>
                           <th>已打开表</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -83,8 +82,6 @@
                           <td>{{$v.Open_Files}}</td>
                           <td>{{$v.Table_Open_Cache}}</td>
                           <td>{{$v.Open_Tables}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

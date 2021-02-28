@@ -67,7 +67,6 @@
                           <th>总大小(MB)</th>
                           <th>空闲大小(MB)</th>
                           <th>使用率</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -81,7 +80,6 @@
                           <td>{{$v.Total_Mb}}</td>
                           <td>{{$v.Free_Mb}}</td>
                           <td>{{$v.Used_Rate}}</td>
-                          <td></td>
                         </tr>
                       {{end}}
                       </tbody>

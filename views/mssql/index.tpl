@@ -69,7 +69,6 @@
                           <th>进程数</th>
                           <th>运行进程数</th>
                           <th>等待进程数</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -77,7 +76,7 @@
                         <tr>
                           <td>{{$v.Alias}}</td>
                           <td>{{$v.Host}}</td>
-                          <td>{{$v.Connect}}</td>
+                          <td>{{if eq 1 $v.Connect}}连接{{else}}未连接{{end}}</td>
                           <td>{{$v.Role}}</td>
                           <td>{{$v.Uptime}}</td>
                           <td>{{$v.Version}}</td>
@@ -85,8 +84,6 @@
                           <td>{{$v.Processes}}</td>
                           <td>{{$v.Processes_Running}}</td>
                           <td>{{$v.Processes_Waits}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

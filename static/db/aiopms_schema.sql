@@ -86,7 +86,7 @@ INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-dr-ma
 
 INSERT INTO `pms_permissions` VALUES ('2130', '2', '全局配置', 'config-global-manage', '/config/config_global/manage', '', '1', '1', '3');
 
--- INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '4');
+INSERT INTO `pms_permissions` VALUES ('2140', '2', '大屏配置', 'config-screen-manage', '/config/screen/manage', '', '1', '1', '4');
 
 INSERT INTO `pms_permissions` VALUES ('2150', '2', '告警配置', 'config-alarm-manage', '/config/cfg_trigger/manage', '', '1', '1', '5');
 
@@ -97,7 +97,7 @@ INSERT INTO `pms_permissions` VALUES ('3120', '3', '磁盘组', 'oracle-asm-mana
 INSERT INTO `pms_permissions` VALUES ('4100', '4', '实例状态', 'mysql-status-manage', '/mysql/status/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('4110', '4', '资源', 'mysql-resource-manage', '/mysql/resource/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('4120', '4', '键缓存', 'mysql-key-manage', '/mysql/key/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('4130', '4', 'InnoDB', 'mysql-innodb-manage', '/mysql/innodb/manage', '', '1', '1', '1');
+-- INSERT INTO `pms_permissions` VALUES ('4130', '4', 'InnoDB', 'mysql-innodb-manage', '/mysql/innodb/manage', '', '1', '1', '1');
 -- INSERT INTO `pms_permissions` VALUES ('4140', '4', '大表分析', 'mysql-bigtable-manage', '/mysql/bigtable/manage', '', '1', '1', '1');
 -- INSERT INTO `pms_permissions` VALUES ('4150', '4', 'AWR报告', 'mysql-awr-manage', '/mysql/awr/manage', '', '1', '1', '1');
 
@@ -470,11 +470,12 @@ CREATE TABLE `pms_items` (
 -- -----------------------------------------------------------------------------
 DROP TABLE IF EXISTS `pms_item_data`;
 CREATE TABLE `pms_item_data` (
-	`itemid`                 bigint unsigned                           NOT NULL,
-	`time`                   int(10)         DEFAULT '0'               NOT NULL,
+  `db_id`                  int(10)         NOT NULL,
+	`metric_name`            varchar(255)    DEFAULT ''                NOT NULL,
+	`key_time`               varchar(20)     DEFAULT ''               NOT NULL,
 	`value`                  double(16,4)    DEFAULT '0.0000'          NOT NULL,
 	`ns`                     integer         DEFAULT '0'               NOT NULL,
-  PRIMARY KEY (`itemid`,`time`)
+  PRIMARY KEY (`db_id`,`metric_name`,`key_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据表';
 
 

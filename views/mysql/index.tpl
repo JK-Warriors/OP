@@ -68,7 +68,6 @@
                           <th>连接线程数</th>
                           <th>活动线程数</th>
                           <th>等待线程数</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -76,15 +75,13 @@
                         <tr>
                           <td>{{$v.Alias}}</td>
                           <td>{{$v.Host}}</td>
-                          <td>{{$v.Connect}}</td>
+                          <td>{{if eq 1 $v.Connect}}连接{{else}}未连接{{end}}</td>
                           <td>{{$v.Role}}</td>
                           <td>{{$v.Uptime}}</td>
                           <td>{{$v.Version}}</td>
                           <td>{{$v.Threads_Connected}}</td>
                           <td>{{$v.Threads_Running}}</td>
                           <td>{{$v.Threads_Waits}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>
