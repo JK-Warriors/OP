@@ -36,10 +36,10 @@
               <div class="search-form">
                 <div class="form-inline">
                   <div class="form-group">
-                    <form action="/config/cfg_trigger/manage" method="get">
-                    <input type="text" name="search_name" placeholder="请输入告警类型" class="form-control" value="{{.condArr.search_name}}"/>
+                    <form action="/config/screen/manage" method="get">
+                    <input type="text" name="alias" placeholder="请输入别名" class="form-control" value="{{.condArr.alias}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/config/cfg_trigger/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/config/screen/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -58,45 +58,27 @@
                     <table class="table table-bordered table-striped table-condensed">
                       <thead>
                         <tr>
-                          <th>资产主机</th>
-                          <th>资产别名</th>
-                          <th>资产类型</th>
-                          <th>告警类型</th>
-                          <th>级别</th>
-                          <th>表达式</th>
-                          <th>描述</th>
+                          <th></th>
+                          <th>数据库</th>
+                          <th>别名</th>
+                          <th>类型</th>
                           <th>状态</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
                       {{range $k,$v := .dbs}}
                         <tr>
-                          <td>{{$v.Asset_Host}}:{{$v.Asset_Port}}</td>
-                          <td>{{$v.Asset_Alias}}</td>
-                          <td>{{getDBtype $v.Asset_Type}}</td>
-                          <td>{{$v.Trigger_Type}}</td>
-                          <td>{{$v.Severity}}</td>
-                          <td>{{$v.Expression}}</td>
-                          <td>{{$v.Description}}</td>
+                          <td><input type="checkbox" class="checked" value="{{$v.Id}}" {{if eq 1 $v.Show_On_Screen}}checked{{end}}></td>
+                          <td>{{$v.Host}}:{{$v.Port}}</td>
+                          <td>{{$v.Alias}}</td>
+                          <td>{{getDBtype $v.Dbtype}}</td>
                           <td>{{if eq 1 $v.Status}}激活{{else}}禁用{{end}}</td>
-                          <td><div class="btn-group">
-                              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 操作<span class="caret"></span> </button>
-                              <ul class="dropdown-menu">
-                                <li><a href="/config/cfg_trigger/edit/{{$v.Id}}">编辑</a></li>
-                                <li role="separator" class="divider"></li>
-                                {{if eq 1 $v.Status}}
-                                <li><a href="javascript:;" class="js-dbconfig-single" data-id="{{$v.Id}}" data-status="2">禁用</a></li>
-                                {{else}}
-                                <li><a href="javascript:;" class="js-dbconfig-single" data-id="{{$v.Id}}" data-status="1">激活</a></li>
-                                {{end}}
-                              </ul>
-                            </div></td>
                         </tr>
                       {{end}}
                       </tbody>
                     </table>
                   </form>
+			            <a href="javascript:;" id="save" class="btn btn-sm btn-primary">保存</a>
                   {{template "inc/page.tpl" .}}
                 </section>
               </div>
@@ -116,60 +98,27 @@
 
 {{template "inc/foot.tpl" .}}    
 <script>
-    //layer
-    function delete_bs(e){
-      var id = e.getAttribute("data-id");
-      
-      layer.confirm('您确定要删除吗？', {
-        btn: ['确定','取消'] //按钮
-        ,title:"提示"
-      }, function(index){
-        layer.close(index);
-        
-        $.post('/config/dr_business/ajax/delete', {ids:id},function(data){
-          dialogInfo(data.message)
-          if (data.code) {
-            setTimeout(function(){ window.location.reload() }, 1000);
-          } else {
-            setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
-          }
-        },'json');
-      });
-    }
+	$('#save').on('click', function(){
+	
+		var ck = $('.checked:checked');
+		if(ck.length > 4) { dialogInfo('不能超过4个数据库'); return false; }
+		
+		var str = '';
+		$.each(ck, function(i, n){
+			str += n['value']+',';
+		});
+		str = str.substring(0, str.length - 1)
 
-    
-    $('#business-form').validate({
-        ignore:'',        
-		    rules : {
-			      bs_name:{required: true},
-        },
-        messages : {
-			      bs_name:{required: '请填写业务系统名'},
-        },
+    $.post('/config/screen/ajax/save', {ids:str},function(data){
+      dialogInfo(data.message)
+      if (data.code) {
+        setTimeout(function(){ window.location.reload(); }, 1000);
+      } else {
+        setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
+      }			
+    },'json');
 
-        submitHandler:function(form) {
-            var id = $("#bs_id").val()
-            if(id == ""){
-                target_url = "/config/dr_business/add";
-            }else{
-                target_url = "/config/dr_business/edit";
-            }
-            $(form).ajaxSubmit({
-                type:'POST',
-                url: target_url, 
-                dataType:'json',
-                success:function(data) {
-                    dialogInfo(data.message)
-                    if (data.code) {
-                       setTimeout(function(){window.location.href="/config/dr_business/manage"}, 1000);
-                    } else {
-                       setTimeout(function(){ $('#dialogInfo').modal('hide'); }, 1000);
-                    }
-                }
-            });
-        }
-
-    });
+	});
 </script>
 </body>
 </html>

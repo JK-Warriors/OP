@@ -353,6 +353,7 @@ CREATE TABLE `pms_asset_config` (
   `os_password` varchar(255) DEFAULT '' COMMENT '主机密码',
   `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；2：禁用',
   `is_delete` tinyint(2) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
+  `show_on_screen` tinyint(2) DEFAULT 0 COMMENT '0：不显示; 1: 显示',
   `retention` int(10) NOT NULL DEFAULT 0 COMMENT '保留时间，默认单位为天',
   `alert_mail` tinyint(1) DEFAULT 0 COMMENT '告警发送到邮件：0：不发送; 1: 发送',
   `alert_wechat` tinyint(1) DEFAULT 0 COMMENT '告警发送到微信：0：不发送; 1: 发送',
@@ -476,6 +477,22 @@ CREATE TABLE `pms_item_data` (
 	`value`                  double(16,4)    DEFAULT '0.0000'          NOT NULL,
 	`ns`                     integer         DEFAULT '0'               NOT NULL,
   PRIMARY KEY (`db_id`,`metric_name`,`key_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据表';
+
+
+-- -----------------------------------------------------------------------------
+-- Table structure for pms_metric_data
+-- -----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `pms_metric_data`;
+CREATE TABLE `pms_metric_data` (
+  `db_id`               int(10)         NOT NULL,         -- endpoint
+	`metric`              varchar(255)    DEFAULT ''                NOT NULL,
+	`tags`                varchar(255)    DEFAULT ''                NOT NULL,
+	`timestamp`           varchar(255)    DEFAULT ''                NOT NULL,
+	`value`               varchar(20)     DEFAULT ''                NOT NULL,
+	`counterType`         varchar(20)     DEFAULT ''                NOT NULL,
+	`step`                integer         DEFAULT '60'              NOT NULL,
+  PRIMARY KEY (`db_id`,`metric`,`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据表';
 
 
@@ -874,7 +891,9 @@ CREATE TABLE `pms_mssql_status` (
   `version` varchar(50) NOT NULL DEFAULT '-1',
   `lock_timeout` int(11) NOT NULL DEFAULT '-1',
   `trancount` int(11) NOT NULL DEFAULT '-1',
+  `bytes_written` int(11) NOT NULL DEFAULT '-1',
   `max_connections` int(11) NOT NULL DEFAULT '-1',
+  `sessions` int(11) NOT NULL DEFAULT '-1',
   `processes` int(11) NOT NULL DEFAULT '-1',
   `processes_running` int(11) NOT NULL DEFAULT '-1',
   `processes_waits` int(11) NOT NULL DEFAULT '-1',
@@ -898,6 +917,7 @@ CREATE TABLE `pms_mssql_status_his` (
   `version` varchar(50) NOT NULL DEFAULT '-1',
   `lock_timeout` int(11) NOT NULL DEFAULT '-1',
   `trancount` int(11) NOT NULL DEFAULT '-1',
+  `bytes_written` int(11) NOT NULL DEFAULT '-1',
   `max_connections` int(11) NOT NULL DEFAULT '-1',
   `processes` int(11) NOT NULL DEFAULT '-1',
   `processes_running` int(11) NOT NULL DEFAULT '-1',
@@ -1033,6 +1053,10 @@ CREATE TABLE `pms_mysql_status` (
   `role` varchar(30) NOT NULL DEFAULT '-1',
   `uptime` int(11) NOT NULL DEFAULT '-1',
   `version` varchar(50) NOT NULL DEFAULT '-1',
+  `questions` int(10) NOT NULL DEFAULT '-1',
+  `com_commit` int(10) NOT NULL DEFAULT '-1',
+  `com_rollback` int(10) NOT NULL DEFAULT '-1',
+  `innodb_log` int(10) NOT NULL DEFAULT '-1',
   `max_connections` smallint(4) NOT NULL DEFAULT '-1',
   `max_connect_errors` smallint(4) NOT NULL DEFAULT '-1',
   `open_files_limit` int(10) NOT NULL DEFAULT '-1',
@@ -1134,6 +1158,10 @@ CREATE TABLE `pms_mysql_status_his` (
   `role` varchar(30) NOT NULL DEFAULT '-1',
   `uptime` int(11) NOT NULL DEFAULT '-1',
   `version` varchar(50) NOT NULL DEFAULT '-1',
+  `questions` int(10) NOT NULL DEFAULT '-1',
+  `com_commit` int(10) NOT NULL DEFAULT '-1',
+  `com_rollback` int(10) NOT NULL DEFAULT '-1',
+  `innodb_log` int(10) NOT NULL DEFAULT '-1',
   `max_connections` smallint(4) NOT NULL DEFAULT '-1',
   `max_connect_errors` smallint(4) NOT NULL DEFAULT '-1',
   `open_files_limit` int(10) NOT NULL DEFAULT '-1',

@@ -242,8 +242,8 @@
 window.onload = function () {
   new Progress().renderOne('canvas0', 100, 7, 60)
   new Progress().renderOne('canvas1', 100, 7, 50)
-  //new Progress().renderOne('canvas2', 100, 7, 80)
-  //new Progress().renderOne('canvas3', 100, 7, 75)
+  new Progress().renderOne('canvas2', 100, 7, 80)
+  new Progress().renderOne('canvas3', 100, 7, 75)
 };
 
 
@@ -522,7 +522,7 @@ window.onload = function () {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: [{{range $k,$v := $.redo_x}}{{$v.Time}},{{end}}],
+      data: [{{range $k,$v := $.log_per_sec_x}}{{$v.Time}},{{end}}],
     },
     yAxis: {
       type: 'value',
@@ -532,7 +532,7 @@ window.onload = function () {
       {
         name: {{$v.Alias}},
         type: 'line',
-        data: [{{range $k2,$a := $.redo_y}}{{if eq $v.Id $a.Db_Id}}{{$a.Value}},{{end}}{{end}}
+        data: [{{range $k2,$a := $.log_per_sec_y}}{{if eq $v.Id $a.Db_Id}}{{$a.Value}},{{end}}{{end}}
         ],
       },
       {{end}}
@@ -606,26 +606,18 @@ window.onload = function () {
   dataset: {
   },
   xAxis: {type: 'category',
-          data: ['Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie']
+          data: [{{range $k,$v := $.tbs}}{{$v.Tbs_Name}},{{end}}]
   },
-  yAxis: {},
+  yAxis: {
+        type: 'value'
+  },
   // Declare several bar series, each will be mapped
   // to a column of dataset.source by default.
   series: [
     {
         type: 'bar',
-        name: '2015',
-        data: [89.3, 92.1, 94.4, 85.4]
-    },
-    {
-        type: 'bar',
-        name: '2016',
-        data: [95.8, 89.4, 91.2, 76.9]
-    },
-    {
-        type: 'bar',
-        name: '2017',
-        data: [97.7, 83.1, 92.5, 78.1]
+        data: [{{range $k,$v := $.tbs}}{{$v.Rate}},{{end}}]
+        //data: [2,2,1,1,0,0,0,0]
     }
   ]
   }

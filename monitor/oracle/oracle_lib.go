@@ -146,3 +146,13 @@ func GetBufferCacheHit(db *sql.DB) int {
 	}
 	return count
 }
+
+func GetLogPerSecond(db *sql.DB) string {
+	var log_per_sec string
+	sql := `select value from v$sysmetric where metric_name = 'Redo Generated Per Sec' and value > 0 and rownum = 1`
+	err := db.QueryRow(sql).Scan(&log_per_sec)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+	}
+	return log_per_sec
+}

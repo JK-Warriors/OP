@@ -18,30 +18,31 @@ import (
 )
 
 type Dbconfigs struct {
-	Id           int    `orm:"pk;column(id);"`
-	Dbtype       int    `orm:"column(asset_type);"`
-	Host         string `orm:"column(host);"`
-	Protocol     string `orm:"column(protocol);"`
-	Port         int    `orm:"column(port);"`
-	Alias        string `orm:"column(alias);"`
-	InstanceName string `orm:"column(instance_name);"`
-	Dbname       string `orm:"column(db_name);"`
-	Username     string `orm:"column(username);"`
-	Password     string `orm:"column(password);"`
-	Role         int    `orm:"column(role);"`
-	Ostype       int    `orm:"column(os_type);"`
-	OsProtocol   string `orm:"column(os_protocol);"`
-	OsPort       string `orm:"column(os_port);"`
-	OsUsername   string `orm:"column(os_username);"`
-	OsPassword   string `orm:"column(os_password);"`
-	Status       int    `orm:"column(status);"`
-	IsDelete     int    `orm:"column(is_delete);"`
-	Retention    int    `orm:"column(retention);"`
-	Alert_Mail   int    `orm:"column(alert_mail);"`
-	Alert_WeChat int    `orm:"column(alert_wechat);"`
-	Alert_SMS    int    `orm:"column(alert_sms);"`
-	Created      int64  `orm:"column(created);"`
-	Updated      int64  `orm:"column(updated);"`
+	Id             int    `orm:"pk;column(id);"`
+	Dbtype         int    `orm:"column(asset_type);"`
+	Host           string `orm:"column(host);"`
+	Protocol       string `orm:"column(protocol);"`
+	Port           int    `orm:"column(port);"`
+	Alias          string `orm:"column(alias);"`
+	InstanceName   string `orm:"column(instance_name);"`
+	Dbname         string `orm:"column(db_name);"`
+	Username       string `orm:"column(username);"`
+	Password       string `orm:"column(password);"`
+	Role           int    `orm:"column(role);"`
+	Ostype         int    `orm:"column(os_type);"`
+	OsProtocol     string `orm:"column(os_protocol);"`
+	OsPort         string `orm:"column(os_port);"`
+	OsUsername     string `orm:"column(os_username);"`
+	OsPassword     string `orm:"column(os_password);"`
+	Status         int    `orm:"column(status);"`
+	IsDelete       int    `orm:"column(is_delete);"`
+	Show_On_Screen int    `orm:"column(show_on_screen);"`
+	Retention      int    `orm:"column(retention);"`
+	Alert_Mail     int    `orm:"column(alert_mail);"`
+	Alert_WeChat   int    `orm:"column(alert_wechat);"`
+	Alert_SMS      int    `orm:"column(alert_sms);"`
+	Created        int64  `orm:"column(created);"`
+	Updated        int64  `orm:"column(updated);"`
 }
 
 func (this *Dbconfigs) TableName() string {
@@ -77,6 +78,7 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.Alert_SMS = upd.Alert_SMS
 	dbconf.Status = 1
 	dbconf.IsDelete = 0
+	dbconf.Show_On_Screen = 0
 	dbconf.Created = time.Now().Unix()
 	id, err := o.Insert(dbconf)
 
@@ -245,7 +247,7 @@ func ListScreenDBconfig() (dbconf []Dbconfigs) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select * from pms_asset_config where is_delete = 0 and id in(101,102)`
+	sql := `select * from pms_asset_config where is_delete = 0 and show_on_screen = 1 `
 	_, _ = o.Raw(sql).QueryRows(&dbconf)
 
 	return dbconf

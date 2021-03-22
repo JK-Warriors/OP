@@ -38,7 +38,7 @@ func GetDRNormal(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl = -1`
+	sql := `select count(1) from pms_asset_status where asset_type = ? and repl > -1`
 	_ = o.Raw(sql, asset_type).QueryRow(&num)
 	return num
 }
@@ -47,7 +47,7 @@ func GetDRWarning(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl = -1`
+	sql := `select count(1) from pms_asset_status where asset_type = ? and repl > -1 and repl_delay > 600 and  repl_delay <= 3600`
 	_ = o.Raw(sql, asset_type).QueryRow(&num)
 	return num
 }
@@ -56,7 +56,7 @@ func GetDRCritical(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl = -1`
+	sql := `select count(1) from pms_asset_status where asset_type = ? and repl = -1 and repl_delay > 3600`
 	_ = o.Raw(sql, asset_type).QueryRow(&num)
 	return num
 }
@@ -73,11 +73,34 @@ func GetDBTime() (dbtime []DbTime) {
 	sql := `select alias, sum(db_time) as value
 			from pms_oracle_db_time o, pms_asset_config c
 			where o.db_id = c.id
-			and db_id in(101, 102)
+			and c.status = 1
+			and c.is_delete = 0
+			and c.show_on_screen = 1
 			group by alias`
 	_, _ = o.Raw(sql).QueryRows(&dbtime)
 
 	return dbtime
+}
+
+type Tbs_Rate struct {
+	Tbs_Name string  `orm:"column(tbs_name);"`
+	Rate     float32 `orm:"column(max_rate);"`
+}
+
+func GetTablespace() (tbs_rate []Tbs_Rate) {
+	o := orm.NewOrm()
+	o.Using("default")
+
+	sql := `select CONCAT(o.alias, ': ', o.tablespace_name) tbs_name, o.max_rate 
+			from pms_oracle_tablespace o, pms_asset_config c
+				where o.db_id = c.id
+				and c.status = 1
+				and c.is_delete = 0
+				and c.show_on_screen = 1
+				order by max_rate desc`
+	_, _ = o.Raw(sql).QueryRows(&tbs_rate)
+
+	return tbs_rate
 }
 
 type MetricValue struct {
@@ -86,114 +109,33 @@ type MetricValue struct {
 	Value int    `orm:"column(value);"`
 }
 
-func GetActiveSessionX(db_id int) (metricvalue []MetricValue) {
+func GetMetrixValueX(metric_name string) (metricvalue []MetricValue) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select db_id, from_unixtime(created) as time, session_actives as value
-			from pms_oracle_status_his
-			where db_id in(101)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetActiveSessionY(db_id int) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, from_unixtime(created) as time, session_actives as value
-			from pms_oracle_status_his
-			where db_id in(101,102)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetTotalSessionX(db_id int) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, from_unixtime(created) as time, session_total as value
-			from pms_oracle_status_his
-			where db_id in(101)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetTotalSessionY(db_id int) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, from_unixtime(created) as time, session_total as value
-			from pms_oracle_status_his
-			where db_id in(101,102)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetRedoX(db_id int) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, key_time as time, redo_log as value
-			from pms_oracle_redo
-			where db_id in(101)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetRedoY(db_id int) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, key_time as time, redo_log as value
-			from pms_oracle_redo
-			where db_id in(101,102)
-			and created > UNIX_TIMESTAMP() - 3600*24*100
-			order by db_id, created`
-	_, _ = o.Raw(sql).QueryRows(&metricvalue)
-
-	return metricvalue
-}
-
-func GetMetrixValueX(db_id int, metric_name string) (metricvalue []MetricValue) {
-	o := orm.NewOrm()
-	o.Using("default")
-
-	sql := `select db_id, key_time as time, value
-			from pms_item_data
-			where metric_name = ?
-			and db_id in(101)
-			and ns > UNIX_TIMESTAMP() - 3600*24*7
+	sql := `select db_id, timestamp as time, value
+			from pms_metric_data m, (select * from pms_asset_config where status = 1 and is_delete = 0 and show_on_screen = 1 limit 1) c
+			where m.metric = ?
+			and m.db_id = c.id
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 
 	return metricvalue
 }
 
-func GetMetrixValueY(db_id int, metric_name string) (metricvalue []MetricValue) {
+func GetMetrixValueY(metric_name string) (metricvalue []MetricValue) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select db_id, key_time as time, value
-			from pms_item_data
-			where metric_name = ?
-			and db_id in(101,102)
-			and ns > UNIX_TIMESTAMP() - 3600*24*7
+	sql := `select db_id, timestamp as time, value
+			from pms_metric_data m, pms_asset_config c
+			where m.metric = ?
+			and m.db_id = c.id
+			and c.status = 1
+			and c.is_delete = 0
+			and c.show_on_screen = 1
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 

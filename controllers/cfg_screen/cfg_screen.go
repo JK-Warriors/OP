@@ -53,15 +53,29 @@ func (this *ManageScreenController) Get() {
 	this.TplName = "cfg_screen/index.tpl"
 }
 
-type EditScreenController struct {
+type AjaxSaveScreenController struct {
 	controllers.BaseController
 }
 
-func (this *EditScreenController) Get() {
+func (this *AjaxSaveScreenController) Post() {
 	//权限检测
 	if !strings.Contains(this.GetSession("userPermission").(string), "config-screen-manage") {
 		this.Abort("401")
 	}
 
-	this.TplName = "cfg_screen/form.tpl"
+	ids := this.GetString("ids")
+	//utils.LogDebug(ids)
+	var err error
+	if "" == ids {
+		err = RemoveAllShowOnScreen(ids)
+	} else {
+		err = SaveShowOnScreen(ids)
+	}
+
+	if err == nil {
+		this.Data["json"] = map[string]interface{}{"code": 1, "message": "大屏显示配置更改成功"}
+	} else {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "大屏显示配置更改失败"}
+	}
+	this.ServeJSON()
 }

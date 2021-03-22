@@ -104,7 +104,7 @@ func init() {
 	beego.Router("/config/cfg_trigger/edit/:id", &cfg_trigger.EditTriggerController{})
 
 	beego.Router("/config/screen/manage", &cfg_screen.ManageScreenController{})
-	beego.Router("/config/screen/edit", &cfg_screen.EditScreenController{})
+	beego.Router("/config/screen/ajax/save", &cfg_screen.AjaxSaveScreenController{})
 
 	//资产状态
 	beego.Router("/asset/status/manage", &asset.ManageAssetController{})

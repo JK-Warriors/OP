@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"opms/monitor/utils"
-	"time"
+	"strconv"
 	"sync"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/xormplus/xorm"
 )
 
@@ -28,7 +29,6 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 	}
 	defer db.Close()
 
-	
 	err = db.Ping()
 	if err != nil {
 		utils.LogDebugf("DB Ping %s failed: %s", alias, err.Error())
@@ -52,18 +52,20 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 		AlertConnect(mysql, db_id)
 	} else {
 		log.Println("ping succeeded")
-		
+
 		//get sqlserver basic infomation
-		GatherBasicInfo(db, mysql , db_id, host, port, alias)
+		GatherBasicInfo(db, mysql, db_id, host, port, alias)
 		AlertConnect(mysql, db_id)
-		
+
+		GatherMetricValue(db, mysql, db_id, host, port, alias)
+
 	}
 
 	(*wg).Done()
 
 }
 
-func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) error{
+func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) error {
 
 	connect := 1
 	role := 1
@@ -73,11 +75,12 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	processes := GetProcesses(db)
 	processes_running := GetProcessesRunning(db)
 	processes_waits := GetProcessesWaits(db)
-	
-	lock_timeout := GetVariables(db,"LOCK_TIMEOUT")
-	trancount := GetVariables(db,"TRANCOUNT")
-	max_connections := GetVariables(db,"MAX_CONNECTIONS")
-	
+	bytes_written := GetBytesWritten(db)
+
+	lock_timeout := GetVariables(db, "LOCK_TIMEOUT")
+	trancount := GetVariables(db, "TRANCOUNT")
+	max_connections := GetVariables(db, "MAX_CONNECTIONS")
+
 	// storage result
 	session := mysql.NewSession()
 	defer session.Close()
@@ -99,9 +102,9 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	//storage stats into pms_mssql_status
 	MoveToHistory(mysql, "pms_mssql_status", "db_id", db_id)
 
-	sql = `insert into pms_mssql_status(db_id, host, port, alias, connect, role, uptime, version, lock_timeout, trancount, max_connections, processes, processes_running, processes_waits, created) 
-						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, role, uptime, version, lock_timeout, trancount, max_connections, processes, processes_running, processes_waits, time.Now().Unix())
+	sql = `insert into pms_mssql_status(db_id, host, port, alias, connect, role, uptime, version, lock_timeout, trancount, bytes_written, max_connections, processes, processes_running, processes_waits, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, role, uptime, version, lock_timeout, trancount, bytes_written, max_connections, processes, processes_running, processes_waits, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()
@@ -113,8 +116,44 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	return err
 }
 
+func GatherMetricValue(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
+	timestamp := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
 
-func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int){
+	total_sessions := GetTotalSessions(db)
+	active_sessions := GetActiveSessions(db)
+
+	StorageMetricData(mysql, db_id, "TotalSessions", timestamp, strconv.Itoa(total_sessions), "GAUGE")
+	StorageMetricData(mysql, db_id, "ActiveSessions", timestamp, strconv.Itoa(active_sessions), "GAUGE")
+
+	//get QPS
+	qps := GetQPS(db)
+	StorageMetricData(mysql, db_id, "Queries Per Second", timestamp, strconv.Itoa(qps), "GAUGE")
+
+	//get TPS
+	tps := GetTPS(db)
+	StorageMetricData(mysql, db_id, "Transactions Per Second", timestamp, strconv.Itoa(tps), "GAUGE")
+
+	//get Buffer Cache Hit
+	bchit := GetBufferCacheHit(db)
+	StorageMetricData(mysql, db_id, "Buffer Cache Hit", timestamp, strconv.Itoa(bchit), "GAUGE")
+
+	//get Redo
+	log_per_sec := GetLogPerSecond(mysql, db_id)
+	StorageMetricData(mysql, db_id, "Log Per Second", timestamp, strconv.Itoa(log_per_sec), "GAUGE")
+}
+
+// Storage metric data
+func StorageMetricData(mysql *xorm.Engine, db_id int, metric string, timestamp string, value string, counterType string) {
+
+	sql := `insert into pms_metric_data(db_id, metric, timestamp, value, counterType) 
+			values(?,?,?,?,?)`
+	_, err := mysql.Exec(sql, db_id, metric, timestamp, value, counterType)
+	if err != nil {
+		log.Printf("StorageMetricData -- %s: %s", sql, err.Error())
+	}
+}
+
+func MoveToHistory(mysql *xorm.Engine, table_name string, key_name string, key_value int) {
 	sql := `insert into ` + table_name + `_his select * from ` + table_name + ` where ` + key_name + ` = ?`
 	_, err := mysql.Exec(sql, key_value)
 	if err != nil {

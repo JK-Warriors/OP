@@ -61,23 +61,25 @@ func (this *ManageScreenController) Get() {
 
 	this.Data["db_time"] = GetDBTime()
 
-	this.Data["active_session_x"] = GetActiveSessionX(101)
-	this.Data["active_session_y"] = GetActiveSessionY(101)
+	this.Data["tbs"] = GetTablespace()
 
-	this.Data["total_session_x"] = GetTotalSessionX(101)
-	this.Data["total_session_y"] = GetTotalSessionY(101)
+	this.Data["active_session_x"] = GetMetrixValueX("ActiveSessions")
+	this.Data["active_session_y"] = GetMetrixValueY("ActiveSessions")
 
-	this.Data["redo_x"] = GetRedoX(101)
-	this.Data["redo_y"] = GetRedoY(101)
+	this.Data["total_session_x"] = GetMetrixValueX("TotalSessions")
+	this.Data["total_session_y"] = GetMetrixValueY("TotalSessions")
 
-	this.Data["qps_x"] = GetMetrixValueX(101, "Queries Per Second")
-	this.Data["qps_y"] = GetMetrixValueY(101, "Queries Per Second")
+	this.Data["log_per_sec_x"] = GetMetrixValueX("Log Per Second")
+	this.Data["log_per_sec_y"] = GetMetrixValueY("Log Per Second")
 
-	this.Data["tps_x"] = GetMetrixValueX(101, "Transactions Per Second")
-	this.Data["tps_y"] = GetMetrixValueY(101, "Transactions Per Second")
+	this.Data["qps_x"] = GetMetrixValueX("Queries Per Second")
+	this.Data["qps_y"] = GetMetrixValueY("Queries Per Second")
 
-	this.Data["bch_x"] = GetMetrixValueX(101, "Buffer Cache Hit")
-	this.Data["bch_y"] = GetMetrixValueY(101, "Buffer Cache Hit")
+	this.Data["tps_x"] = GetMetrixValueX("Transactions Per Second")
+	this.Data["tps_y"] = GetMetrixValueY("Transactions Per Second")
+
+	this.Data["bch_x"] = GetMetrixValueX("Buffer Cache Hit")
+	this.Data["bch_y"] = GetMetrixValueY("Buffer Cache Hit")
 
 	this.TplName = "screen/index.tpl"
 }

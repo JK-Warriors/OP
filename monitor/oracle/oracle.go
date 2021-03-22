@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"opms/monitor/utils"
+	"strconv"
 	"sync"
 	"time"
 
@@ -134,29 +135,38 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 }
 
 func GatherMetricValue(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
+	timestamp := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
 
-	key_time := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
-	sql := `insert into pms_item_data(db_id, metric_name, key_time, value, ns) values(?,?,?,?,?)`
+	session_total := GetSessionTotal(db)
+	session_actives := GetSessionActive(db)
+	StorageMetricData(mysql, db_id, "TotalSessions", timestamp, strconv.Itoa(session_total), "GAUGE")
+	StorageMetricData(mysql, db_id, "ActiveSessions", timestamp, strconv.Itoa(session_actives), "GAUGE")
 
 	//get QPS
 	qps := GetQPS(db)
-	_, err := mysql.Exec(sql, db_id, "Queries Per Second", key_time, qps, time.Now().Unix())
-	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
-	}
+	StorageMetricData(mysql, db_id, "Queries Per Second", timestamp, strconv.Itoa(qps), "GAUGE")
 
 	//get TPS
 	tps := GetTPS(db)
-	_, err = mysql.Exec(sql, db_id, "Transactions Per Second", key_time, tps, time.Now().Unix())
-	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
-	}
+	StorageMetricData(mysql, db_id, "Transactions Per Second", timestamp, strconv.Itoa(tps), "GAUGE")
 
 	//get Buffer Cache Hit
 	bchit := GetBufferCacheHit(db)
-	_, err = mysql.Exec(sql, db_id, "Buffer Cache Hit", key_time, bchit, time.Now().Unix())
+	StorageMetricData(mysql, db_id, "Buffer Cache Hit", timestamp, strconv.Itoa(bchit), "GAUGE")
+
+	//get Redo
+	log_per_sec := GetLogPerSecond(db)
+	StorageMetricData(mysql, db_id, "Log Per Second", timestamp, log_per_sec, "GAUGE")
+}
+
+// Storage metric data
+func StorageMetricData(mysql *xorm.Engine, db_id int, metric string, timestamp string, value string, counterType string) {
+
+	sql := `insert into pms_metric_data(db_id, metric, timestamp, value, counterType) 
+			values(?,?,?,?,?)`
+	_, err := mysql.Exec(sql, db_id, metric, timestamp, value, counterType)
 	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
+		log.Printf("StorageMetricData -- %s: %s", sql, err.Error())
 	}
 }
 
