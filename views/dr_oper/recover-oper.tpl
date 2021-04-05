@@ -22,9 +22,9 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/dr_recover/manage">容灾操作</a></li>
         <li><a href="/operation/dr_recover/manage">误删除恢复</a></li>
-        <li class="active">恢复详情</li>
+        <li><a href="/operation/dr_recover/detail/{{.dr_id}}">容灾详细</a></li>
+        <li class="active">恢复操作</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -101,7 +101,7 @@
 <script>
 var user_pwd = {{.user.Password}} ;
 var query_url="/operation/dr_switch/process";
-var bs_id = {{.bs_id}} ;
+var dr_id = {{.dr_id}} ;
 var db_id = {{.db_id}} ;
 var	op_type = "STARTFLASHBACK";
 
@@ -195,7 +195,7 @@ function checkUser(e){
 											callback: function(){
 												$.ajax({
 												url: "/operation/dr_recover/flashback",
-												data: {"bs_id":bs_id,"db_id":db_id,"fb_method":fb_method,"fb_point":fb_point,"fb_time":fb_time},
+												data: {"dr_id":dr_id,"db_id":db_id,"fb_method":fb_method,"fb_point":fb_point,"fb_time":fb_time},
 												type: "POST",
 												success: function (data) {
 													//回调函数，判断提交返回的数据执行相应逻辑
@@ -217,7 +217,7 @@ function checkUser(e){
 													shadeClose: false, //开启遮罩关闭
 													content: $('#div_layer')
 												});
-		                						oTimer = setInterval("queryHandle(query_url, bs_id, op_type)",2000);
+		                						oTimer = setInterval("queryHandle(query_url, dr_id, op_type)",2000);
 		                        }
 							        },
 							        cancel: {
@@ -249,8 +249,8 @@ function checkUser(e){
 }
 
   
-function queryHandle(url, bs_id, op_type){
-    $.post(url, {"bs_id":bs_id, "op_type":op_type}, function(json){
+function queryHandle(url, dr_id, op_type){
+    $.post(url, {"dr_id":dr_id, "op_type":op_type}, function(json){
         if(json.on_process == 0){
 			if(json.op_type != ""){
 				//alert(json.op_result);

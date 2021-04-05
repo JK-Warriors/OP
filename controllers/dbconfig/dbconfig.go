@@ -140,6 +140,8 @@ func (this *AddDBConfigController) Post() {
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 	
+	display_order,_  := this.GetInt("display_order")
+
 	alert_mail,_ := this.GetInt("alert_mail")
 	alert_wechat,_  := this.GetInt("alert_wechat")
 	alert_sms,_  := this.GetInt("alert_sms")
@@ -161,6 +163,7 @@ func (this *AddDBConfigController) Post() {
 	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
+	dbconf.Display_Order = display_order
 	dbconf.Alert_Mail = alert_mail
 	dbconf.Alert_WeChat = alert_wechat
 	dbconf.Alert_SMS = alert_sms
@@ -270,6 +273,8 @@ func (this *EditDBConfigController) Post() {
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 	
+	display_order,_  := this.GetInt("display_order")
+
 	alert_mail,_ := this.GetInt("alert_mail")
 	alert_wechat,_ := this.GetInt("alert_wechat")
 	alert_sms,_ := this.GetInt("alert_sms")
@@ -291,6 +296,7 @@ func (this *EditDBConfigController) Post() {
 	dbconf.OsPort = os_port
 	dbconf.OsUsername = os_username
 	dbconf.OsPassword = os_password
+	dbconf.Display_Order = display_order
 	dbconf.Alert_Mail = alert_mail
 	dbconf.Alert_WeChat = alert_wechat
 	dbconf.Alert_SMS = alert_sms

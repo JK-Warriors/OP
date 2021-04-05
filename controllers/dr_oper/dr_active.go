@@ -5,56 +5,10 @@ import (
 	"opms/controllers"
 	"opms/lib/exception"
 	. "opms/models/dr_oper"
-	. "opms/models/users"
 	"opms/utils"
-	"strings"
 
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/utils/pagination"
 	"github.com/godror/godror"
 )
-
-//业务系统管理
-type ManageDrActiveController struct {
-	controllers.BaseController
-}
-
-func (this *ManageDrActiveController) Get() {
-	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-active-manage") {
-		this.Abort("401")
-	}
-
-	page, err := this.GetInt("p")
-	if err != nil {
-		page = 1
-	}
-
-	offset, err1 := beego.AppConfig.Int("pageoffset")
-	if err1 != nil {
-		offset = 15
-	}
-
-	search_name := this.GetString("search_name")
-	condArr := make(map[string]string)
-	condArr["search_name"] = search_name
-
-	countDr := CountOracleDrConfig(condArr)
-
-	paginator := pagination.SetPaginator(this.Ctx, offset, countDr)
-	_, _, dr := ListOracleDr(condArr, page, offset)
-
-	this.Data["paginator"] = paginator
-	this.Data["condArr"] = condArr
-	this.Data["dr"] = dr
-	this.Data["countDr"] = countDr
-
-	userid, _ := this.GetSession("userId").(int64)
-	user, _ := GetUser(userid)
-	this.Data["user"] = user
-
-	this.TplName = "dr_oper/active-index.tpl"
-}
 
 type AjaxDrStartReadController struct {
 	controllers.BaseController

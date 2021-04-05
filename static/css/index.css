@@ -1,0 +1,26 @@
+@charset "UTF-8";
+
+
+.textico {
+  background: #000;
+  color: #fff;
+  display: inline-block;
+  padding: 2px 0px;
+  border-radius: 3px;
+  font-size: 12px;
+  width: 75px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.textico.i_oracle {
+  background: #ED1A23;
+}
+
+.textico.i_mysql {
+  background: #014967;
+}
+
+.textico.i_sqlserver {
+  background: #C74541;
+}

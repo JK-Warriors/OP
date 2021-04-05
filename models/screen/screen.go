@@ -117,7 +117,7 @@ func GetMetrixValueX(metric_name string) (metricvalue []MetricValue) {
 			from pms_metric_data m, (select * from pms_asset_config where status = 1 and is_delete = 0 and show_on_screen = 1 limit 1) c
 			where m.metric = ?
 			and m.db_id = c.id
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 
@@ -129,13 +129,13 @@ func GetMetrixValueY(metric_name string) (metricvalue []MetricValue) {
 	o.Using("default")
 
 	sql := `select db_id, timestamp as time, value
-			from pms_metric_data m, pms_asset_config c
+			from pms_metric_data m, (select * from pms_asset_config where status = 1 and is_delete = 0 and show_on_screen = 1 limit 1) c
 			where m.metric = ?
 			and m.db_id = c.id
 			and c.status = 1
 			and c.is_delete = 0
 			and c.show_on_screen = 1
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 

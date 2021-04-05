@@ -35,6 +35,7 @@ type Dbconfigs struct {
 	OsUsername     string `orm:"column(os_username);"`
 	OsPassword     string `orm:"column(os_password);"`
 	Status         int    `orm:"column(status);"`
+	Display_Order         int    `orm:"column(display_order);"`
 	IsDelete       int    `orm:"column(is_delete);"`
 	Show_On_Screen int    `orm:"column(show_on_screen);"`
 	Retention      int    `orm:"column(retention);"`
@@ -73,6 +74,7 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.OsPort = upd.OsPort
 	dbconf.OsUsername = upd.OsUsername
 	dbconf.OsPassword = upd.OsPassword
+	dbconf.Display_Order = upd.Display_Order
 	dbconf.Alert_Mail = upd.Alert_Mail
 	dbconf.Alert_WeChat = upd.Alert_WeChat
 	dbconf.Alert_SMS = upd.Alert_SMS
@@ -108,6 +110,7 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		dbconf.OsPort = upd.OsPort
 		dbconf.OsUsername = upd.OsUsername
 		dbconf.OsPassword = upd.OsPassword
+		dbconf.Display_Order = upd.Display_Order
 		dbconf.Alert_Mail = upd.Alert_Mail
 		dbconf.Alert_WeChat = upd.Alert_WeChat
 		dbconf.Alert_SMS = upd.Alert_SMS
@@ -225,7 +228,7 @@ func ListDBconfig(condArr map[string]string, page int, offset int) (num int64, e
 	}
 	start := (page - 1) * offset
 
-	qs = qs.OrderBy("id")
+	qs = qs.OrderBy("display_order")
 	nums, errs := qs.Limit(offset, start).All(&dbconf)
 	return nums, errs, dbconf
 }

@@ -3,6 +3,7 @@ package alarm
 import (
 	//"fmt"
 	"opms/models"
+	"strconv"
 	//"opms/utils"
 
 	"github.com/astaxie/beego"
@@ -12,6 +13,7 @@ import (
 type Alert struct {
     Id 				int				`orm:"pk;column(Id);"`
     Asset_Id 		int		    	`orm:"column(asset_id);"`
+    Asset_Desc 		string		    `orm:"column(asset_desc);"`
     Name 			string		    `orm:"column(name);"`
     Severity 		string		    `orm:"column(severity);"`
     Templateid 		int		    	`orm:"column(templateid);"`
@@ -66,8 +68,19 @@ func ListAlerts(condArr map[string]string, page int, offset int) (num int64, err
 	}
 	start := (page - 1) * offset
 
-	qs = qs.OrderBy("-id")
-	nums, errs := qs.Limit(offset, start).All(&alerts)
+	// qs = qs.OrderBy("-id")
+	// nums, errs := qs.Limit(offset, start).All(&alerts)
+	
+	sql := `select s.*, concat(host, ':', port, ' (' , alias, ')')  as asset_desc
+			from pms_alerts s, pms_asset_config c 
+			where s.asset_id = c.id 
+			and s.status = 1 
+			and s.created > UNIX_TIMESTAMP() - 3600*24*7
+			order by id
+			`
+	sql = sql + " limit "  + strconv.Itoa(start) + "," + strconv.Itoa(offset) 
+	nums, errs := o.Raw(sql).QueryRows(&alerts)
+
 	return nums, errs, alerts
 }
 
@@ -91,7 +104,9 @@ func ListAllAlerts() (num int64, err error, alerts []Alert) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select * from pms_alerts where status = 1 and created > UNIX_TIMESTAMP() - 3600*24*7`
+	sql := `select s.*, concat(host, ':', port, ' (' , alias, ')')  as asset_desc
+			from pms_alerts s, pms_asset_config c 
+			where s.asset_id = c.id and s.status = 1 and s.created > UNIX_TIMESTAMP() - 3600*24`
 	nums, errs := o.Raw(sql).QueryRows(&alerts)
 
 	return nums, errs, alerts

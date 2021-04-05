@@ -124,7 +124,7 @@
                       {{range $k,$v := .alerts}}
                       <div class="row">
                         <span class="span1">{{GetDateMHS $v.Created}}</span>
-                        <span class="span2">[{{$v.Severity}}] [{{getDBDesc $v.Asset_Id}}] {{$v.Message}}</span>
+                        <span class="span2">[{{$v.Severity}}] [{{ $v.Asset_Desc}}] {{$v.Message}}</span>
                       </div>
                       {{end}}
                     </div>
@@ -136,7 +136,7 @@
         </div>
         <div class="pt_right" style="position: absolute; right: 0;">
           <div class="pt_5">
-            <div class="c8">
+            <div class="c8" style="min-height:170px">
               <div class="tit">
                 <span>过去7天历史告警统计</span>
               </div>

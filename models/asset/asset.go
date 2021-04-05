@@ -39,12 +39,12 @@ type Asset struct {
 	Created  			int64  `orm:"column(created);"`
 }
 
-func (this *Asset) TableName() string {
-	return models.TableName("asset_status")
-}
-func init() {
-	orm.RegisterModel(new(Asset))
-}
+// func (this *Asset) TableName() string {
+// 	return models.TableName("asset_status")
+// }
+// func init() {
+// 	orm.RegisterModel(new(Asset))
+// }
 
 
 //获取资产状态列表
@@ -92,7 +92,7 @@ func ListAllDBStatus() (num int64, err error, asset []Asset) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select * from pms_asset_status where asset_type < 99 order by connect`
+	sql := `select s.* from pms_asset_status s, pms_asset_config c where s.asset_id = c.id and s.asset_type < 99 order by c.display_order`
 	nums, errs := o.Raw(sql).QueryRows(&asset)
 
 	return nums, errs, asset

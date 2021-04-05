@@ -22,8 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/dr_switch/manage">容灾操作</a></li>
-        <li class="active">容灾切换</li>
+        <li><a href="/operation/dr_manage/list">容灾管理</a></li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -39,7 +38,7 @@
                     <form method="get">
                     <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/operation/dr_switch/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/operation/dr_manage/list" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -71,9 +70,10 @@
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
-                            <a name="screen" class="btn btn-primary" href="/operation/dr_switch/screen/{{$v.Id}}"> <i class="fa fa-reset"></i> 灾备大屏 </a>
-                            <button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>
-                            <button name="failover" class="btn btn-danger" type="button" value="Failover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 灾难切换 </button>
+						  	<a name="screen"  {{if eq 1 $v.Db_Type_P}}class="btn btn-primary" href="/operation/screen/view/{{$v.Id}}"{{else}}class="btn btn-default"{{end}}> <i class="fa fa-reset"></i> 灾备大屏 </a> 
+                            <a name="btnDrManage" class="btn btn-primary" type="button" href="/operation/dr_manage/detail/{{$v.Id}}"> <i class="fa fa-reset"></i> 容灾管理 </a>
+                            <!--<button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>
+                            <button name="failover" class="btn btn-danger" type="button" value="Failover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 灾难切换 </button>-->
                           </td>
                         </tr>
                       {{end}}

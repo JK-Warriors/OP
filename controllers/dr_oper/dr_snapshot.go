@@ -2,6 +2,8 @@ package dr_oper
 
 import (
 	"log"
+	"strconv"
+	"fmt"
 	"opms/controllers"
 	"opms/lib/exception"
 	. "opms/models/dr_oper"
@@ -55,6 +57,72 @@ func (this *ManageDrSnapshotController) Get() {
 
 	this.TplName = "dr_oper/snapshot-index.tpl"
 }
+
+
+
+//快照详细
+type DetailSnapshotController struct {
+	controllers.BaseController
+}
+
+func (this *DetailSnapshotController) Get() {
+	//权限检测
+	if !strings.Contains(this.GetSession("userPermission").(string), "oper-snapshot-manage") {
+		this.Abort("401")
+	}
+
+	idstr := this.Ctx.Input.Param(":id")
+	dr_id, _ := strconv.Atoi(idstr)
+
+	asset_type :=GetAssetType(dr_id)
+
+	pri_id, err := GetPrimaryDBId(dr_id)
+	if err != nil {
+		utils.LogDebug("GetPrimaryID failed: " + err.Error())
+	}
+	utils.LogDebug(fmt.Sprintf("GetPrimaryID %d successfully.", pri_id))
+	sta_id, err := GetStandbyDBId(dr_id)
+	if err != nil {
+		utils.LogDebug("GetStandbyID failed: " + err.Error())
+	}
+	utils.LogDebug(fmt.Sprintf("GetStandbyID %d successfully.", sta_id))
+
+	pri_config, err := GetOracleBasicInfo(pri_id)
+	if err != nil {
+		utils.LogDebug("GetOracleBasicInfo failed: " + err.Error())
+	}
+
+	sta_config, err := GetOracleBasicInfo(sta_id)
+	if err != nil {
+		utils.LogDebug("GetOracleBasicInfo failed: " + err.Error())
+	}
+
+	pri_dr, err := GetPrimaryDrInfo(pri_id)
+	if err != nil {
+		utils.LogDebug("GetPrimaryDrInfo failed: " + err.Error())
+	}
+
+	sta_dr, err := GetStandbyDrInfo(sta_id)
+	if err != nil {
+		utils.LogDebug("GetStandbyDrInfo failed: " + err.Error())
+	}
+
+	this.Data["pri_config"] = pri_config
+	this.Data["sta_config"] = sta_config
+	this.Data["pri_dr"] = pri_dr
+	this.Data["sta_dr"] = sta_dr
+	this.Data["dr_id"] = dr_id
+	this.Data["asset_type"] = asset_type
+	
+	userid, _ := this.GetSession("userId").(int64)
+	user, _ := GetUser(userid)
+	this.Data["user"] = user
+
+	this.TplName = "dr_oper/snapshot_detail.tpl"
+}
+
+
+
 
 type AjaxDrStartSnapshotController struct {
 	controllers.BaseController

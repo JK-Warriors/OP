@@ -20,14 +20,6 @@ import (
 	"github.com/oliamb/cutter"
 )
 
-//主页
-type MainController struct {
-	controllers.BaseController
-}
-
-func (this *MainController) Get() {
-	this.TplName = "index.tpl"
-}
 
 //登录
 type LoginUserController struct {

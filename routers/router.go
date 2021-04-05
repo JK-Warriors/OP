@@ -2,7 +2,6 @@ package routers
 
 import (
 	"opms/controllers/alarm"
-	"opms/controllers/asset"
 	"opms/controllers/cfg_screen"
 	"opms/controllers/cfg_trigger"
 	"opms/controllers/config_global"
@@ -20,12 +19,14 @@ import (
 	"opms/controllers/roles"
 	"opms/controllers/screen"
 	"opms/controllers/users"
+	"opms/controllers/index"
+	hc "opms/controllers/healthcheck"
 
 	"github.com/astaxie/beego"
 )
 
 func init() {
-	beego.Router("/", &users.MainController{})
+	beego.Router("/", &index.MainController{})
 
 	//用户
 	beego.Router("/login", &users.LoginUserController{})
@@ -107,7 +108,7 @@ func init() {
 	beego.Router("/config/screen/ajax/save", &cfg_screen.AjaxSaveScreenController{})
 
 	//资产状态
-	beego.Router("/asset/status/manage", &asset.ManageAssetController{})
+	// beego.Router("/asset/status/manage", &asset.ManageAssetController{})
 	beego.Router("/oracle/status/manage", &oracle.ManageOracleController{})
 	beego.Router("/oracle/tbs/manage", &oracle.ManageOracleTbsController{})
 	beego.Router("/oracle/asm/manage", &oracle.ManageOracleAsmController{})
@@ -123,25 +124,31 @@ func init() {
 	beego.Router("/os/io/manage", &os.ManageOSDiskIOController{})
 
 	//操作
-	beego.Router("/operation/dr_switch/manage", &dr_oper.ManageDrSwitchController{})
-	//beego.Router("/operation/dr_switch/view/:id", &dr_oper.ViewDrSwitchController{})
-	beego.Router("/operation/dr_switch/screen/:id", &dr_oper.ScreenDrSwitchController{})
+	beego.Router("/operation/dr_manage/list", &dr_oper.ListDrController{})
+	beego.Router("/operation/dr_manage/detail/:id", &dr_oper.DetailDrController{})
+	
+	beego.Router("/operation/screen/view/:id", &dr_oper.ScreenDrViewController{})
 	beego.Router("/operation/dr_switch/switchover", &dr_oper.AjaxDrSwitchoverController{})
 	beego.Router("/operation/dr_switch/failover", &dr_oper.AjaxDrFailoverController{})
 	beego.Router("/operation/dr_switch/process", &dr_oper.AjaxDrProcessController{})
-	beego.Router("/operation/dr_active/manage", &dr_oper.ManageDrActiveController{})
 	beego.Router("/operation/dr_active/startread", &dr_oper.AjaxDrStartReadController{})
 	beego.Router("/operation/dr_active/stopread", &dr_oper.AjaxDrStopReadController{})
-	beego.Router("/operation/dr_snapshot/manage", &dr_oper.ManageDrSnapshotController{})
-	beego.Router("/operation/dr_snapshot/startsnapshot", &dr_oper.AjaxDrStartSnapshotController{})
-	beego.Router("/operation/dr_snapshot/stopsnapshot", &dr_oper.AjaxDrStopSnapshotController{})
-	beego.Router("/operation/dr_sync/manage", &dr_oper.ManageDrSyncController{})
 	beego.Router("/operation/dr_sync/startsync", &dr_oper.AjaxDrStartSyncController{})
 	beego.Router("/operation/dr_sync/stopsync", &dr_oper.AjaxDrStopSyncController{})
+	beego.Router("/operation/dr_snapshot/manage", &dr_oper.ManageDrSnapshotController{})
+	beego.Router("/operation/dr_snapshot/detail/:id", &dr_oper.DetailSnapshotController{})
+	beego.Router("/operation/dr_snapshot/startsnapshot", &dr_oper.AjaxDrStartSnapshotController{})
+	beego.Router("/operation/dr_snapshot/stopsnapshot", &dr_oper.AjaxDrStopSnapshotController{})
 	beego.Router("/operation/dr_recover/manage", &dr_oper.ManageDrRecoverController{})
+	beego.Router("/operation/dr_recover/detail/:id", &dr_oper.DetailRecoverController{})
 	beego.Router("/operation/dr_recover/oper/:id", &dr_oper.OperDrRecoverController{})
 	beego.Router("/operation/dr_recover/flashback", &dr_oper.AjaxDrFlashbackController{})
 	beego.Router("/operation/dr_recover/recover", &dr_oper.AjaxDrRecoverController{})
+
+	//巡检
+	beego.Router("/healthcheck/config/manage", &hc.ManageConfigController{})
+	beego.Router("/healthcheck/config/edit", &hc.EditConfigController{})
+
 
 	//大屏
 	beego.Router("/screen/manage", &screen.ManageScreenController{})

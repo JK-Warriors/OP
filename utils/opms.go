@@ -6,6 +6,53 @@ import (
 	"strings"
 )
 
+
+func GetAssetImage(Asset_Type int) string {
+	var db_type_img string
+	switch Asset_Type {
+	case 1:
+		db_type_img = "<span class='textico i_oracle'>Oracle</span>"
+	case 2:
+		db_type_img = "<span class='textico i_mysql'>MySQL</span>"
+	case 3:
+		db_type_img = "<span class='textico i_sqlserver'>SQL Server</span>"
+	default:
+		db_type_img = ""
+	}
+	return db_type_img
+}
+
+func GetDbRoleImage(Role string) string {
+	var db_role_img string
+	if(Role == "PRIMARY"){
+		db_role_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='Master/Primary'><img src='/static/img/primary.png' /></a>"
+	}else if(Role == "PHYSICAL STANDBY") {
+		db_role_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='Slave/Secondary'><img src='/static/img/slave.png' /></a>"
+	}else{
+		db_role_img = "---"
+	}
+
+	return db_role_img
+}
+
+func CheckDbStatusLevel(data int, data_tips string) string {
+	var level_img string
+	switch data {
+	case -1:
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='no data'><img src='/static/img/none.png' /></a>"
+	case 1:
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + data_tips + "'><img src='/static/img/ok.png' /></a>"
+	case 2:
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + data_tips + "'><img src='/static/img/warning.png' /></a>"
+	case 3:
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + data_tips + "'><img src='/static/img/critical.png' /></a>"
+	default:
+		level_img = "<img src='/static/img/none.png' alt='none' title='no data' />"
+	}
+	return level_img
+}
+
+
 func GetNeedsStatus(status int) string {
 	var txt string
 	switch status {

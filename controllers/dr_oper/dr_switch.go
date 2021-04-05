@@ -5,109 +5,13 @@ import (
 	"log"
 	"opms/controllers"
 	"opms/lib/exception"
-	"strconv"
 
 	. "opms/models/dr_oper"
-	. "opms/models/users"
 	"opms/utils"
-	"strings"
 
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/utils/pagination"
 	"github.com/godror/godror"
 )
 
-//业务切换管理
-type ManageDrSwitchController struct {
-	controllers.BaseController
-}
-
-func (this *ManageDrSwitchController) Get() {
-	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-manage") {
-		this.Abort("401")
-	}
-
-	page, err := this.GetInt("p")
-	if err != nil {
-		page = 1
-	}
-
-	offset, err1 := beego.AppConfig.Int("pageoffset")
-	if err1 != nil {
-		offset = 15
-	}
-
-	search_name := this.GetString("search_name")
-	condArr := make(map[string]string)
-	condArr["search_name"] = search_name
-
-	countDr := CountDrconfig(condArr)
-
-	paginator := pagination.SetPaginator(this.Ctx, offset, countDr)
-	_, _, dr := ListDr(condArr, page, offset)
-
-	this.Data["paginator"] = paginator
-	this.Data["condArr"] = condArr
-	this.Data["dr"] = dr
-	this.Data["countDr"] = countDr
-
-	userid, _ := this.GetSession("userId").(int64)
-	user, _ := GetUser(userid)
-	this.Data["user"] = user
-
-	this.TplName = "dr_oper/switch-index.tpl"
-}
-
-//业务大屏
-type ScreenDrSwitchController struct {
-	controllers.BaseController
-}
-
-func (this *ScreenDrSwitchController) Get() {
-	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-switch-view") {
-		this.Abort("401")
-	}
-
-	userid, _ := this.GetSession("userId").(int64)
-	user, _ := GetUser(userid)
-	this.Data["user"] = user
-
-	idstr := this.Ctx.Input.Param(":id")
-	bs_id, _ := strconv.Atoi(idstr)
-	//灾备配置检查
-	cfg_count, err := CheckDrConfig(bs_id)
-	if cfg_count == 0 {
-		//没有配置容灾库
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "该系统没有配置容灾库"}
-		this.ServeJSON()
-		return
-	}
-
-	pri_id, err := GetPrimaryDBId(bs_id)
-	if err != nil {
-		utils.LogDebug("GetPrimaryDBID failed: " + err.Error())
-	}
-	utils.LogDebug("GetPrimaryDBID successfully.")
-	sta_id, err := GetStandbyDBId(bs_id)
-	if err != nil {
-		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
-	}
-	utils.LogDebug("GetStandbyDBID successfully.")
-
-	pri_basic, err := GetOracleBasicInfo(pri_id)
-	sta_basic, err := GetOracleBasicInfo(sta_id)
-	pri_dr, err := GetPrimaryDrInfo(pri_id)
-	sta_dr, err := GetStandbyDrInfo(sta_id)
-
-	this.Data["pri_basic"] = pri_basic
-	this.Data["sta_basic"] = sta_basic
-	this.Data["pri_dr"] = pri_dr
-	this.Data["sta_dr"] = sta_dr
-
-	this.TplName = "dr_oper/screen-oracle.tpl"
-}
 
 type AjaxDrSwitchoverController struct {
 	controllers.BaseController

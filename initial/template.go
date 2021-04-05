@@ -4,6 +4,7 @@ import (
 	//"fmt"
 	"opms/models/dr_business"
 	"opms/models/dbconfig"
+	"opms/models/dr_oper"
 	"opms/models/roles"
 	"opms/models/users"
 	"opms/utils"
@@ -32,6 +33,11 @@ func InitTemplate() {
 		beego.AddFuncMap("getOagoodProcess", oagoods.ListOagoodApproverProcessHtml)
 		beego.AddFuncMap("getOvertimeProcess", overtimes.ListOvertimeApproverProcessHtml)
 	*/
+	beego.AddFuncMap("getAssetImage", utils.GetAssetImage)
+	beego.AddFuncMap("getDbRoleImage", utils.GetDbRoleImage)
+	beego.AddFuncMap("checkDbStatusLevel", utils.CheckDbStatusLevel)
+
+	beego.AddFuncMap("getTransferStatus", dr_oper.GetTransferStatus)
 
 	beego.AddFuncMap("getDate", utils.GetDate)
 	beego.AddFuncMap("getDateMH", utils.GetDateMH)

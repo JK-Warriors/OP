@@ -22,71 +22,54 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/dr_sync/manage">容灾操作</a></li>
-        <li class="active">容灾同步</li>
+        <li><a href="/operation/dr_manage/list">误删除恢复</a></li>
+        <li class="active">容灾详细</li>
       </ul>
     </div>
     <!-- page heading end-->
     <!--body wrapper start-->
-    <div class="wrapper">
-      <div class="row">
-        <div class="col-sm-12">
-          <!-- 主体内容 开始 -->
-            <div class="searchdiv">
-              <div class="search-form">
-                <div class="form-inline">
-                  <div class="form-group">
-                    <form method="get">
-                    <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
-                    <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/operation/dr_sync/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+	<div class="pull-right">
+		<a href="/operation/dr_recover/oper/{{.dr_id}}" class="btn btn-primary"> <i class="fa fa-reset"></i> 进入恢复 </a>
+		<button name="stopflashback" class="btn btn-primary" type="button" value="StopFlashback" onclick="checkUser(this)" data-id="{{.dr_id}}"> <i class="fa fa-reset"></i> 重新同步 </button>
+	</div>
 
-            <section class="panel">
-              <header class="panel-heading"> 容灾列表 / 总数：{{.countDr}}
-                <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
-                <!--a href="javascript:;" class="fa fa-times"></a-->
-                </span> 
-              </header>
-              <div class="panel-body">
-                <section id="unseen">
-                  <form id="user-form-list">
-                    <table class="table table-bordered table-striped table-condensed">
-                      <thead>
-                        <tr>
-                          <th>容灾组名称</th>
-                          <th>主库</th>
-                          <th>备库</th>
-                          <th>操作</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      {{range $k,$v := .dr}}
-                        <tr>
-                          <td>{{$v.Bs_Name}}</td>
-                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
-                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
-                          <td>
-                            <button name="startsync" class="btn btn-primary" type="button" value="StartSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 启动同步 </button>
-                            <button name="stopsync" class="btn btn-danger" type="button" value="StopSync" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 停止同步 </button>
-                          </td>
-                        </tr>
-                      {{end}}
-                      </tbody>
-                    </table>
-                  </form>
-                  {{template "inc/page.tpl" .}}
-                </section>
-              </div>
-            </section>
-          <!-- 主体内容 结束 -->
-        </div>
-      </div>
-    </div>
+	<div style="padding: 19px; " >
+		<div style='padding: 20px 120px 0px 60px; height:150px; overflow:hidden'>
+			<div style='float:left; height:100px; width:280px;'>
+			<div><label name="pri_host" class="control-label" for="">IP：{{ .pri_config.Host }}</label></div>
+			<div><label name="pri_dbname" class="control-label" for="">数据库名：{{ .pri_config.Instance_name }}</label></div>
+			<div><label name="pri_dbstatus" class="control-label" for="">实例状态：{{ .pri_config.Open_Mode }}</label></div>
+			<div><label name="pri_port" class="control-label" for="">监听端口：{{ .pri_config.Port }}</label></div>
+			</div>
+			<div style='float:right; height:100px; width:280px;'>
+			<div><label name="sta_host" class="control-label" for="">IP：{{ .sta_config.Host }}</label></div>
+			<div><label name="sta_dbname" class="control-label" for="">数据库名：{{ .sta_config.Instance_name }}</label></div>
+			<div><label name="sta_dbstatus" class="control-label" for="">实例状态：{{ .sta_config.Open_Mode }}</label></div>
+			<div><label name="sta_port" class="control-label" for="">监听端口：{{ .sta_config.Port }}</label></div>
+			</div>
+		</div>
+	</div>
+
+	<div style='padding: 5px 0px 0px 200px; height:150px;'>
+		<div style="float:left;"><img {{if eq -1 .pri_config.Connect }}src="/static/img/connect_error.png"{{else}}src="/static/img/primary_db.png"{{end}} /></div> 
+
+			<div style="float:left;">
+			<div><label style='padding: 0px 0px 0px 120px;' class="control-label" for="">序列：{{ .sta_dr.Sequence }}</label></div>
+			<div><img src="{{ getTransferStatus .sta_dr.DB_Id}}"> </div>
+			</div> 
+			
+			<div style="float:left;"><img {{if eq -1 .sta_config.Connect }}src="/static/img/connect_error.png"{{else}}src="/static/img/standby_db.png"{{end}}/></div> 
+			</div>
+
+
+			<div style="float:left; width:340px; height:30px; border:0px solid red;">
+			</div>
+			<div id="mrp_warning" style="float:left; width:400px; height:30px; border:0px solid red; color:red; ">
+				<label id="lb_warning" class="control-label" style="font-size:18px;color:red; padding: 5px 0px 0px 20px;"></label>
+			</div>
+			
+	</div>  
+
     <!--body wrapper end-->
     <!--footer section start-->
     {{template "inc/foot-info.tpl" .}}
@@ -104,21 +87,16 @@ var oTimer = null;
     
 var user_pwd = {{.user.Password}} ;
 var div_layer = document.getElementById("div_layer");
-var query_url="/operation/dr_switch/process";
+var query_url="";
 var bs_id = -1;
 
 function checkUser(e){
     bs_id = $(e).attr('data-id');
     
-		if(e.value == "StartSync"){
-			_message = "确认要开始启动同步吗？";
-      target_url = "/operation/dr_sync/startsync";
-			op_type = "STARTSYNC";
-		}
-		else if(e.value == "StopSync"){
-			_message = "确认要开始停止同步吗？";
-      target_url = "/operation/dr_sync/stopsync";
-			op_type = "STOPSYNC";
+		if(e.value == "StopFlashback"){
+			_message = "确认要开始重新同步吗？";
+      target_url = "/operation/dr_recover/recover";
+			op_type = "STOPFLASHBACK";
 		}
 		else{
 			return;
@@ -221,22 +199,14 @@ function queryHandle(url, bs_id, op_type){
         		if(json.op_type != ""){
 		        		//alert(json.op_result);
 		        		
-		        		if(json.op_type == "STARTSYNC"){
+		        		if(json.op_type == "STOPFLASHBACK"){
                     if(json.op_reason == 'null'){
-                      error_message = "启动同步失败，详细原因请查看相关日志";
+                      error_message = "重新同步失败，详细原因请查看相关日志";
                     }else{
-                      error_message = "启动同步失败，原因是：" + json.op_reason;
-                    }
-							
-							      ok_message = "启动同步成功";
-		        		}else if(json.op_type == "STOPSYNC"){
-                    if(json.op_reason == 'null'){
-                      error_message = "停止同步失败，详细原因请查看相关日志";
-                    }else{
-                      error_message = "停止同步失败，原因是：" + json.op_reason;
+                      error_message = "重新同步失败，原因是：" + json.op_reason;
                     }
                     
-                    ok_message = "停止同步成功";
+                    ok_message = "重新同步成功";
 		        		}
         		
         				if(json.op_result == '-1'){
@@ -319,7 +289,7 @@ function queryHandle(url, bs_id, op_type){
       $(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
     }
     },'json');  
-}    
+}  
 
 </script>
 </body>

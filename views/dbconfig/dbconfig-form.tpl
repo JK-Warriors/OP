@@ -160,6 +160,12 @@
                   </div>
                 </div>
 
+                <div id="div_display_order" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>显示顺序</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="display_order" name="display_order"  value="{{.dbconf.Display_Order}}" class="form-control" placeholder="">
+                  </div>
+                </div>
                 
                 <div id="div_alarm" class="form-group">
                   <label class="col-sm-2 col-sm-2 control-label"><span></span>告警发送 </label>

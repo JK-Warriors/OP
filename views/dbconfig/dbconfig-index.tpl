@@ -86,7 +86,7 @@
                     
                     {{range $k,$v := .dbconf}}
                     <tr>
-                      <td>{{getDBtype $v.Dbtype}}</td>
+                      <td>{{ getAssetImage $v.Dbtype | str2html}}</td>
                       <td>{{$v.Host}}</td>
                       <td>{{$v.Port}}</a></td>
                       <td>{{$v.Alias}}</a></td>

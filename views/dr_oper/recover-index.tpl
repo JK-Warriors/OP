@@ -22,8 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/operation/dr_recover/manage">容灾操作</a></li>
-        <li class="active">误删除恢复</li>
+        <li><a href="/operation/dr_recover/manage">误删除恢复</a></li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -71,8 +70,7 @@
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
                           <td>
-                            <a href="/operation/dr_recover/oper/{{$v.Id}}" class="btn btn-primary"> <i class="fa fa-reset"></i> 进入恢复 </a>
-                            <button name="stopflashback" class="btn btn-primary" type="button" value="StopFlashback" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 重新同步 </button>
+                            <a name="btnDrManage" class="btn btn-primary" type="button" href="/operation/dr_recover/detail/{{$v.Id}}"> <i class="fa fa-reset"></i> 恢复管理 </a>
                           </td>
                         </tr>
                       {{end}}
@@ -98,215 +96,7 @@
 
 {{template "inc/foot.tpl" .}}    
 <script>
-var mylay = null;
-var oTimer = null; 
-
-    
-var user_pwd = {{.user.Password}} ;
-var div_layer = document.getElementById("div_layer");
-var query_url="/operation/dr_switch/process";
-var bs_id = -1;
-
-function checkUser(e){
-    bs_id = $(e).attr('data-id');
-    
-		if(e.value == "StopFlashback"){
-			_message = "确认要开始重新同步吗？";
-      target_url = "/operation/dr_recover/recover";
-			op_type = "STOPFLASHBACK";
-		}
-		else{
-			return;
-		}	
-    
-
-		bootbox.prompt({
-		    title: "请确认密码",
-		    inputType: 'password',
-			buttons: {confirm: {label: "确认"}, cancel: {label: "取消"} },
-		    callback: function (result) {
-		    	if(result)
-		    	{ 
-		        if (md5(result) == user_pwd)
-		        {
-					bootbox.dialog({
-						message: _message,
-						buttons: {
-							cancel: {
-								label: '取消',
-								className: 'btn-default',
-								callback: function () {
-								}
-							},
-							ok: {
-								label: '确定',
-								className: 'btn-danger',
-								callback: function(){
-									$.ajax({url: target_url,
-											type: "POST",
-											data: {"bs_id":bs_id,"asset_type":1},
-											success: function (json) {
-												//回调函数，判断提交返回的数据执行相应逻辑
-												if (json.code == 0) {
-                            bootbox.alert({
-                              message: json.message,
-                              buttons: {
-                                    ok: {
-                                      label: '确定',
-                                      className: 'btn-success'
-                                    }
-                                  },
-                                callback: function () {
-                                  window.location.reload();
-                              }
-                            });
-                                    
-                            if(mylay!=null){
-                              layer.close(mylay);
-                            }
-                            clearInterval(oTimer);
-												}
-												else {
-												}
-											}
-											});
-
-												
-											$('#div_layer').html("");			//初始化div
-											mylay = layer.open({
-												type: 1,
-												skin: 'layui-layer-demo layblack', //样式类名
-												closeBtn: 0, //不显示关闭按钮
-												anim: 1,
-												title: '详细过程',
-												area: ['450px', '240px'],
-												shadeClose: false, //开启遮罩关闭
-												content: $('#div_layer')
-											});
-											
-											oTimer = setInterval("queryHandle(query_url, bs_id, op_type)",2000);
-								}
-							}
-						}
-					});
-		        }
-		        else
-		        {
-		        	bootbox.alert({
-		        		message: "密码不对，请确认后重新尝试!",
-		        		buttons: {
-							        ok: {
-							            label: '确定',
-							            className: 'btn-success'
-							        }
-							    }
-		        	});
-		        }
-		      }
-		
-		    }
-		});
-
-}
-
   
-function queryHandle(url, bs_id, op_type){
-    $.post(url, {"bs_id":bs_id, "op_type":op_type}, function(json){
-        if(json.on_process == 0){
-        		if(json.op_type != ""){
-		        		//alert(json.op_result);
-		        		
-		        		if(json.op_type == "STOPFLASHBACK"){
-                    if(json.op_reason == 'null'){
-                      error_message = "重新同步失败，详细原因请查看相关日志";
-                    }else{
-                      error_message = "重新同步失败，原因是：" + json.op_reason;
-                    }
-                    
-                    ok_message = "重新同步成功";
-		        		}
-        		
-        				if(json.op_result == '-1'){
-                    bootbox.alert({
-                      message: error_message,
-                      buttons: {
-                            ok: {
-                              label: '确定',
-                              className: 'btn-success'
-                            }
-                          },
-                        callback: function () {
-                          window.location.reload();
-                      }
-                    });
-                            
-                    if(mylay!=null){
-                      layer.close(mylay);
-                    }
-                    clearInterval(oTimer);
-						        	
-        				}else if(json.op_result == '1'){
-                    bootbox.alert({
-                        message: ok_message,
-                        buttons: {
-                              ok: {
-                                label: '确定',
-                                className: 'btn-success'
-                              }
-                            },
-                          callback: function () {
-                            window.location.reload();
-                        }
-                    });
-                            
-                    if(mylay!=null){
-                      layer.close(mylay);
-                    }
-                    clearInterval(oTimer); 
-        				}else{
-                    if(mylay!=null){
-                      layer.close(mylay);
-                    }
-                    clearInterval(oTimer); 
-                  }
-        		}
-        }else if(json.on_process == -1){
-            bootbox.alert({
-                message: "该系统没有配置容灾库",
-                buttons: {
-                      ok: {
-                        label: '确定',
-                        className: 'btn-success'
-                      }
-                    },
-                  callback: function () {
-                    window.location.reload();
-                }
-            });
-                    
-            if(mylay!=null){
-              layer.close(mylay);
-            }
-            clearInterval(oTimer); 
-        }
-
-		if(mylay!=null){
-      if(json.json_process == "null"){
-        		$("#div_layer").append("<p>" + json.json_process + "</p>");
-      }else{
-        localJson = $.parseJSON(json.json_process);
-        //alert(localJson);
-        $("#div_layer").empty();
-        $.each(localJson,function(idx,item){   
-          //alert("Time:"+item.Time+",Process_desc:"+item.Process_desc);   
-              $("#div_layer").append("<p>" + item.Time + ": " + item.Process_desc + "</p>");
-        });  
-      }
-
-      $(".layui-layer-content").scrollTop($(".layui-layer-content")[0].scrollHeight);
-    }
-    },'json');  
-}    
 
 </script>
 </body>

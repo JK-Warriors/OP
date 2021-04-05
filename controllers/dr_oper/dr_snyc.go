@@ -2,60 +2,15 @@ package dr_oper
 
 import (
 	"log"
+	"fmt"
 	"opms/controllers"
 	"opms/lib/exception"
 
 	. "opms/models/dr_oper"
-	. "opms/models/users"
 	"opms/utils"
-	"strings"
 
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/utils/pagination"
 	"github.com/godror/godror"
 )
-
-//业务系统管理
-type ManageDrSyncController struct {
-	controllers.BaseController
-}
-
-func (this *ManageDrSyncController) Get() {
-	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "oper-sync-manage") {
-		this.Abort("401")
-	}
-
-	page, err := this.GetInt("p")
-	if err != nil {
-		page = 1
-	}
-
-	offset, err1 := beego.AppConfig.Int("pageoffset")
-	if err1 != nil {
-		offset = 15
-	}
-
-	search_name := this.GetString("search_name")
-	condArr := make(map[string]string)
-	condArr["search_name"] = search_name
-
-	countDr := CountOracleDrConfig(condArr)
-
-	paginator := pagination.SetPaginator(this.Ctx, offset, countDr)
-	_, _, dr := ListOracleDr(condArr, page, offset)
-
-	this.Data["paginator"] = paginator
-	this.Data["condArr"] = condArr
-	this.Data["dr"] = dr
-	this.Data["countDr"] = countDr
-
-	userid, _ := this.GetSession("userId").(int64)
-	user, _ := GetUser(userid)
-	this.Data["user"] = user
-
-	this.TplName = "dr_oper/sync-index.tpl"
-}
 
 type AjaxDrStartSyncController struct {
 	controllers.BaseController
@@ -83,14 +38,16 @@ func (this *AjaxDrStartSyncController) Post() {
 	if err != nil {
 		utils.LogDebug("GetStandbyDBID failed: " + err.Error())
 		return
+	}else{
+		utils.LogDebug(fmt.Sprintf("GetStandbyID %d successfully.", sta_id))
 	}
-	utils.LogDebug("GetStandbyDBID successfully.")
 
 	dsn_s, err := GetDsn(sta_id, asset_type)
 	if err != nil {
 		utils.LogDebug("GetStandbyDsn failed: " + err.Error())
+	}else{
+		utils.LogDebug("GetStandbyDsn successfully.")
 	}
-	utils.LogDebug("GetStandbyDsn successfully.")
 
 	on_process, err := GetOnProcess(bs_id)
 	if on_process == 1 {

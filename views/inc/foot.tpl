@@ -9,7 +9,7 @@
 <script src="/static/js/jquery.validate.js"></script>
 <script src="/static/js/opms.js"></script>
 <script src="/static/js/ui-choose.js"></script>
-<script src="/static/js/layer/layer.js"></script>
+{* <script src="/static/js/layer/layer.js"></script> *}
 <script src="/static/js/bootbox.js"></script>
 <script src="/static/js/md5.js"></script>
 <script src="/static/js/metisMenu.js"></script>

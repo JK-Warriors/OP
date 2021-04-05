@@ -483,12 +483,13 @@ func GetOpResultById(op_id int64) (string, string, error) {
 
 type OracleInstance struct {
 	Id              int    `orm:"pk;column(id);"`
-	Asset_Type         int    `orm:"column(asset_type);"`
+	Asset_Type      int    `orm:"column(asset_type);"`
 	Connect         int    `orm:"column(connect);"`
 	Instance_name   string `orm:"column(instance_name);"`
 	Db_Name         string `orm:"column(db_name);"`
 	Host            string `orm:"column(host);"`
-	Role            string `orm:"column(role);"`
+	Port            string `orm:"column(port);"`
+	Role            string `orm:"column(inst_role);"`
 	Version         string `orm:"column(version);"`
 	Open_Mode       string `orm:"column(open_mode);"`
 	Flashback_On    string `orm:"column(flashback_on);"`
@@ -499,14 +500,15 @@ type OracleInstance struct {
 func GetOracleBasicInfo(db_id int) (OracleInstance, error) {
 	var ora_instance OracleInstance
 
-	sql := `select c.id, c.asset_type, s.connect, c.instance_name, c.db_name, c.host, s.role, version, open_mode, flashback_on, flashback_usage, s.created 
-			from pms_asset_config c, pms_db_status s 
-			where c.id = s.id and s.id = ?`
+	sql := `select c.id, c.asset_type, s.connect, c.instance_name, c.db_name, c.host, c.port, s.inst_role, version, open_mode, flashback_on, flashback_usage, s.created 
+			from pms_asset_config c, pms_oracle_status s 
+			where c.id = s.db_id and s.db_id = ?`
 	o := orm.NewOrm()
 	err := o.Raw(sql, db_id).QueryRow(&ora_instance)
 
 	return ora_instance, err
 }
+
 
 type DrPrimary struct {
 	DB_Id          int    `orm:"pk;column(db_id);"`
@@ -542,7 +544,7 @@ type DrStandby struct {
 	Apply_Rate   string `orm:"column(apply_rate);"`
 	Curr_Scn     int64  `orm:"column(curr_scn);"`
 	Curr_Db_Time string `orm:"column(curr_db_time);"`
-	Mrp_Status   int    `orm:"column(mrp_status);"`
+	Mrp_Status   string    `orm:"column(mrp_status);"`
 	Created      int64  `orm:"column(created);"`
 }
 
@@ -551,6 +553,180 @@ func GetStandbyDrInfo(db_id int) (DrStandby, error) {
 
 	sql := `select db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created 
 			from pms_dr_sta_status where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_sta)
+
+	return dis_sta, err
+}
+
+
+
+type MySQLInstance struct {
+	Id              int    `orm:"pk;column(id);"`
+	Asset_Type      int    `orm:"column(asset_type);"`
+	Connect         int    `orm:"column(connect);"`
+	Instance_name   string `orm:"column(instance_name);"`
+	Db_Name         string `orm:"column(db_name);"`
+	Host            string `orm:"column(host);"`
+	Port            string `orm:"column(port);"`
+	Role            string `orm:"column(role);"`
+	Version         string `orm:"column(version);"`
+	Created         int64  `orm:"column(created);"`
+}
+
+func GetMySQLBasicInfo(db_id int) (MySQLInstance, error) {
+	var asset MySQLInstance
+
+	sql := `select c.id, c.asset_type, s.connect, c.instance_name, c.db_name, c.host, c.port, s.role, version, s.created 
+			from pms_asset_config c, pms_mysql_status s 
+			where c.id = s.db_id  and s.db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&asset)
+
+	return asset, err
+}
+
+type DrMySQLPrimary struct {
+	Id             	 int    `orm:"pk;column(id);"`
+	Dr_Id          	 int    `orm:"column(dr_id);"`
+	Db_Id		   	 int    `orm:"column(db_id);"`
+	Read_Only        string `orm:"column(read_only);"`
+	Gtid_Mode  		 string `orm:"column(gtid_mode);"`
+	M_Binlog_File    string `orm:"column(master_binlog_file);"`
+	M_Binlog_Pos     string `orm:"column(master_binlog_pos);"`
+	M_Binlog_Space   int64	`orm:"column(master_binlog_space);"`
+	Created        	 int64  `orm:"column(created);"`
+}
+
+func GetDrMySqlPrimaryInfo(db_id int) (DrMySQLPrimary, error) {
+	var dis_pri DrMySQLPrimary
+
+	sql := `select id, dr_id, db_id, read_only, gtid_mode, master_binlog_file, master_binlog_pos, master_binlog_space, created
+			from pms_dr_mysql_p where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_pri)
+
+	return dis_pri, err
+}
+
+
+type DrMySQLStandby struct {
+	Id        	 			int    `orm:"pk;column(id);"`
+	Dr_Id       		 	int    `orm:"column(dr_id);"`
+	DB_Id        			int    `orm:"column(db_id);"`
+	Read_Only        		string `orm:"column(read_only);"`
+	Gtid_Mode  		 		string `orm:"column(gtid_mode);"`
+	M_Server  		 		string `orm:"column(master_server);"`
+	M_Port  		 		string `orm:"column(master_port);"`
+	Slave_IO_Run  		 	string `orm:"column(slave_io_run);"`
+	Slave_SQL_Run  		 	string `orm:"column(slave_sql_run);"`
+	Delay  		 			int 	`orm:"column(delay);"`
+	C_Binlog_File  		 	string `orm:"column(current_binlog_file);"`
+	C_Binlog_Pos  		 	string `orm:"column(current_binlog_pos);"`
+	M_Binlog_File    		string `orm:"column(master_binlog_file);"`
+	M_Binlog_Pos     		string `orm:"column(master_binlog_pos);"`
+	M_Binlog_Space   		int64  `orm:"column(master_binlog_space);"`
+	Created      			int64  `orm:"column(created);"`
+}
+
+func GetDrMySqlStandbyInfo(db_id int) (DrMySQLStandby, error) {
+	var dis_sta DrMySQLStandby
+
+	sql := `select id, dr_id, db_id, read_only, gtid_mode, master_server, master_port, slave_io_run, slave_sql_run, delay, 
+				current_binlog_file, current_binlog_pos, master_binlog_file, master_binlog_pos, master_binlog_space, created
+			from pms_dr_mysql_s where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_sta)
+
+	return dis_sta, err
+}
+
+type MSSqlInstance struct {
+	Id              int    `orm:"pk;column(id);"`
+	Asset_Type      int    `orm:"column(asset_type);"`
+	Connect         int    `orm:"column(connect);"`
+	Instance_name   string `orm:"column(instance_name);"`
+	Db_Name         string `orm:"column(db_name);"`
+	Host            string `orm:"column(host);"`
+	Port            string `orm:"column(port);"`
+	Role            string `orm:"column(role);"`
+	Version         string `orm:"column(version);"`
+	Created         int64  `orm:"column(created);"`
+}
+
+func GetMSSqlBasicInfo(db_id int) (MSSqlInstance, error) {
+	var asset MSSqlInstance
+
+	sql := `select c.id, c.asset_type, s.connect, c.instance_name, c.db_name, c.host, c.port, s.role, version, s.created 
+			from pms_asset_config c, pms_mssql_status s 
+			where c.id = s.db_id  and s.db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&asset)
+
+	return asset, err
+}
+
+type DrMSSqlPrimary struct {
+	Id             	 int    `orm:"pk;column(id);"`
+	Dr_Id          	 int    `orm:"column(dr_id);"`
+	Db_Id		   	 int    `orm:"column(db_id);"`
+	Database_Id        	int `orm:"column(database_id);"`
+	Db_Name  		 	string `orm:"column(db_name);"`
+	Role    			int 	`orm:"column(role);"`
+	State     			int 	`orm:"column(state);"`
+	State_Desc   		string	`orm:"column(state_desc);"`
+	Safety_Level   		int		`orm:"column(safety_level);"`
+	Partner_Name   		string	`orm:"column(partner_name);"`
+	Partner_Instance   	string	`orm:"column(partner_instance);"`
+	Failover_Lsn   		int64	`orm:"column(failover_lsn);"`
+	Connection_Timeout  int		`orm:"column(connection_timeout);"`
+	Redo_Queue   		int		`orm:"column(redo_queue);"`
+	End_Of_Log_Lsn   	int64	`orm:"column(end_of_log_lsn);"`
+	Replication_Lsn   	int64	`orm:"column(replication_lsn);"`
+	Created        	 	int64  `orm:"column(created);"`
+}
+
+func GetDrMSSqlPrimaryInfo(db_id int) (DrMSSqlPrimary, error) {
+	var dis_pri DrMSSqlPrimary
+
+	sql := `select id, dr_id, db_id, database_id, db_name, role, state, state_desc, safety_level, partner_name, partner_instance, 
+				failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, created
+			from pms_dr_mssql_p where db_id = ?`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&dis_pri)
+
+	return dis_pri, err
+}
+
+
+type DrMSSqlStandby struct {
+	Id             	 int    `orm:"pk;column(id);"`
+	Dr_Id          	 int    `orm:"column(dr_id);"`
+	Db_Id		   	 int    `orm:"column(db_id);"`
+	Database_Id        	int `orm:"column(database_id);"`
+	Db_Name  		 	string `orm:"column(db_name);"`
+	Master_Server  		string `orm:"column(master_server);"`
+	Master_Port  		string `orm:"column(master_port);"`
+	Role    			int 	`orm:"column(role);"`
+	State     			int 	`orm:"column(state);"`
+	State_Desc   		string	`orm:"column(state_desc);"`
+	Safety_Level   		int		`orm:"column(safety_level);"`
+	Partner_Name   		string	`orm:"column(partner_name);"`
+	Partner_Instance   	string	`orm:"column(partner_instance);"`
+	Failover_Lsn   		int64	`orm:"column(failover_lsn);"`
+	Connection_Timeout  int		`orm:"column(connection_timeout);"`
+	Redo_Queue   		int		`orm:"column(redo_queue);"`
+	End_Of_Log_Lsn   	int64	`orm:"column(end_of_log_lsn);"`
+	Replication_Lsn   	int64	`orm:"column(replication_lsn);"`
+	Created        	 	int64  `orm:"column(created);"`
+}
+
+func GetDrMSSqlStandbyInfo(db_id int) (DrMSSqlStandby, error) {
+	var dis_sta DrMSSqlStandby
+
+	sql := `select id, dr_id, db_id, database_id, db_name, master_server, master_port, role, state, state_desc, safety_level, partner_name, partner_instance, 
+				failover_lsn, connection_timeout, redo_queue, end_of_log_lsn, replication_lsn, created
+			from pms_dr_mssql_s where db_id = ?`
 	o := orm.NewOrm()
 	err := o.Raw(sql, db_id).QueryRow(&dis_sta)
 
