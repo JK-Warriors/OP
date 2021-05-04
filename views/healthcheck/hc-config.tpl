@@ -108,7 +108,7 @@
             content: ["/healthcheck/config/edit",'no'],
             end: function () {
                 //关闭时做的事情
-                oDataTable.ajax.reload();
+                //oDataTable.ajax.reload();
             }
         });
     });

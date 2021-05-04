@@ -57,6 +57,7 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		//}
 		//get oracle basic infomation
 		GatherBasicInfo(db, mysql, db_id, host, port, alias)
+		GatherDbStatus(mysql, db_id)
 		AlertBasicInfo(mysql, db_id)
 
 		GatherRedo(db, mysql, db_id, host, port, alias)
@@ -85,7 +86,7 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	inst_role := Get_Instance(db, "instance_role")
 	inst_status := Get_Instance(db, "status")
 	version := Get_Instance(db, "version")
-	startup_time := Get_Instance(db, "startup_time")
+	startup_time := Get_StartupTime(db)
 	host_name := Get_Instance(db, "host_name")
 	archiver := Get_Instance(db, "archiver")
 
@@ -101,6 +102,9 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	session_actives := GetSessionActive(db)
 	session_waits := GetSessionWait(db)
 
+	max_processes := GetMaxProcesses(db)
+	processes := GetProcesses(db)
+
 	//get flashback_usage
 	flashback_usage := GetFlashbackUsage(db)
 
@@ -113,9 +117,9 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	//move old data to history table
 	MoveToHistory(mysql, "pms_asset_status", "asset_id", db_id)
 
-	sql := `insert into pms_asset_status(asset_id, asset_type, host, port, alias, role, version, connect, sessions, created) 
-						values(?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, db_id, 1, host, port, alias, db_role, version, connect, session_total, time.Now().Unix())
+	sql := `insert into pms_asset_status(asset_id, asset_type, host, port, alias, role, version, connect, created) 
+						values(?,?,?,?,?,?,?,?,?)`
+	_, err = mysql.Exec(sql, db_id, 1, host, port, alias, db_role, version, connect, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}
@@ -123,9 +127,9 @@ func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, por
 	//storage stats into pms_oracle_status
 	MoveToHistory(mysql, "pms_oracle_status", "db_id", db_id)
 
-	sql = `insert into pms_oracle_status(db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, flashback_on, flashback_usage, created) 
-						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, flashback_on, flashback_usage, time.Now().Unix())
+	sql = `insert into pms_oracle_status(db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, processes, max_processes, flashback_on, flashback_usage, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	_, err = mysql.Exec(sql, db_id, host, port, alias, connect, inst_num, inst_name, inst_role, inst_status, version, startup_time, host_name, archiver, db_name, db_role, open_mode, protection_mode, session_total, session_actives, session_waits, processes, max_processes, flashback_on, flashback_usage, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}

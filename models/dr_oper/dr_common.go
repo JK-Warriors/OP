@@ -23,6 +23,7 @@ type Dr struct {
 	Alias_P     string `orm:"column(alias_p);"`
 	Inst_Name_P string `orm:"column(inst_name_p);"`
 	Db_Name_P   string `orm:"column(db_name_p);"`
+	Db_Time_P   string `orm:"column(db_time_p);"`
 	Db_Id_S     int    `orm:"column(db_id_s);"`
 	Db_Type_S   int    `orm:"column(db_type_s);"`
 	Host_S      string `orm:"column(host_s);"`
@@ -30,6 +31,9 @@ type Dr struct {
 	Alias_S     string `orm:"column(alias_s);"`
 	Inst_Name_S string `orm:"column(inst_name_s);"`
 	Db_Name_S   string `orm:"column(db_name_s);"`
+	Db_Time_S   string `orm:"column(db_time_s);"`
+	Repl_Status  string `orm:"column(repl_status);"`
+	Repl_Delay   string `orm:"column(repl_delay);"`
 	Is_Switch   int    `orm:"column(is_switch);"`
 }
 
@@ -39,27 +43,42 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 	o.Using("default")
 
 	sql := `select d.bs_id as id, 
-					d.bs_name,
-					d.db_id_p, 
-					pp.asset_type as db_type_p,
-					pp.host as host_p,
-					pp.port as port_p, 
-					pp.alias as alias_p, 
-					pp.instance_name as inst_name_p, 
-					pp.db_name as db_name_p, 
-					d.db_id_s, 
-					ps.asset_type as db_type_s,
-					ps.host as host_s,
-					ps.port as port_s, 
-					ps.alias as alias_s, 
-					ps.instance_name as inst_name_s, 
-					ps.db_name as db_name_s, 
-					d.is_switch
-				from pms_dr_config d
-				left join pms_asset_config pp on d.db_id_p = pp.id
-				left join pms_asset_config ps on d.db_id_s = ps.id
-				where d.is_delete = 0
-				 and d.status = 1`
+			d.bs_name,
+			d.db_id_p, 
+			p.asset_type as db_type_p,
+			p.host as host_p,
+			p.port as port_p, 
+			p.alias as alias_p, 
+			p.instance_name as inst_name_p, 
+			p.db_name as db_name_p, 
+			ps.curr_db_time as db_time_p,
+			d.db_id_s, 
+			s.asset_type as db_type_s,
+			s.host as host_s,
+			s.port as port_s, 
+			s.alias as alias_s, 
+			s.instance_name as inst_name_s, 
+			s.db_name as db_name_s, 
+			ss.curr_db_time as db_time_s,
+			ss.mrp_status as repl_status,
+			ss.delay_mins as repl_delay,
+			d.is_shift
+		from pms_dr_config d
+		left join pms_asset_config p on d.db_id_p = p.id
+		left join pms_asset_config s on d.db_id_s = s.id
+		left join (select dr_id, db_id, curr_db_time from pms_dr_pri_status
+							union
+							select dr_id, db_id, '-' from pms_dr_mysql_p
+							union 
+							select dr_id, db_id, '-' from pms_dr_mssql_p) ps on d.bs_id = ps.dr_id
+		left join (select dr_id, db_id, curr_db_time, mrp_status, delay_mins from pms_dr_sta_status
+							union
+							select dr_id, db_id, '-', slave_sql_run, delay from pms_dr_mysql_s
+							union 
+							select dr_id, db_id, '-', '-', '-' from pms_dr_mssql_s) ss on d.bs_id = ss.dr_id
+		where d.is_delete = 0
+		and d.asset_type = 1
+		and d.status = 1`
 
 	if condArr["search_name"] != "" {
 		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
@@ -109,28 +128,34 @@ func ListOracleDr(condArr map[string]string, page int, offset int) (num int64, e
 	o.Using("default")
 
 	sql := `select d.bs_id as id, 
-					d.bs_name,
-					d.db_id_p, 
-					pp.asset_type as db_type_p,
-					pp.host as host_p,
-					pp.port as port_p, 
-					pp.alias as alias_p, 
-					pp.instance_name as inst_name_p, 
-					pp.db_name as db_name_p, 
-					d.db_id_s, 
-					ps.asset_type as db_type_s,
-					ps.host as host_s,
-					ps.port as port_s, 
-					ps.alias as alias_s, 
-					ps.instance_name as inst_name_s, 
-					ps.db_name as db_name_s, 
-					d.is_shift
-				from pms_dr_config d
-				left join pms_asset_config pp on d.db_id_p = pp.id
-				left join pms_asset_config ps on d.db_id_s = ps.id
-				where d.is_delete = 0
-				 and d.asset_type = 1
-				 and d.status = 1`
+				d.bs_name,
+				d.db_id_p, 
+				p.asset_type as db_type_p,
+				p.host as host_p,
+				p.port as port_p, 
+				p.alias as alias_p, 
+				p.instance_name as inst_name_p, 
+				p.db_name as db_name_p, 
+				ps.curr_db_time as db_time_p,
+				d.db_id_s, 
+				s.asset_type as db_type_s,
+				s.host as host_s,
+				s.port as port_s, 
+				s.alias as alias_s, 
+				s.instance_name as inst_name_s, 
+				s.db_name as db_name_s, 
+				ss.curr_db_time as db_time_s,
+				ss.mrp_status as repl_status,
+				ss.delay_mins as repl_delay,
+				d.is_shift
+			from pms_dr_config d
+			left join pms_asset_config p on d.db_id_p = p.id
+			left join pms_asset_config s on d.db_id_s = s.id
+			left join pms_dr_pri_status ps on d.bs_id = ps.dr_id
+			left join pms_dr_sta_status ss on d.bs_id = ss.dr_id
+			where d.is_delete = 0
+			and d.asset_type = 1
+			and d.status = 1`
 
 	if condArr["search_name"] != "" {
 		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
@@ -558,6 +583,41 @@ func GetStandbyDrInfo(db_id int) (DrStandby, error) {
 
 	return dis_sta, err
 }
+
+type Redo struct {
+	Key_Time    string    `orm:"pk;column(key_time);"`
+	Value       int    `orm:"column(redo_log);"`
+}
+
+func GetOracleRedo(db_id int) ([]Redo, error) {
+    var redo []Redo
+	sql := `select substr(key_time, 12) as key_time, redo_log from (
+		select id, key_time, redo_log from pms_oracle_redo where db_id = ? order by id desc limit 24) t
+		order by id
+		`
+	o := orm.NewOrm()
+	_, err := o.Raw(sql, db_id).QueryRows(&redo)
+
+	return redo, err
+}
+
+
+
+func GetPrimaryOSId(db_id int) (int) {
+    var os_id int = -1
+	sql := `select id from pms_asset_config 
+			where asset_type = 99 
+			and host in(select host from pms_asset_config where id = ?) limit 1
+		`
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&os_id)
+	if err != nil {
+		return -1
+	}
+
+	return os_id
+}
+
 
 
 

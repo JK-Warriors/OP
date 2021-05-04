@@ -99,16 +99,16 @@ func (this *AddDBConfigController) Post() {
 		return
 	}
 
-	protocol := this.GetString("protocol")
-	if ("" == protocol && asset_type == 99) {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择协议"}
+	port, _ := this.GetInt("port")
+	if port <= 0 && asset_type < 99 {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写端口"}
 		this.ServeJSON()
 		return
 	}
 
-	port, _ := this.GetInt("port")
-	if port <= 0 {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写端口"}
+	alias := this.GetString("alias")
+	if "" == host {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写别名"}
 		this.ServeJSON()
 		return
 	}
@@ -136,7 +136,7 @@ func (this *AddDBConfigController) Post() {
 
 	os_type, _ := this.GetInt("os_type")
 	os_protocol := this.GetString("os_protocol")
-	os_port := this.GetString("os_port")
+	os_port,_ := this.GetInt("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 	
@@ -150,9 +150,9 @@ func (this *AddDBConfigController) Post() {
 
 	dbconf.Dbtype = asset_type
 	dbconf.Host = host
-	dbconf.Protocol = protocol
+	dbconf.Protocol = ""
 	dbconf.Port = port
-	dbconf.Alias = this.GetString("alias")
+	dbconf.Alias = alias
 	dbconf.InstanceName = this.GetString("instance_name")
 	dbconf.Dbname = this.GetString("db_name")
 	dbconf.Username = username
@@ -168,13 +168,19 @@ func (this *AddDBConfigController) Post() {
 	dbconf.Alert_WeChat = alert_wechat
 	dbconf.Alert_SMS = alert_sms
 
-	err := AddDBconfig(dbconf)
+	count := CheckDbExists(dbconf)
+	if count == 0{
+		err := AddDBconfig(dbconf)
 
-	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 1, "message": "资产配置信息添加成功"}
-	} else {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "资产配置信息添加失败"}
+		if err == nil {
+			this.Data["json"] = map[string]interface{}{"code": 1, "message": "数据库配置信息添加成功"}
+		} else {
+			this.Data["json"] = map[string]interface{}{"code": 0, "message": "数据库配置信息添加失败"}
+		}
+	}else{
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "数据库已存在"}
 	}
+
 	this.ServeJSON()
 }
 
@@ -231,16 +237,16 @@ func (this *EditDBConfigController) Post() {
 		return
 	}
 
-	protocol := this.GetString("protocol")
-	if ("" == protocol && asset_type == 99) {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请选择协议"}
+	port, _ := this.GetInt("port")
+	if port <= 0 {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写端口"}
 		this.ServeJSON()
 		return
 	}
 
-	port, _ := this.GetInt("port")
-	if port <= 0 {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写端口"}
+	alias := this.GetString("alias")
+	if "" == host {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "请填写别名"}
 		this.ServeJSON()
 		return
 	}
@@ -269,7 +275,7 @@ func (this *EditDBConfigController) Post() {
 
 	os_type, _ := this.GetInt("os_type")
 	os_protocol := this.GetString("os_protocol")
-	os_port := this.GetString("os_port")
+	os_port,_ := this.GetInt("os_port")
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 	
@@ -283,9 +289,9 @@ func (this *EditDBConfigController) Post() {
 
 	dbconf.Dbtype = asset_type
 	dbconf.Host = host
-	dbconf.Protocol = protocol
+	dbconf.Protocol = ""
 	dbconf.Port = port
-	dbconf.Alias = this.GetString("alias")
+	dbconf.Alias = alias
 	dbconf.InstanceName = this.GetString("instance_name")
 	dbconf.Dbname = this.GetString("db_name")
 	dbconf.Username = username
@@ -301,13 +307,17 @@ func (this *EditDBConfigController) Post() {
 	dbconf.Alert_WeChat = alert_wechat
 	dbconf.Alert_SMS = alert_sms
 
-
-	err := UpdateDBconfig(id, dbconf)
-
-	if err == nil {
-		this.Data["json"] = map[string]interface{}{"code": 1, "message": "资产配置信息修改成功", "id": fmt.Sprintf("%d", id)}
-	} else {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "资产配置信息修改失败"}
+	count := CheckDbExists(dbconf)
+	if count == 0{
+		err := UpdateDBconfig(id, dbconf)
+	
+		if err == nil {
+			this.Data["json"] = map[string]interface{}{"code": 1, "message": "数据库配置信息修改成功", "id": fmt.Sprintf("%d", id)}
+		} else {
+			this.Data["json"] = map[string]interface{}{"code": 0, "message": "数据库配置信息修改失败"}
+		}
+	}else{
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "数据库已存在"}
 	}
 	this.ServeJSON()
 }
@@ -405,8 +415,6 @@ func (this *AjaxConnectDBConfigController) Post() {
 		err = CheckMysqlConnect(host, port, db_name, username, password)
 	} else if asset_type == "3" {
 		err = CheckSqlserverConnect(host, port, inst_name, db_name, username, password)
-	} else if asset_type == "99" {
-		err = CheckOSConnect(host, port, protocol, username, password)
 	}
 
 	if err == nil {

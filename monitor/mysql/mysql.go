@@ -51,6 +51,7 @@ func GenerateMySQLStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 
 		//get sqlserver basic infomation
 		GatherBasicInfo(db, mysql, db_id, host, port, alias)
+		GatherDbStatus(mysql, db_id)
 		AlertBasicInfo(mysql, db_id)
 		//GetGlobalStatus(db)
 
@@ -65,7 +66,7 @@ func GenerateMySQLStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 func GatherBasicInfo(db *sql.DB, mysql *xorm.Engine, db_id int, host string, port int, alias string) error {
 
 	connect := 1
-	role := 1
+	role := GetRole(db)
 	version := GetVersion(db)
 	//log.Printf("version: %s", version)
 

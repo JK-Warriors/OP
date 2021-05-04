@@ -22,7 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/config/cfg_trigger/manage">配置中心</a></li>
+        <li><a href="/config/db/manage">配置中心</a></li>
         <li class="active">大屏配置</li>
       </ul>
     </div>
@@ -58,7 +58,7 @@
                     <table class="table table-bordered table-striped table-condensed">
                       <thead>
                         <tr>
-                          <th></th>
+                          <th>大屏显示</th>
                           <th>数据库</th>
                           <th>别名</th>
                           <th>类型</th>
@@ -77,6 +77,19 @@
                       {{end}}
                       </tbody>
                     </table>
+
+                  
+                  <div class="clearfix"></div>
+                  <div class="form-group">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">大屏显示核心数据库：</label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                      <select id="core_db" name="core_db" class="form-control">
+                      {{range $k,$v := .ora}}
+                        <option value={{$v.Id}} {{if eq $.core_db $v.Id}}selected{{end}}>{{$v.Host}}:{{$v.Port}}({{$v.Alias}})</option>
+                      {{end}}
+                      </select>
+                    </div>
+                  </div>
                   </form>
 			            <a href="javascript:;" id="save" class="btn btn-sm btn-primary">保存</a>
                   {{template "inc/page.tpl" .}}
@@ -109,7 +122,9 @@
 		});
 		str = str.substring(0, str.length - 1)
 
-    $.post('/config/screen/ajax/save', {ids:str},function(data){
+    var core_db = $('#core_db').val();
+
+    $.post('/config/screen/ajax/save', {ids:str, core_db:core_db},function(data){
       dialogInfo(data.message)
       if (data.code) {
         setTimeout(function(){ window.location.reload(); }, 1000);

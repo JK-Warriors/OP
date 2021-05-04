@@ -2,7 +2,7 @@ package os
 
 import (
 	"log"
-	//"reflect"
+	"reflect"
 	"os/exec"
 	"bufio"
 	"io"
@@ -17,6 +17,45 @@ import (
   gs "github.com/soniah/gosnmp"
 )
 
+func GetHostname(snmp *gs.GoSNMP) (string, error){
+	oids := []string{".1.3.6.1.2.1.1.5.0"}		//SNMPv2-MIB::sysName.0
+	
+	var hostname string
+
+	result, err := snmp.Get(oids)
+    if err != nil {
+        utils.LogDebugf("GetHostname err: %s", err.Error())
+		return "-1", err
+	}
+
+    for _, v := range result.Variables {
+		fmt.Println(reflect.TypeOf(v.Value)) 
+		hostname = v.Value.(string)
+	}  
+
+	return hostname, nil
+}
+
+func GetKernel(snmp *gs.GoSNMP) (string, error){
+	oids := []string{".1.3.6.1.2.1.1.1.0"}		//SNMPv2-MIB::sysDescr.0
+	
+	var kernel string
+
+	result, err := snmp.Get(oids)
+    if err != nil {
+        utils.LogDebugf("GetKernel err: %s", err.Error())
+		return "-1", err
+	}
+
+    for _, v := range result.Variables {
+		fmt.Println(reflect.TypeOf(v.Value)) 
+		kernel = v.Value.(string)
+	}  
+
+	return kernel, nil
+}
+
+
 func GetSystemDate(snmp *gs.GoSNMP) (string, error){
 	oids := []string{".1.3.6.1.2.1.25.1.2.0"}		//HOST-RESOURCES-MIB::hrSystemDate.0
 	
@@ -28,18 +67,14 @@ func GetSystemDate(snmp *gs.GoSNMP) (string, error){
 		return "-1", err
 	}
 	
-	fmt.Println(result)
 
     for _, v := range result.Variables {
 		//fmt.Println(reflect.TypeOf(v.Value)) 
-		if(nil == v.Value){
-			return "-1", nil
-		}else{
-			sysdate = fmt.Sprintf("%s", v.Value)
-		}
+		sysdate = v.Value.(string)
+		fmt.Println(sysdate)
 	}  
 
-	return sysdate, nil
+	return "-1", nil
 }
 
 
@@ -63,6 +98,96 @@ func GetUptime(snmp *gs.GoSNMP) (string, error){
 	return uptime, nil
 }
 
+func GetProcess(snmp *gs.GoSNMP) (int64, error){
+	oids := []string{".1.3.6.1.2.1.25.1.6.0"}		//HOST-RESOURCES-MIB::hrSystemProcesses.0
+	
+	var process int64
+
+	result, err := snmp.Get(oids)
+    if err != nil {
+        utils.LogDebugf("GetProcess err: %s", err.Error())
+		return -1, err
+	}
+	
+    for _, v := range result.Variables {
+		fmt.Println(reflect.TypeOf(v.Value)) 
+		process = int64(v.Value.(uint))
+	}  
+
+	return process, nil
+}
+
+
+func GetSnmpStringByOids(snmp *gs.GoSNMP, oids []string) (map[int]string, error){
+	valuestr := make(map[int]string)
+
+	result, err := snmp.Get(oids)
+    if err != nil {
+        utils.LogDebugf("GetSnmpStringByOids err: %s", err.Error())
+		return nil, err
+	}
+	
+    for i, v := range result.Variables {
+		fmt.Println(reflect.TypeOf(v.Value)) 
+		valuestr[i] = v.Value.(string)
+	}  
+	
+	return valuestr, nil
+}
+
+
+func GetSnmpInt64ByOids(snmp *gs.GoSNMP, oids []string) (map[int]int64, error){
+	valuestr := make(map[int]int64)
+
+	result, err := snmp.Get(oids)
+    if err != nil {
+        utils.LogDebugf("GetSnmpInt64ByOids err: %s", err.Error())
+		return nil, err
+	}
+	
+    for i, v := range result.Variables {
+		fmt.Println(reflect.TypeOf(v.Value)) 
+		valuestr[i] = ToBigInt(v.Value)
+	}  
+	
+	return valuestr, nil
+}
+
+func ToBigInt(value interface{}) int64 {
+	var val int64
+	switch value := value.(type) { // shadow
+	case int:
+		val = int64(value)
+	case int8:
+		val = int64(value)
+	case int16:
+		val = int64(value)
+	case int32:
+		val = int64(value)
+	case int64:
+		val = value
+	case uint:
+		val = int64(value)
+	case uint8:
+		val = int64(value)
+	case uint16:
+		val = int64(value)
+	case uint32:
+		val = int64(value)
+	case uint64:
+		val = int64(value)
+	case string:
+		// for testing and other apps - numbers may appear as strings
+		var err error
+		if val, err = strconv.ParseInt(value, 10, 64); err != nil {
+			return val
+		}
+	default:
+		return -1
+	}
+
+	return val
+}
 
 func GetNetDescr(host string) (map[string]string, error){
 	var net = make(map[string]string)
@@ -164,34 +289,6 @@ func GetNetBytesOut(host string, netid string) (int64, error){
 	}
 
 	return netbytes, nil
-}
-
-func GetSnmpValueByOids(snmp *gs.GoSNMP, oids []string) (map[int]string, error){
-	valuestr := make(map[int]string)
-
-	result, err := snmp.Get(oids)
-    if err != nil {
-        utils.LogDebugf("GetSnmpValueByOids err: %s", err.Error())
-		return nil, err
-	}
-	
-    for i, v := range result.Variables {
-        //fmt.Printf("%d. oid: %s ", i, v.Name)
-        switch v.Type{
-        case gs.OctetString:
-			//fmt.Printf("string: %s\n", v.Value)
-			valuestr[i] = fmt.Sprintf("%s", v.Value)
-		case gs.Uinteger32:
-			//fmt.Printf("number: %d\n", gs.ToBigInt(v.Value))
-			valuestr[i] = fmt.Sprintf("%d", gs.ToBigInt(v.Value))
-        default:
-            //fmt.Printf("number: %d\n", gs.ToBigInt(v.Value))
-			valuestr[i] = fmt.Sprintf("%s", v.Value)
-		}
-		
-	}  
-	
-	return valuestr, nil
 }
 
 

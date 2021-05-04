@@ -66,22 +66,22 @@ INSERT INTO `pms_permissions` VALUES ('2', '0', '配置中心', 'config', '/conf
 INSERT INTO `pms_permissions` VALUES ('3', '0', 'Oracle', 'Oracle', '/oracle', '', '1', '1', '3');
 INSERT INTO `pms_permissions` VALUES ('4', '0', 'MySQL', 'MySQL', '/mysql', '', '1', '1', '4');
 INSERT INTO `pms_permissions` VALUES ('5', '0', 'SQLServer', 'SQLServer', '/mssql', '', '1', '1', '5');
-INSERT INTO `pms_permissions` VALUES ('6', '0', 'OS', 'OS', '/os', '', '1', '1', '6');
+INSERT INTO `pms_permissions` VALUES ('6', '0', '操作系统', 'OS', '/os', '', '1', '1', '6');
 INSERT INTO `pms_permissions` VALUES ('9', '0', '容灾操作', 'operation', '/operation', '', '1', '1', '9');
 INSERT INTO `pms_permissions` VALUES ('10', '0', '健康巡检', 'healthcheck', '/healthcheck', '', '1', '1', '10');
 INSERT INTO `pms_permissions` VALUES ('98', '0', '告警管理', 'alarm', '/alarm', '', '1', '1', '98');
 INSERT INTO `pms_permissions` VALUES ('99', '0', '系统管理', 'system', '/system', '', '1', '1', '99');
 
 
-INSERT INTO `pms_permissions` VALUES ('2100', '2', '资产配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加资产', 'config-db-add', '/config/db/add', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2102', '2', '编辑资产', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
-INSERT INTO `pms_permissions` VALUES ('2103', '2', '删除资产', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2100', '2', '数据库配置', 'config-db-manage', '/config/db/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('2101', '2', '添加数据库', 'config-db-add', '/config/db/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2102', '2', '编辑数据库', 'config-db-edit', '/config/db/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2103', '2', '删除数据库', 'config-db-delete', '/config/db/delete', '', '0', '0', '0');
 
--- INSERT INTO `pms_permissions` VALUES ('2110', '2', '业务系统配置', 'config-business-manage', '/config/dr_business/manage', '', '1', '1', '2');
--- INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加业务系统', 'config-business-add', '/config/dr_business/add', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑业务系统', 'config-business-edit', '/config/dr_business/edit', '', '0', '0', '0');
--- INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除业务系统', 'config-business-delete', '/config/dr_business/delete', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2110', '2', '操作系统配置', 'config-os-manage', '/config/os/manage', '', '1', '1', '2');
+INSERT INTO `pms_permissions` VALUES ('2111', '2', '添加操作系统', 'config-os-add', '/config/os/add', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2112', '2', '编辑操作系统', 'config-os-edit', '/config/os/edit', '', '0', '0', '0');
+INSERT INTO `pms_permissions` VALUES ('2113', '2', '删除操作系统', 'config-os-delete', '/config/os/delete', '', '0', '0', '0');
 
 INSERT INTO `pms_permissions` VALUES ('2120', '2', '容灾配置', 'config-dr-manage', '/config/dr_config/manage', '', '1', '1', '3');
 
@@ -105,8 +105,8 @@ INSERT INTO `pms_permissions` VALUES ('4120', '4', '键缓存', 'mysql-key-manag
 INSERT INTO `pms_permissions` VALUES ('5100', '5', '实例状态', 'mssql-status-manage', '/mssql/status/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('6100', '6', '健康状态', 'os-status-manage', '/os/status/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('6110', '6', '磁盘', 'disk-status-manage', '/disk/status/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('6120', '6', '磁盘IO', 'diskio-status-manage', '/diskio/status/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('6110', '6', '磁盘', 'os-disk-manage', '/os/disk/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('6120', '6', '磁盘IO', 'os-io-manage', '/os/io/manage', '', '1', '1', '1');
 
 INSERT INTO `pms_permissions` VALUES ('9100', '9', '容灾管理', 'oper-manage-list', '/operation/dr_manage/list', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9101', '9', '容灾详细', 'oper-manage-detail', '/operation/dr_manage/detail', '', '0', '0', '1');
@@ -123,10 +123,11 @@ INSERT INTO `pms_permissions` VALUES ('9201', '10', '下班巡检', 'hc-offduty-
 INSERT INTO `pms_permissions` VALUES ('9202', '10', '全面巡检', 'hc-manual-manage', '/healthcheck/manual/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9203', '10', '巡检记录', 'hc-history-manage', '/healthcheck/history/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9204', '10', '巡检配置', 'hc-config-manage', '/healthcheck/config/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9205', '10', '巡检模板', 'hc-templete-manage', '/healthcheck/templete/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9205', '10', '巡检模板', 'hc-template-manage', '/healthcheck/template/manage', '', '1', '1', '1');
 
 
 INSERT INTO `pms_permissions` VALUES ('9810', '98', '告警管理', 'alarm-manage', '/alarm/alarm/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9811', '98', '告警历史', 'alarm-history', '/alarm/history/list', '', '1', '1', '2');
 
 INSERT INTO `pms_permissions` VALUES ('9910', '99', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9911', '99', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
@@ -180,10 +181,10 @@ INSERT INTO `pms_role_permission` VALUES ('2100', '1', '2100');
 INSERT INTO `pms_role_permission` VALUES ('2101', '1', '2101');
 INSERT INTO `pms_role_permission` VALUES ('2102', '1', '2102');
 INSERT INTO `pms_role_permission` VALUES ('2103', '1', '2103');
--- INSERT INTO `pms_role_permission` VALUES ('2110', '1', '2110');
--- INSERT INTO `pms_role_permission` VALUES ('2111', '1', '2111');
--- INSERT INTO `pms_role_permission` VALUES ('2112', '1', '2112');
--- INSERT INTO `pms_role_permission` VALUES ('2113', '1', '2113');
+INSERT INTO `pms_role_permission` VALUES ('2110', '1', '2110');
+INSERT INTO `pms_role_permission` VALUES ('2111', '1', '2111');
+INSERT INTO `pms_role_permission` VALUES ('2112', '1', '2112');
+INSERT INTO `pms_role_permission` VALUES ('2113', '1', '2113');
 INSERT INTO `pms_role_permission` VALUES ('2120', '1', '2120');
 INSERT INTO `pms_role_permission` VALUES ('2130', '1', '2130');
 INSERT INTO `pms_role_permission` VALUES ('2140', '1', '2140');
@@ -216,6 +217,7 @@ INSERT INTO `pms_role_permission` VALUES ('9203', '1', '9203');
 INSERT INTO `pms_role_permission` VALUES ('9204', '1', '9204');
 INSERT INTO `pms_role_permission` VALUES ('9205', '1', '9205');
 INSERT INTO `pms_role_permission` VALUES ('9810', '1', '9810');
+INSERT INTO `pms_role_permission` VALUES ('9811', '1', '9811');
 INSERT INTO `pms_role_permission` VALUES ('9910', '1', '9910');
 INSERT INTO `pms_role_permission` VALUES ('9911', '1', '9911');
 INSERT INTO `pms_role_permission` VALUES ('9912', '1', '9912');
@@ -368,7 +370,7 @@ CREATE TABLE `pms_asset_config` (
   `role` tinyint(2) DEFAULT 1 COMMENT '1：主; 2: 备',
   `os_type` tinyint(2) DEFAULT 1 COMMENT '1：Linux; 2: Windows; 3: AIX; 4: HP-Unix; 5: Solaris',
   `os_protocol` varchar(10) DEFAULT 0 COMMENT '主机协议',
-  `os_port` varchar(10)  DEFAULT 0 COMMENT '主机端口',
+  `os_port` int(10)  DEFAULT 0 COMMENT '主机端口',
   `os_username` varchar(30) DEFAULT '' COMMENT '主机用户名',
   `os_password` varchar(255) DEFAULT '' COMMENT '主机密码',
   `status` tinyint(2) DEFAULT 1 COMMENT '1: 激活；2：禁用',
@@ -531,10 +533,35 @@ CREATE TABLE `pms_asset_status` (
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `connect_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `sessions` tinyint(2) NOT NULL DEFAULT '-1',
+  `sessions_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `actives` tinyint(2) NOT NULL DEFAULT '-1',
+  `actives_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `waits` tinyint(2) NOT NULL DEFAULT '-1',
+  `waits_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `process` tinyint(2) NOT NULL DEFAULT '-1',
+  `process_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `repl` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_delay_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
+  `tablespace_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `diskgroup` tinyint(2) NOT NULL DEFAULT '-1',
+  `diskgroup_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `flashback_space` tinyint(2) NOT NULL DEFAULT '-1',
+  `flashback_space_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `load` tinyint(2) NOT NULL DEFAULT '-1',
+  `load_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `cpu` tinyint(2) NOT NULL DEFAULT '-1',
+  `cpu_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `memory` tinyint(2) NOT NULL DEFAULT '-1',
+  `memory_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `io` tinyint(2) NOT NULL DEFAULT '-1',
+  `io_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `net` tinyint(2) NOT NULL DEFAULT '-1',
+  `net_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `score`      int(10) NOT NULL DEFAULT 100,
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`)
@@ -557,10 +584,35 @@ CREATE TABLE `pms_asset_status_his` (
   `role`    varchar(30) DEFAULT NULL COMMENT '角色',
   `version` varchar(30) DEFAULT NULL COMMENT '版本',
   `connect` tinyint(2) DEFAULT NULL COMMENT '连接',
+  `connect_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `sessions` tinyint(2) NOT NULL DEFAULT '-1',
+  `sessions_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `actives` tinyint(2) NOT NULL DEFAULT '-1',
+  `actives_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `waits` tinyint(2) NOT NULL DEFAULT '-1',
+  `waits_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `process` tinyint(2) NOT NULL DEFAULT '-1',
+  `process_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `repl` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `repl_delay` tinyint(2) NOT NULL DEFAULT '-1',
+  `repl_delay_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `tablespace` tinyint(2) NOT NULL DEFAULT '-1',
+  `tablespace_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `diskgroup` tinyint(2) NOT NULL DEFAULT '-1',
+  `diskgroup_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `flashback_space` tinyint(2) NOT NULL DEFAULT '-1',
+  `flashback_space_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `load` tinyint(2) NOT NULL DEFAULT '-1',
+  `load_tips` varchar(500) NOT NULL DEFAULT '-1',
+  `cpu` tinyint(2) NOT NULL DEFAULT '-1',
+  `cpu_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `memory` tinyint(2) NOT NULL DEFAULT '-1',
+  `memory_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `io` tinyint(2) NOT NULL DEFAULT '-1',
+  `io_tips` varchar(500) NOT NULL DEFAULT 'no_data',
+  `net` tinyint(2) NOT NULL DEFAULT '-1',
+  `net_tips` varchar(500) NOT NULL DEFAULT 'no_data',
   `score`      int(10) NOT NULL DEFAULT 100,
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`),
@@ -583,7 +635,7 @@ CREATE TABLE `pms_oracle_status` (
   `inst_name` varchar(30) NOT NULL DEFAULT '-1',
   `inst_role` varchar(50) NOT NULL DEFAULT '-1',
   `inst_status` varchar(50) NOT NULL DEFAULT '-1',
-  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) DEFAULT '',
   `startup_time` varchar(50) NOT NULL DEFAULT '-1',
   `host_name` varchar(50) NOT NULL DEFAULT '-1',
   `archiver` varchar(50) NOT NULL DEFAULT '-1',
@@ -597,6 +649,7 @@ CREATE TABLE `pms_oracle_status` (
   `dg_stats` varchar(255) NOT NULL DEFAULT '-1',
   `dg_delay` int(10) NOT NULL DEFAULT '-1',
   `processes` int(10) NOT NULL DEFAULT '-1',
+  `max_processes` int(10) NOT NULL DEFAULT '-1',
   `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
@@ -618,7 +671,7 @@ CREATE TABLE `pms_oracle_status_his` (
   `inst_name` varchar(30) NOT NULL DEFAULT '-1',
   `inst_role` varchar(50) NOT NULL DEFAULT '-1',
   `inst_status` varchar(50) NOT NULL DEFAULT '-1',
-  `version` varchar(50) NOT NULL DEFAULT '-1',
+  `version` varchar(50) DEFAULT '',
   `startup_time` varchar(50) NOT NULL DEFAULT '-1',
   `host_name` varchar(50) NOT NULL DEFAULT '-1',
   `archiver` varchar(50) NOT NULL DEFAULT '-1',
@@ -632,6 +685,7 @@ CREATE TABLE `pms_oracle_status_his` (
   `dg_stats` varchar(255) NOT NULL DEFAULT '-1',
   `dg_delay` int(10) NOT NULL DEFAULT '-1',
   `processes` int(10) NOT NULL DEFAULT '-1',
+  `max_processes` int(10) NOT NULL DEFAULT '-1',
   `flashback_on` varchar(10) DEFAULT NULL COMMENT '闪回状态',
   `flashback_usage` varchar(10) DEFAULT NULL COMMENT '闪回空间使用率',
   `created` int(10) DEFAULT NULL COMMENT '操作时间',
@@ -827,6 +881,7 @@ CREATE TABLE `pms_op_process_his` (
 DROP TABLE IF EXISTS `pms_dr_pri_status`;
 CREATE TABLE `pms_dr_pri_status` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL,
   `db_id` int(10) NOT NULL,
   `check_seq` smallint(4) NOT NULL DEFAULT '0',
   `dest_id` smallint(4) NOT NULL DEFAULT '0',
@@ -844,6 +899,7 @@ CREATE TABLE `pms_dr_pri_status` (
 DROP TABLE IF EXISTS `pms_dr_pri_status_his`;
 CREATE TABLE `pms_dr_pri_status_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL,
   `db_id` int(10) NOT NULL,
   `check_seq` smallint(4) NOT NULL DEFAULT '0',
   `dest_id` smallint(4) NOT NULL DEFAULT '0',
@@ -864,6 +920,7 @@ CREATE TABLE `pms_dr_pri_status_his` (
 DROP TABLE IF EXISTS `pms_dr_sta_status`;
 CREATE TABLE `pms_dr_sta_status` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL,
   `db_id` int(10) NOT NULL,
   `thread` smallint(4) NOT NULL,
   `sequence` int(20) DEFAULT NULL,
@@ -880,6 +937,7 @@ CREATE TABLE `pms_dr_sta_status` (
 DROP TABLE IF EXISTS `pms_dr_sta_status_his`;
 CREATE TABLE `pms_dr_sta_status_his` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
+  `dr_id` int(10) NOT NULL,
   `db_id` int(10) NOT NULL,
   `thread` smallint(4) NOT NULL,
   `sequence` int(20) DEFAULT NULL,
@@ -1451,11 +1509,13 @@ CREATE TABLE `pms_os_disk` (
   `os_id` int(10) NOT NULL,
   `host` varchar(50) NOT NULL,
   `alias` varchar(100) DEFAULT NULL,
-  `mounted` varchar(50) NOT NULL DEFAULT '0',
+  `mounted` varchar(100) DEFAULT NULL,
+  `device` varchar(200) DEFAULT NULL,
   `total_size` bigint(18) NOT NULL DEFAULT '0',
   `used_size` bigint(18) NOT NULL DEFAULT '0',
   `avail_size` bigint(18) NOT NULL DEFAULT '0',
   `used_rate` varchar(10) NOT NULL DEFAULT '0',
+  `node_rate` varchar(10) NOT NULL DEFAULT '0',
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -1469,11 +1529,13 @@ CREATE TABLE `pms_os_disk_his` (
   `os_id` int(10) NOT NULL,
   `host` varchar(50) NOT NULL,
   `alias` varchar(100) DEFAULT NULL,
-  `mounted` varchar(50) NOT NULL DEFAULT '0',
+  `mounted` varchar(100) DEFAULT NULL,
+  `device` varchar(200) DEFAULT NULL,
   `total_size` bigint(18) NOT NULL DEFAULT '0',
   `used_size` bigint(18) NOT NULL DEFAULT '0',
   `avail_size` bigint(18) NOT NULL DEFAULT '0',
   `used_rate` varchar(10) NOT NULL DEFAULT '0',
+  `node_rate` varchar(10) NOT NULL DEFAULT '0',
   `created` int(10) DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_os_id` (`os_id`) USING BTREE,
@@ -1654,6 +1716,7 @@ CREATE TABLE `pms_alerts` (
 	`name`                   varchar(200)    DEFAULT ''                NOT NULL,
 	`severity`               varchar(50)     DEFAULT '0'               NOT NULL,
 	`templateid`             int(10)         DEFAULT '0'               NOT NULL,
+	`is_recovery`            tinyint(1)      DEFAULT '0'               NOT NULL,
 	`subject`                varchar(255)    DEFAULT ''                NULL,
 	`message`                text                                      NOT NULL,
 	`status`                 integer         DEFAULT '1'               NOT NULL,
@@ -1679,6 +1742,39 @@ CREATE INDEX `pms_alerts_2` ON `pms_alerts` (`asset_id`);
 CREATE INDEX `pms_alerts_4` ON `pms_alerts` (`status`);
 CREATE INDEX `pms_alerts_5` ON `pms_alerts` (`created`);
 
+
+DROP TABLE IF EXISTS `pms_alert_history`;
+CREATE TABLE `pms_alert_history` (
+  `id`                     int(10)         AUTO_INCREMENT            NOT NULL ,
+	`asset_id`               int(10)         DEFAULT '0'               NOT NULL,
+	`name`                   varchar(200)    DEFAULT ''                NOT NULL,
+	`severity`               varchar(50)     DEFAULT '0'               NOT NULL,
+	`templateid`             int(10)         DEFAULT '0'               NOT NULL,
+	`is_recovery`            tinyint(1)      DEFAULT '0'               NOT NULL,
+	`subject`                varchar(255)    DEFAULT ''                NULL,
+	`message`                text                                      NOT NULL,
+	`status`                 integer         DEFAULT '1'               NOT NULL,
+  `send_mail`              tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_mail_list`         varchar(1024)   DEFAULT 0                 NOT NULL,
+  `send_mail_status`       tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_mail_retries`      integer         DEFAULT 0                 NOT NULL,
+  `send_mail_error`        varchar(1024)   DEFAULT '',
+  `send_wechat`            tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_wechat_status`     tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_wechat_retries`    integer         DEFAULT 0                 NOT NULL,
+  `send_wechat_error`      varchar(1024)   DEFAULT '',
+  `send_sms`               tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_sms_list`          varchar(1024)   DEFAULT 0                 NOT NULL,
+  `send_sms_status`        tinyint(1)      DEFAULT 0                 NOT NULL,
+  `send_sms_retries`       integer         DEFAULT 0                 NOT NULL,
+  `send_sms_error`         varchar(1024)   DEFAULT '',
+  `created`                int(10)         DEFAULT NULL COMMENT '操作时间',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE INDEX `pms_alert_his_1` ON `pms_alert_history` (`id`);
+CREATE INDEX `pms_alert_his_2` ON `pms_alert_history` (`asset_id`);
+CREATE INDEX `pms_alert_his_4` ON `pms_alert_history` (`status`);
+CREATE INDEX `pms_alert_his_5` ON `pms_alert_history` (`created`);
 -- ----------------------------
 -- Table structure for pms_global_options
 -- ----------------------------
@@ -1716,3 +1812,5 @@ INSERT INTO `pms_global_options` VALUES ('send_alert_sms', '发送告警短信',
 INSERT INTO `pms_global_options` VALUES ('send_sms_to_list', '告警短信收件人', '', '短信收件人列表');
 INSERT INTO `pms_global_options` VALUES ('send_sms_sleep_time', '发送短信休眠时间', '300', '发送短信休眠时间(分钟)');
 INSERT INTO `pms_global_options` VALUES ('send_alarm_wx', '发送告警微信', '0', '是否发送微信');
+
+INSERT INTO `pms_global_options` VALUES ('core_db', '大屏显示核心库', '', '大屏显示核心库');

@@ -65,7 +65,6 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 				}else{
 					log.Printf("there is no recovery mode for this trigger")
 				}
-
 			}
 
 
@@ -75,6 +74,7 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 	}
 	
 }
+
 
 func AlertBasicInfo(mysql *xorm.Engine, db_id int){
 	connect := GetConnect(mysql, db_id)
@@ -180,28 +180,29 @@ func GetRestart(mysql *xorm.Engine, db_id int) string{
 }
 
 func GetMrpStatus(mysql *xorm.Engine, db_id int) string{
-	var dg_stats string = "-1"
+	var mrp_status string = "-1"
 
-	sql := `select dg_stats from pms_oracle_status where db_id = ?`
+	sql := `select mrp_status from pms_dr_sta_status where db_id = ?`
 
-	_, err := mysql.SQL(sql, db_id).Get(&dg_stats)
+	_, err := mysql.SQL(sql, db_id).Get(&mrp_status)
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}
 
-	return dg_stats
+	return mrp_status
 }
 
 
 func GetDgDelay(mysql *xorm.Engine, db_id int) string{
 	var dg_delay string = "-1"
 
-	sql := `select dg_delay from pms_oracle_status where db_id = ?`
+	sql := `select delay_mins from pms_dr_sta_status where db_id = ?`
 
 	_, err := mysql.SQL(sql, db_id).Get(&dg_delay)
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}
+	log.Printf("dg_delay: %s", dg_delay)
 
 	return dg_delay
 }

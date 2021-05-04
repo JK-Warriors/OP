@@ -26,7 +26,7 @@
       <!--<h3> 组织管理 {{template "users/nav.tpl" .}}</h3>-->
       <ul class="breadcrumb pull-left">
         <li> <a href="/config/db/manage">配置中心</a> </li>
-        <li class="active"> 资产配置 </li>
+        <li class="active"> 数据库配置 </li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -40,7 +40,7 @@
                 <div class="form-group">
                   <form action="/config/db/manage" method="get">
                     <select name="asset_type" class="form-control">
-                      <option value="">资产类型</option>
+                      <option value="">数据库类型</option>
                       <option value="1" {{if eq "1" .condArr.asset_type}}selected{{end}}>Oracle</option>
                       <option value="2" {{if eq "2" .condArr.asset_type}}selected{{end}}>MySQL</option>
                       <option value="3" {{if eq "3" .condArr.asset_type}}selected{{end}}>SQLServer</option>
@@ -52,13 +52,13 @@
                   </form>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-success" id="add_db"><i class="fa fa-plus"></i> 新增资产</a>
+                  <a href="#" class="btn btn-success" id="add_db"><i class="fa fa-plus"></i> 新增</a>
                 </div>
               </div>
             </div>
           </div>
           <section class="panel">
-            <header class="panel-heading"> 资产列表 / 总数：{{.countDb}}
+            <header class="panel-heading"> 数据库列表 / 总数：{{.countDb}}
               <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
               <!--a href="javascript:;" class="fa fa-times"></a-->
               </span> 
@@ -70,7 +70,7 @@
                   <table class="table table-bordered table-striped table-condensed">
                     <thead>
                       <tr>
-                        <th>资产类型</th>
+                        <th>数据库类型</th>
                         <th>主机IP</th>
                         <th>端口</th>
                         <th>别名</th>
@@ -157,7 +157,7 @@
           type: 1,
           closeBtn: true,
           shift: 2,
-          title: '新增资产',
+          title: '新增数据库',
           area: ['600px', '30%'],
           offset: ['180px'],
           shadeClose: true,

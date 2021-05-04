@@ -226,3 +226,17 @@ func CountDiskgroups(condArr map[string]string) int64 {
 	num, _ := qs.SetCond(cond).Count()
 	return num
 }
+
+
+
+func GetProcessRateByDbId(db_id int) int64 {
+	var process_rate int64 = -1
+	sql := `select round(processes*100/max_processes,0) from pms_oracle_status where db_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, db_id).QueryRow(&process_rate)
+	if err != nil {
+		return -1
+	}
+	return process_rate
+}

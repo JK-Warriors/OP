@@ -225,3 +225,71 @@ func CountDiskIO(condArr map[string]string) int64 {
 	num, _ := qs.SetCond(cond).Count()
 	return num
 }
+
+
+// for oracle dr screen
+func GetCpuRateByOsId(os_id int) int64 {
+	var cpu_rate int64 = -1.0
+	sql := `select 100 - cpu_idle_time from pms_os_status where os_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, os_id).QueryRow(&cpu_rate)
+	if err != nil {
+		return -1.0
+	}
+
+	return cpu_rate
+}
+
+func GetMemRateByOsId(os_id int) float64 {
+	var mem_rate float64 = -1
+	sql := `select round(mem_usage_rate,0) from pms_os_status where os_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, os_id).QueryRow(&mem_rate)
+	if err != nil {
+		return -1
+	}
+	
+	return mem_rate
+}
+
+func GetSwapRateByOsId(os_id int) float64 {
+	var swap_rate float64 = -1
+	sql := `select round(100-swap_avail*100/swap_total,0) from pms_os_status where os_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, os_id).QueryRow(&swap_rate)
+	if err != nil {
+		return -1
+	}
+	
+	return swap_rate
+}
+
+func GetDiskRateByOsId(os_id int) float64 {
+	var disk_rate float64 = -1
+	sql := `select max(used_rate+0) from pms_os_disk where os_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, os_id).QueryRow(&disk_rate)
+	if err != nil {
+		return -1
+	}
+	
+	return disk_rate
+}
+
+
+func GetInodeRateByOsId(os_id int) float64 {
+	var node_rate float64 = -1
+	sql := `select max(node_rate+0) from pms_os_disk where os_id = ? `
+	
+	o := orm.NewOrm()
+	err := o.Raw(sql, os_id).QueryRow(&node_rate)
+	if err != nil {
+		return -1
+	}
+	
+	return node_rate
+}

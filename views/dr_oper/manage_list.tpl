@@ -59,7 +59,11 @@
                         <tr>
                           <th>容灾组名称</th>
                           <th>主库</th>
+                          <th>主库时间</th>
                           <th>备库</th>
+                          <th>备库时间</th>
+                          <th>同步状态</th>
+                          <th>延时</th>
                           <th>操作</th>
                         </tr>
                       </thead>
@@ -68,8 +72,12 @@
                         <tr>
                           <td>{{$v.Bs_Name}}</td>
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
-                          <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
-                          <td>
+                          <td>{{$v.Db_Time_P}}</td>
+						  <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
+                          <td>{{$v.Db_Time_S}}</td>
+						  <td>{{checkDrStatusLevel $v.Repl_Status | str2html}}</td>
+						  <td>{{$v.Repl_Delay}}</td>
+						  <td>
 						  	<a name="screen"  {{if eq 1 $v.Db_Type_P}}class="btn btn-primary" href="/operation/screen/view/{{$v.Id}}"{{else}}class="btn btn-default"{{end}}> <i class="fa fa-reset"></i> 灾备大屏 </a> 
                             <a name="btnDrManage" class="btn btn-primary" type="button" href="/operation/dr_manage/detail/{{$v.Id}}"> <i class="fa fa-reset"></i> 容灾管理 </a>
                             <!--<button name="switchover" class="btn btn-primary" type="button" value="Switchover" onclick="checkUser(this)" data-id="{{$v.Id}}"> <i class="fa fa-reset"></i> 维护切换 </button>

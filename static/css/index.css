@@ -24,3 +24,23 @@
 .textico.i_sqlserver {
   background: #C74541;
 }
+
+.textico.i_linux {
+  background: #ED1A23;
+}
+
+.textico.i_windows {
+  background: #014967;
+}
+
+.textico.i_aix {
+  background: #C74541;
+}
+
+.textico.i_hp_unix {
+  background: #ED1A23;
+}
+
+.textico.i_solaris {
+  background: #ED1A23;
+}

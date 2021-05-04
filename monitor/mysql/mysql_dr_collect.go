@@ -132,6 +132,10 @@ func GenerateSlave(mysql *xorm.Engine, dr_id int, db_id int, connStr string) {
 
 		_, err = mysql.Exec(sql, dr_id, db_id, read_only, gtid_mode, a2.String, a4.String, a11.String, a12.String, a33.String, a10.String, a22.String, a6.String, a7.String, 0, time.Now().Unix())
 
+		
+		timestamp := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
+		StorageMetricData(mysql, dr_id, "Recovery Time Objective", timestamp, a33.String, "GAUGE")
+		
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 			session.Rollback()

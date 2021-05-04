@@ -52,11 +52,11 @@
     <div class="container-flex">
       <div class="boxtit">
         <div class="b1">当前时间：&nbsp;<span id="Timer"></span></div>
-        <div class="b2">数据平台数据库容灾监控中心</div>
+        <div class="b2">{{.drconf.Bs_Name}}监控中心</div>
         <div class="b3">
           最新检测时间：&nbsp;<span>{{GetDateMHS .sta_dr.Created}}</span>
 
-          <a href="#" class="qbtn"
+          <a href="/operation/dr_manage/list" class="qbtn"
             ><img src="/static/img/quit.png" title="退出"
           /></a>
         </div>
@@ -78,7 +78,7 @@
             </div>
             <div class="m1 ml">
               <p>生产系统</p>
-              <img src="/static/img/database.png" alt="" />
+              <img src="{{getOraScreenConnectImage .pri_basic.Connect}}" alt="" />
               <div class="mtext">
                 <li><span>数据库时间:</span> {{.pri_dr.Curr_Db_Time}}</li>
                 <li><span>实例名: </span>{{.pri_basic.Instance_name}}</li>
@@ -88,7 +88,7 @@
             </div>
             <div class="m1 mr">
               <p>灾备系统</p>
-              <img src="/static/img/database.png" alt="" />
+              <img src="{{getOraScreenConnectImage .sta_basic.Connect}}" alt="" />
               <div class="mtext">
                 <li><span>数据库时间:</span> {{.sta_dr.Curr_Db_Time}}</li>
                 <li><span>实例名: </span>{{.sta_basic.Instance_name}}</li>
@@ -104,9 +104,12 @@
                   <p class="sp2"><span>序列:</span> {{.pri_dr.Sequence}}</p>
                 </li>
 
-                <li><span>状态:</span>{{if eq "READ WRITE" $.pri_basic.Open_Mode}}读写{{else if eq "MOUNTED" $.pri_basic.Open_Mode}}应用{{else}}$.pri_basic.Open_Mode{{end}}</li>
-                <li style="{{if eq "YES" $.pri_basic.Flashback_On}}display: none;{{end}}"><span>生产库快照状态:</span>未启动</li>
-                <li style="{{if eq "NO" $.pri_basic.Flashback_On}}display: none;{{end}}"><span>最早快照时间:</span></li>
+                <li><span>状态:</span>{{getOraInstStatus $.pri_basic.Open_Mode}}</li>
+                {{if eq "YES" $.pri_basic.Flashback_On}}
+                  <li><span>最早快照时间:</span></li>
+                {{else}}
+                  <li><span>生产库快照状态:</span>未启动</li>
+                {{end}}
                 <li><span>快照空间使用率:</span>{{.pri_basic.Flashback_Usage}}%</li>
               </div>
             </div>
@@ -123,9 +126,13 @@
                   <p class="sp2">序列: {{.sta_dr.Sequence}}</p>
                 </li>
 
-                <li><span>状态:</span>{{if eq "READ WRITE" $.sta_basic.Open_Mode}}读写{{else if eq "MOUNTED" $.sta_basic.Open_Mode}}应用{{else}}$.sta_basic.Open_Mode{{end}}</li>
-                <li style="{{if eq "YES" $.sta_basic.Flashback_On}}display: none;{{end}}"><span>容灾库快照状态:</span>未启动</li>
-                <li style="{{if eq "NO" $.sta_basic.Flashback_On}}display: none;{{end}}"><span>最早快照时间:</span></li>
+                <li><span>状态:</span>{{getOraInstStatus $.sta_basic.Open_Mode}}</li>
+                {{if eq "YES" $.sta_basic.Flashback_On}}
+                  <li><span>最早快照时间:</span></li>
+                {{else}}
+                  <li><span>容灾库快照状态:</span>未启动</li>
+                {{end}}
+
                 <li><span>快照空间使用率:</span>{{.sta_basic.Flashback_Usage}}%</li>
               </div>
             </div>
@@ -139,29 +146,29 @@
               <div id="main" style="width: 100%; height: 100%; "></div>
             </div>
             <div class="e2">
-              <h4>指标雷达</h4>
+              <h4>关键指标</h4>
               <div id="main2" style="width: 100%; height: 100%; "></div>
             </div>
             <div class="e3">
               <table border="0">
                 <tbody>
                   <tr>
-                    <td>CPU空闲率</td>
-                    <td>99%</td>
-                    <td>内存空闲率</td>
-                    <td>2%</td>
+                    <td>CPU使用率</td>
+                    <td>{{.cpu_rate}}%</td>
+                    <td>内存使用率</td>
+                    <td>{{.mem_rate}}%</td>
                   </tr>
                   <tr>
-                    <td>Swap空闲率</td>
-                    <td>99%</td>
-                    <td>磁盘空闲率</td>
-                    <td>62%</td>
+                    <td>Swap使用率</td>
+                    <td>{{.swap_rate}}%</td>
+                    <td>磁盘使用率</td>
+                    <td>{{.disk_rate}}%</td>
                   </tr>
                   <tr>
-                    <td>Inode空闲率</td>
-                    <td></td>
-                    <td>进程数</td>
-                    <td>277</td>
+                    <td>Inode使用率</td>
+                    <td>{{.inode_rate}}%</td>
+                    <td>进程使用率</td>
+                    <td>{{.process_rate}}%</td>
                   </tr>
                 </tbody>
               </table>
@@ -191,7 +198,7 @@
       </div>
     </div>
 
-    <script type="text/javascript">
+<script type="text/javascript">
       var myChart = echarts.init(document.getElementById('main'), 'chalk')
       var option = {
         tooltip: {
@@ -221,32 +228,7 @@
               }
             }
           },
-          data: [
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-          ]
+          data: [{{range $k,$a := .redo}}{{$a.Key_Time}},{{end}}]
         },
         yAxis: {
           type: 'value'
@@ -255,32 +237,7 @@
           {
             symbol: 'circle', //设定为实心点
             symbolSize: 1, //设定实心点的大小
-            data: [
-              '488',
-              '0',
-              '0',
-              '493',
-              '0',
-              '490',
-              '0',
-              '0',
-              '0',
-              '0',
-              '0',
-              '508',
-              '490',
-              '1146',
-              '0',
-              '0',
-              '524',
-              '490',
-              '0',
-              '0',
-              '490',
-              '0',
-              '490',
-              '0'
-            ],
+            data: [{{range $k,$a := .redo}}{{$a.Value}},{{end}}],
             type: 'line',
             areaStyle: {}
           }
@@ -321,7 +278,12 @@
             symbolSize: 1, //设定实心点的大小
             data: [
               {
-                value: [99, 99, 2, 62, 80, 55]
+                value: [{{.cpu_rate}}, 
+                        {{.swap_rate}}, 
+                        {{.mem_rate}}, 
+                        {{.disk_rate}}, 
+                        {{.inode_rate}}, 
+                        {{.process_rate}}]
               }
             ]
           }
@@ -333,8 +295,9 @@
         myChart.resize()
         myChart2.resize()
       })
-    </script>
-    <script type="text/javascript">
+</script>
+
+<script type="text/javascript">
       $(function() {
         setInterval('GetTime()', 1000)
       })

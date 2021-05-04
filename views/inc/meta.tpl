@@ -16,7 +16,24 @@
 <![endif]-->
 
 
+<script src="/static/js/jquery-3.4.1.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/jquery.nicescroll.js"></script>
+<script src="/static/js/scripts.js"></script>
+<script src="/static/js/jquery.validate.js"></script>
+<script src="/static/js/opms.js"></script>
+<script src="/static/js/ui-choose.js"></script>
+<script src="/static/js/bootbox.js"></script>
+<script src="/static/js/md5.js"></script>
+<script src="/static/js/metisMenu.js"></script>
 <script src="/static/js/layui-v2.6.2/layui.js"></script>
+<script src="/static/js/layer/layer.js"></script>
+
+<script type="text/javascript">
+  $(function() {
+      $('#side-menu').metisMenu(); // ul.nav#side-menu
+  })
+</script>
 
 <script>
 var _hmt = _hmt || [];

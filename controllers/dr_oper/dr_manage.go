@@ -7,6 +7,9 @@ import (
 
 	. "opms/models/dr_oper"
 	. "opms/models/users"
+	. "opms/models/dr_config"
+	. "opms/models/os"
+	. "opms/models/oracle"
 	"opms/utils"
 	"strings"
 
@@ -214,6 +217,8 @@ func (this *ScreenDrViewController) Get() {
 		return
 	}
 
+	drconf,_ := GetDrConfig(bs_id)
+
 	pri_id, err := GetPrimaryDBId(bs_id)
 	if err != nil {
 		utils.LogDebug("GetPrimaryDBID failed: " + err.Error())
@@ -230,10 +235,30 @@ func (this *ScreenDrViewController) Get() {
 	pri_dr, err := GetPrimaryDrInfo(pri_id)
 	sta_dr, err := GetStandbyDrInfo(sta_id)
 
+	//get
+	redo, err := GetOracleRedo(pri_id)
+
+	os_id := GetPrimaryOSId(pri_id)
+	cpu_rate := GetCpuRateByOsId(os_id)
+	mem_rate := GetMemRateByOsId(os_id)
+	swap_rate := GetSwapRateByOsId(os_id)
+	disk_rate := GetDiskRateByOsId(os_id)
+	inode_rate := GetInodeRateByOsId(os_id)
+	process_rate := GetProcessRateByDbId(pri_id)
+
 	this.Data["pri_basic"] = pri_basic
 	this.Data["sta_basic"] = sta_basic
 	this.Data["pri_dr"] = pri_dr
 	this.Data["sta_dr"] = sta_dr
+	this.Data["drconf"] = drconf
+	this.Data["redo"] = redo
+	
+	this.Data["cpu_rate"] = cpu_rate
+	this.Data["mem_rate"] = mem_rate
+	this.Data["swap_rate"] = swap_rate
+	this.Data["disk_rate"] = disk_rate
+	this.Data["inode_rate"] = inode_rate
+	this.Data["process_rate"] = process_rate
 
 	this.TplName = "dr_oper/screen-oracle.tpl"
 }

@@ -88,12 +88,13 @@ func (this *BaseController) Prepare() {
 		}
 		this.Data["current_url"] = url
 		
+		level2_url := url_first_part + "/" + url_sec_part
 
 		//_, _, leftNav := ListRoleUserPermission(this.GetSession("userRoleid").(string))
 		_, _, leftNavLevel1 := GetLeftNavLevel1(this.GetSession("userRoleid").(string), url_first_part)
 		this.Data["leftNavLevel1"] = leftNavLevel1
 		
-		_, _, leftNavLevel2 := GetLeftNavLevel2(this.GetSession("userRoleid").(string), url_sec_part)
+		_, _, leftNavLevel2 := GetLeftNavLevel2(this.GetSession("userRoleid").(string), level2_url)
 		this.Data["leftNavLevel2"] = leftNavLevel2
 
 	}

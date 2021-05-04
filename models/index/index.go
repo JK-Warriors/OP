@@ -20,10 +20,35 @@ type DbStatus struct {
 	Role   				string `orm:"column(role);"`
 	Version   			string `orm:"column(version);"`
 	Connect   			int `orm:"column(connect);"`
-	Session_Total 		int    `orm:"column(sessions);"`
-	Repl	 			string  `orm:"column(repl);"`
-	Repl_Delay	 		string  `orm:"column(repl_delay);"`
-	Tablespace	 		string  `orm:"column(tablespace);"`
+	Connect_Tips   		string `orm:"column(connect_tips);"`
+	Sess_Total 			int    `orm:"column(sessions);"`
+	Sess_Total_Tips 	string    `orm:"column(sessions_tips);"`
+	Sess_Actives 		int    		`orm:"column(actives);"`
+	Sess_Actives_Tips 	string    	`orm:"column(actives_tips);"`
+	Sess_Waits 			int    		`orm:"column(waits);"`
+	Sess_Waits_Tips 	string    	`orm:"column(waits_tips);"`
+	Process 			int    		`orm:"column(process);"`
+	Process_Tips 		string    	`orm:"column(process_tips);"`
+	Repl	 			int  		`orm:"column(repl);"`
+	Repl_Tips 			string    	`orm:"column(repl_tips);"`
+	Repl_Delay	 		int  		`orm:"column(repl_delay);"`
+	Repl_Delay_Tips 	string    	`orm:"column(repl_delay_tips);"`
+	Tablespace	 		int  		`orm:"column(tablespace);"`
+	Tablespace_Tips 	string    	`orm:"column(tablespace_tips);"`
+	Diskgroup	 		int  		`orm:"column(diskgroup);"`
+	Diskgroup_Tips 		string    	`orm:"column(diskgroup_tips);"`
+	Flashback_Space	 		int  		`orm:"column(flashback_space);"`
+	Flashback_Space_Tips 	string    	`orm:"column(flashback_space_tips);"`
+	Load	 				int  		`orm:"column(load);"`
+	Load_Tips 				string    	`orm:"column(load_tips);"`
+	Cpu	 					int  		`orm:"column(cpu);"`
+	Cpu_Tips 				string    	`orm:"column(cpu_tips);"`
+	Memory	 				int  		`orm:"column(memory);"`
+	Memory_Tips 			string    	`orm:"column(memory_tips);"`
+	IO	 					int  		`orm:"column(io);"`
+	IO_Tips 				string    	`orm:"column(io_tips);"`
+	Net	 					int  		`orm:"column(net);"`
+	Net_Tips 				string    	`orm:"column(net_tips);"`
 	Score		 		string  `orm:"column(score);"`
 	Created  			int64  `orm:"column(created);"`
 }
@@ -48,6 +73,7 @@ func ListDbStatus(condArr map[string]string, page int, offset int) (num int64, e
 	if condArr["host"] != "" {
 		cond = cond.And("host__icontains", condArr["host"])
 	}
+	cond = cond.And("asset_type__lt", 99)
 
 	qs = qs.SetCond(cond)
 	if page < 1 {
@@ -76,7 +102,9 @@ func CountDb(condArr map[string]string) int64 {
 	if condArr["host"] != "" {
 		cond = cond.And("host__icontains", condArr["host"])
 	}
-	
+
+	cond = cond.And("asset_type__lt", 99)
+
 	num, _ := qs.SetCond(cond).Count()
 	return num
 }

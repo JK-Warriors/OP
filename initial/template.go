@@ -34,10 +34,15 @@ func InitTemplate() {
 		beego.AddFuncMap("getOvertimeProcess", overtimes.ListOvertimeApproverProcessHtml)
 	*/
 	beego.AddFuncMap("getAssetImage", utils.GetAssetImage)
+	beego.AddFuncMap("getOSImage", utils.GetOSImage)
 	beego.AddFuncMap("getDbRoleImage", utils.GetDbRoleImage)
 	beego.AddFuncMap("checkDbStatusLevel", utils.CheckDbStatusLevel)
 
 	beego.AddFuncMap("getTransferStatus", dr_oper.GetTransferStatus)
+
+	beego.AddFuncMap("getOraInstStatus", utils.GetOraInstStatus)
+	beego.AddFuncMap("checkDrStatusLevel", utils.CheckDrStatusLevel)
+	beego.AddFuncMap("getOraScreenConnectImage", utils.GetOraScreenConnectImage)
 
 	beego.AddFuncMap("getDate", utils.GetDate)
 	beego.AddFuncMap("getDateMH", utils.GetDateMH)
@@ -65,5 +70,4 @@ func InitTemplate() {
 
 	beego.AddFuncMap("getMessageType", utils.GetMessageType)
 	beego.AddFuncMap("getMessageSubtype", utils.GetMessageSubtype)
-
 }

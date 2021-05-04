@@ -22,12 +22,31 @@ func GetAssetImage(Asset_Type int) string {
 	return db_type_img
 }
 
+func GetOSImage(Asset_Type int) string {
+	var db_type_img string
+	switch Asset_Type {
+	case 1:
+		db_type_img = "<span class='textico i_linux'>Linux</span>"
+	case 2:
+		db_type_img = "<span class='textico i_windows'>Windows</span>"
+	case 3:
+		db_type_img = "<span class='textico i_aix'>AIX</span>"
+	case 4:
+		db_type_img = "<span class='textico i_hp_unix'>HP-Unix</span>"
+	case 5:
+		db_type_img = "<span class='textico i_solaris'>Solaris</span>"
+	default:
+		db_type_img = ""
+	}
+	return db_type_img
+}
+
 func GetDbRoleImage(Role string) string {
 	var db_role_img string
 	if(Role == "PRIMARY"){
 		db_role_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='Master/Primary'><img src='/static/img/primary.png' /></a>"
 	}else if(Role == "PHYSICAL STANDBY") {
-		db_role_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='Slave/Secondary'><img src='/static/img/slave.png' /></a>"
+		db_role_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='Slave/Standby'><img src='/static/img/slave.png' /></a>"
 	}else{
 		db_role_img = "---"
 	}
@@ -50,6 +69,47 @@ func CheckDbStatusLevel(data int, data_tips string) string {
 		level_img = "<img src='/static/img/none.png' alt='none' title='no data' />"
 	}
 	return level_img
+}
+
+func CheckDrStatusLevel(status string) string {
+	var level_img string
+	if (status == "ACTIVE"){
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + status + "'><img src='/static/img/ok.png' /></a>"
+	}else if(status == "INACTIVE"){
+		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + status + "'><img src='/static/img/critical.png' /></a>"
+	}else{
+		level_img = "<img src='/static/img/none.png' alt='none' title='no data' />"
+	}
+
+	return level_img
+}
+
+func GetOraScreenConnectImage(connect int) string {
+	var conn_img string
+	if (connect == 1){
+		conn_img = "/static/img/db1.png"
+	}else{
+		conn_img = "/static/img/db2.png"
+	}
+
+	return conn_img
+}
+
+func GetOraInstStatus(status string) string {
+	var txt string
+	switch status {
+	case "READ WRITE":
+		txt = "读写"
+	case "MOUNTED":
+		txt = "MOUNTED"
+	case "READ ONLY":
+		txt = "只读"
+	case "READ ONLY WITH APPLY":
+		txt = "只读恢复"
+	case "-1":
+		txt = "未知"
+	}
+	return txt
 }
 
 
@@ -386,6 +446,7 @@ func GetCheckworkType(ctype int) string {
 	}
 	return txt
 }
+
 
 func GetMessageType(ctype int) string {
 	var txt string

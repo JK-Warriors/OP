@@ -78,9 +78,9 @@
                           <td>{{$v.Alias}}</td>
                           <td>{{$v.Host}}</td>
                           <td>{{$v.Inst_Name}}</td>
-                          <td>{{if eq 1 $v.Connect}}连接{{else}}未连接{{end}}</td>
-                          <td>{{$v.Db_Role}}</td>
-                          <td>{{$v.Open_Mode}}</td>
+                          <td>{{checkDbStatusLevel $v.Connect "" | str2html}}</td>
+                          <td>{{ getDbRoleImage $v.Db_Role | str2html}}</td>
+                          <td>{{getOraInstStatus $v.Open_Mode}}</td>
                           <td>{{$v.Startup_Time}}</td>
                           <td>{{$v.Version}}</td>
                           <td>{{$v.Session_Total}}</td>

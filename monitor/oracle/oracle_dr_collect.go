@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 	"context"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/godror/godror"
@@ -15,6 +16,8 @@ import (
 )
 
 func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr) {
+	dr_id := dis.Id
+
 	var pri_id int
 	var sta_id int
 	if dis.Is_Shift == 0 {
@@ -37,12 +40,12 @@ func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr
 		return
 	}
 
-	p_pri, _ := godror.ParseConnString(dsn_p)
-	p_sta, _ := godror.ParseConnString(dsn_s)
+	pri_conn_str, _ := godror.ParseConnString(dsn_p)
+	sta_conn_str, _ := godror.ParseConnString(dsn_s)
 
 
-	GeneratePrimary(mysql, p_pri, pri_id)
-	GenerateStandby(mysql, p_pri, p_sta, sta_id)
+	GeneratePrimary(mysql, dr_id, pri_conn_str, pri_id)
+	GenerateStandby(mysql, dr_id, pri_conn_str, sta_conn_str, sta_id)
 
 	log.Println("获取Oracle容灾数据结束！")
 
@@ -50,7 +53,7 @@ func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr
 }
 
 
-func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
+func GeneratePrimary(mysql *xorm.Engine, dr_id int, P godror.ConnectionParams, db_id int) {
 
 	db, err := sql.Open("godror", P.StringWithPassword())
 	if err != nil {
@@ -144,10 +147,10 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 			return
 		}
 
-		sql = `insert into pms_dr_pri_status(db_id, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created) 
-						values(?,?,?,?,?,?,?,?,?,?)`
+		sql = `insert into pms_dr_pri_status(dr_id, db_id, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?)`
 
-		_, err = mysql.Exec(sql, db_id, dest_id, transmit_mode, thread, sequence, current_scn, curr_db_time, archived_delay, applied_delay, time.Now().Unix())
+		_, err = mysql.Exec(sql, dr_id, db_id, dest_id, transmit_mode, thread, sequence, current_scn, curr_db_time, archived_delay, applied_delay, time.Now().Unix())
 
 		if err != nil {
 			log.Printf("%s: %w", sql, err)
@@ -161,7 +164,7 @@ func GeneratePrimary(mysql *xorm.Engine, P godror.ConnectionParams, db_id int) {
 
 }
 
-func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta godror.ConnectionParams, db_id int) {
+func GenerateStandby(mysql *xorm.Engine, dr_id int, p_pri godror.ConnectionParams, p_sta godror.ConnectionParams, db_id int) {
 	db, err := sql.Open("godror", p_sta.StringWithPassword())
 	if err != nil {
 		utils.LogDebugf("%s: %w", p_sta.StringWithPassword(), err)
@@ -211,11 +214,21 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
-	//get standby db time by sta_scn
-	curr_db_time, err := GetDbtimeBySCN(p_pri, sta_scn)
+	
+	//get standby db time by sta_scn from standby
+	curr_db_time, err := GetDbtimeBySCN(p_sta, sta_scn)
 	if err != nil {
 		utils.LogDebugf("GetDbtimeBySCN failed: %s", err.Error())
 		curr_db_time = ""
+	}
+
+	if curr_db_time == ""{
+		//get standby db time by sta_scn from primary
+		curr_db_time, err = GetDbtimeBySCN(p_pri, sta_scn)
+		if err != nil {
+			utils.LogDebugf("GetDbtimeBySCN failed: %s", err.Error())
+			curr_db_time = ""
+		}
 	}
 
 	//get mrp_status
@@ -224,6 +237,9 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 	err = db.QueryRow(sql).Scan(&mrp_status)
 	if err != nil {
 		utils.LogDebugf("%s: %s", sql, err.Error())
+	}
+	if len(mrp_status) == 0 {
+		mrp_status = "INACTIVE"
 	}
 
 	// storage result
@@ -248,10 +264,14 @@ func GenerateStandby(mysql *xorm.Engine, p_pri godror.ConnectionParams, p_sta go
 		return
 	}
 
-	sql = `insert into pms_dr_sta_status(db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created) 
-						values(?,?,?,?,?,?,?,?,?,?)`
+	sql = `insert into pms_dr_sta_status(dr_id, db_id, thread, sequence, block, delay_mins, apply_rate, curr_scn, curr_db_time, mrp_status, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?)`
 
-	_, err = mysql.Exec(sql, db_id, thread, sequence, block, delay_mins, apply_rate, sta_scn, curr_db_time, mrp_status, time.Now().Unix())
+	_, err = mysql.Exec(sql, dr_id, db_id, thread, sequence, block, delay_mins, apply_rate, sta_scn, curr_db_time, mrp_status, time.Now().Unix())
+
+	
+	timestamp := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
+	StorageMetricData(mysql, dr_id, "Recovery Time Objective", timestamp, strconv.Itoa(delay_mins), "GAUGE")
 
 	if err != nil {
 		utils.LogDebugf("%s: %s", sql, err.Error())

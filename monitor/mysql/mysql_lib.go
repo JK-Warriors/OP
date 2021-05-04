@@ -25,6 +25,18 @@ func GetVersion(db *sql.DB) string {
 	return version
 }
 
+func GetRole(db *sql.DB) string {
+	// var version string
+	sql := `show slave status`
+	_, err := db.Query(sql)
+	if err != nil {
+		log.Printf("GetRole failed: %s", err.Error())
+		return "MASTER"
+	}
+
+	return "SLAVE"
+}
+
 func GetGlobalStatus(db *sql.DB) (map[string]string, error) {
 	sql := `SHOW GLOBAL STATUS`
 	globalStatusRows, err := db.Query(sql)

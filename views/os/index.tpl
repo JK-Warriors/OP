@@ -36,11 +36,11 @@
               <div class="search-form">
                 <div class="form-inline">
                   <div class="form-group">
-                    <form action="/mssql/status/manage" method="get">
+                    <form action="/os/status/manage" method="get">
                     <input type="text" name="alias" placeholder="请输入别名" class="form-control" value="{{.condArr.alias}}"/>
                     <input type="text" name="host" placeholder="请输入主机" class="form-control" value="{{.condArr.host}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/mssql/status/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/os/status/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -63,9 +63,7 @@
                           <th>主机</th>
                           <th>连接状态</th>
                           <th>进程数</th>
-                          <th>用户CPU</th>
-                          <th>系统CPU</th>
-                          <th>空闲CPU</th>
+                          <th>CPU空闲率</th>
                           <th>总内存</th>
                           <th>可用内存</th>
                           <th>内存使用率</th>
@@ -73,7 +71,6 @@
                           <th>写IO</th>
                           <th>网络进流量</th>
                           <th>网络出流量</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -81,10 +78,8 @@
                         <tr>
                           <td>{{$v.Alias}}</td>
                           <td>{{$v.Host}}</td>
-                          <td>{{$v.Connect}}</td>
+                          <td>{{checkDbStatusLevel $v.Connect "" | str2html}}</td>
                           <td>{{$v.Process}}</td>
-                          <td>{{$v.Cpu_User_Time}}</td>
-                          <td>{{$v.Cpu_System_Time}}</td>
                           <td>{{$v.Cpu_Idle_Time}}</td>
                           <td>{{$v.Mem_Total}}</td>
                           <td>{{$v.Mem_Available}}</td>
@@ -93,8 +88,6 @@
                           <td>{{$v.Disk_IO_Writes_Total}}</td>
                           <td>{{$v.Net_In_Bytes_Total}}</td>
                           <td>{{$v.Net_Out_Bytes_Total}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

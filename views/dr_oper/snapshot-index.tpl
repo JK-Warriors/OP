@@ -59,7 +59,11 @@
                         <tr>
                           <th>容灾组名称</th>
                           <th>主库</th>
+                          <th>主库时间</th>
                           <th>备库</th>
+                          <th>备库时间</th>
+                          <th>同步状态</th>
+                          <th>延时</th>
                           <th>操作</th>
                         </tr>
                       </thead>
@@ -68,7 +72,11 @@
                         <tr>
                           <td>{{$v.Bs_Name}}</td>
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_P}}:{{$v.Port_P}}{{else}}{{$v.Host_S}}:{{$v.Port_S}}{{end}}{{end}}</td>
+                          <td>{{$v.Db_Time_P}}</td>
                           <td>{{if eq "" $v.Host_P}}---{{else}}{{if eq 0 $v.Is_Switch}}{{$v.Host_S}}:{{$v.Port_S}}{{else}}{{$v.Host_P}}:{{$v.Port_P}}{{end}}{{end}}</td>
+                          <td>{{$v.Db_Time_S}}</td>
+                          <td>{{checkDrStatusLevel $v.Repl_Status | str2html}}</td>
+                          <td>{{$v.Repl_Delay}}</td>
                           <td>
                             <a name="btnDrManage" class="btn btn-primary" type="button" href="/operation/dr_snapshot/detail/{{$v.Id}}"> <i class="fa fa-reset"></i> 快照管理 </a>
                           </td>

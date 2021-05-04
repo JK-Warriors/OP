@@ -3,7 +3,6 @@ package dbconfig
 import (
 	"database/sql"
 	"fmt"
-	"net"
 	"opms/models"
 	"opms/models/cfg_trigger"
 	"opms/utils"
@@ -14,7 +13,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/mattn/go-oci8"
-	"golang.org/x/crypto/ssh"
 )
 
 type Dbconfigs struct {
@@ -31,7 +29,7 @@ type Dbconfigs struct {
 	Role           int    `orm:"column(role);"`
 	Ostype         int    `orm:"column(os_type);"`
 	OsProtocol     string `orm:"column(os_protocol);"`
-	OsPort         string `orm:"column(os_port);"`
+	OsPort         int `orm:"column(os_port);"`
 	OsUsername     string `orm:"column(os_username);"`
 	OsPassword     string `orm:"column(os_password);"`
 	Status         int    `orm:"column(status);"`
@@ -119,6 +117,37 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		_, err = o.Update(&dbconf)
 	}
 	return err
+}
+
+func CheckDbExists(upd Dbconfigs) int{
+	var sql string
+	var count int
+	var err error
+	o := orm.NewOrm()
+
+	if upd.Id > 0 {
+		if upd.Dbtype == 1{
+			sql = "select count(1) from pms_asset_config where asset_type = ? and host = ? and instance_name = ? and id != ?"
+			err = o.Raw(sql, upd.Dbtype, upd.Host, upd.InstanceName, upd.Id).QueryRow(&count)
+		}else{
+			sql = "select count(1) from pms_asset_config where asset_type = ? and host = ? and port = ? and id != ?"
+			err = o.Raw(sql, upd.Dbtype, upd.Host, upd.Port, upd.Id).QueryRow(&count)
+		}
+	}else{
+		if upd.Dbtype == 1{
+			sql = "select count(1) from pms_asset_config where asset_type = ? and host = ? and instance_name = ?"
+			err = o.Raw(sql, upd.Dbtype, upd.Host, upd.InstanceName).QueryRow(&count)
+		}else{
+			sql = "select count(1) from pms_asset_config where asset_type = ? and host = ? and port = ?"
+			err = o.Raw(sql, upd.Dbtype, upd.Host, upd.Port).QueryRow(&count)
+		}
+	}
+
+	if err != nil{
+		return  -1
+	}
+
+	return count
 }
 
 //得到数据库配置信息
@@ -217,6 +246,7 @@ func ListDBconfig(condArr map[string]string, page int, offset int) (num int64, e
 		cond = cond.And("alias__icontains", condArr["alias"])
 	}
 
+	cond = cond.And("asset_type__lt", 99)
 	cond = cond.And("is_delete", 0)
 
 	qs = qs.SetCond(cond)
@@ -299,7 +329,7 @@ func CountDBconfig(condArr map[string]string) int64 {
 	if condArr["alias"] != "" {
 		cond = cond.And("alias__icontains", condArr["alias"])
 	}
-	cond = cond.And("status", 1)
+	cond = cond.And("asset_type__lt", 99)
 	cond = cond.And("is_delete", 0)
 	num, _ := qs.SetCond(cond).Count()
 	return num
@@ -398,152 +428,4 @@ func CheckSqlserverConnect(host string, port string, inst_name string, db_name s
 	}
 
 	return err
-}
-
-type TelnetClient struct {
-	Host             string
-	Port             string
-	IsAuthentication bool
-	UserName         string
-	Password         string
-}
-
-const (
-	//经过测试，嵌入式设备下，延时大概需要大于300ms
-	TIME_DELAY_AFTER_WRITE = 300 //300ms
-)
-
-func CheckOSConnect(host string, port string, protocol string, username string, password string) error {
-	var err error
-
-	if protocol == "ssh" {
-		//dial 获取ssh client
-		config := &ssh.ClientConfig{
-			Timeout:         time.Second, //ssh 连接time out 时间一秒钟, 如果ssh验证错误 会在一秒内返回
-			User:            username,
-			Auth:            []ssh.AuthMethod{ssh.Password(password)},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(), //不够安全
-		}
-
-		addr := fmt.Sprintf("%s:%s", host, port)
-		_, err := ssh.Dial("tcp", addr, config)
-		if err != nil {
-			utils.LogDebugf("SSH dial failed: %s", err.Error())
-		}
-		return err
-	} else {
-
-		telnetClientObj := new(TelnetClient)
-		telnetClientObj.Host = host
-		telnetClientObj.Port = port
-		telnetClientObj.IsAuthentication = true
-		telnetClientObj.UserName = username
-		telnetClientObj.Password = password
-
-		err = telnetClientObj.Telnet(5)
-	}
-
-	return err
-}
-
-func (this *TelnetClient) Telnet(timeout int) error {
-	addr := fmt.Sprintf("%s:%s", this.Host, this.Port)
-	conn, err := net.DialTimeout("tcp", addr, time.Duration(timeout)*time.Second)
-	if nil != err {
-		utils.LogDebugf("net.DialTimeout, errInfo: %s", err.Error())
-		return err
-	}
-	defer conn.Close()
-
-	err = this.telnetProtocolHandshake(conn)
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake failed: %s", err.Error())
-		return err
-	}
-
-	return err
-}
-
-func (this *TelnetClient) telnetProtocolHandshake(conn net.Conn) error {
-	var buf [4096]byte
-	n, err := conn.Read(buf[0:])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Read, errInfo:", err.Error())
-		return err
-	}
-	utils.LogDebug(string(buf[0:n]))
-
-	buf[1] = 252
-	buf[4] = 252
-	buf[7] = 252
-	buf[10] = 252
-	utils.LogDebug((buf[0:n]))
-	n, err = conn.Write(buf[0:n])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Write, errInfo:", err.Error())
-		return err
-	}
-	time.Sleep(time.Millisecond * TIME_DELAY_AFTER_WRITE)
-
-	n, err = conn.Read(buf[0:])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Read, errInfo:", err.Error())
-		return err
-	}
-	utils.LogDebug(string(buf[0:n]))
-
-	buf[1] = 252
-	buf[4] = 251
-	buf[7] = 252
-	buf[10] = 254
-	buf[13] = 252
-	utils.LogDebug((buf[0:n]))
-	n, err = conn.Write(buf[0:n])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Write, errInfo:", err.Error())
-		return err
-	}
-	time.Sleep(time.Millisecond * TIME_DELAY_AFTER_WRITE)
-
-	n, err = conn.Read(buf[0:])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Read, errInfo:", err.Error())
-		return err
-	}
-	utils.LogDebug(string(buf[0:n]))
-	utils.LogDebug((buf[0:n]))
-
-	if false == this.IsAuthentication {
-		return nil
-	}
-
-	n, err = conn.Write([]byte(this.UserName + "\n"))
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Write, errInfo:", err.Error())
-		return err
-	}
-	time.Sleep(time.Millisecond * TIME_DELAY_AFTER_WRITE)
-
-	n, err = conn.Read(buf[0:])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Read, errInfo:", err.Error())
-		return err
-	}
-	utils.LogDebug(string(buf[0:n]))
-
-	n, err = conn.Write([]byte(this.Password + "\n"))
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Write, errInfo:", err.Error())
-		return err
-	}
-	time.Sleep(time.Millisecond * TIME_DELAY_AFTER_WRITE)
-
-	n, err = conn.Read(buf[0:])
-	if nil != err {
-		utils.LogDebugf("telnetProtocolHandshake, method: conn.Read, errInfo:", err.Error())
-		return err
-	}
-	utils.LogDebug(string(buf[0:n]))
-
-	return nil
 }

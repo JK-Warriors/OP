@@ -35,7 +35,7 @@
         <div class="pt_left">
           <div class="pt_2">
             <div class="tit">
-              <span>过去7天数据库繁忙程度</span>
+              <span>过去7天{{getDBAlias .core_db}}库Db Time</span>
             </div>
             <div class="pie"></div>
 
@@ -164,7 +164,7 @@
             </div>
             <div class="c7">
               <div class="tit">
-                <span>容灾RPO</span>
+                <span>容灾RTO</span>
               </div>
               <div class="ct7"></div>
             </div>
@@ -238,6 +238,12 @@
 
 <script type="text/javascript">
 
+function refresh()
+{
+       window.location.reload();
+}
+setTimeout('refresh()',60000); //指定60秒刷新一次
+
 //圆环
 window.onload = function () {
   new Progress().renderOne('canvas0', 100, 7, 60)
@@ -253,14 +259,19 @@ window.onload = function () {
   var myChart = echarts.init(document.querySelector('.pie'), 'chalk')
   // 配置
   var option = {
+    //backgroundColor: 'rgba(0,0,0,0)',
+    color: ['#af89d6', '#4ac7f5', '#0089ff', '#f36f8a', '#f5c847','#ff5800','#839557'],
     tooltip: {
       trigger: 'item',
       formatter: '{a} <br/>{b}: {c} ({d}%)',
     },
     legend: {
-      orient: 'vertical',
-      left: 10,
-      data: [{{range $k,$v := $.screen_db}}{{$v.Alias}},{{end}}],
+        orient: 'vertical',
+        x: 'left',
+        textStyle: {
+            color: '#ccc'
+        },
+        data:[]
     },
     series: [
       {
@@ -268,35 +279,32 @@ window.onload = function () {
         type: 'pie',
         radius: ['50%', '70%'],
         avoidLabelOverlap: false,
-        label: {
-          show: false,
-          position: 'center',
+        itemStyle: { //图形样式
+            normal: {
+                borderColor: '#1e2239',
+                borderWidth: 2,
+            },
         },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '30',
-            fontWeight: 'bold',
-          },
-        },
-        labelLine: {
-          show: false,
-        },
+
         data: [{{range $k,$v := $.db_time}}
-                { value: {{$v.Value}}, name: '{{$v.Alias}}' },
+                { value: {{$v.Db_Time}}, name: '{{$v.End_Time}}' },
               {{end}}
         ],
         label: {
-          color: 'rgba(255, 255, 255, 0.3)',
-          formatter: '{d}%',
-        },
-        labelLine: {
-          lineStyle: {
-            color: 'rgba(255, 255, 255, 0.3)',
-          },
-          smooth: 0.2,
-          length: 10,
-          length2: 20,
+            normal: {
+                show: true,
+                position: 'inside', //标签的位置
+                formatter: "{d}%",
+                textStyle: {
+                    color: '#fff',
+                }
+            },
+            emphasis: {
+                show: true,
+                textStyle: {
+                    fontWeight: 'bold'
+                }
+            }
         },
       },
     ],
@@ -624,7 +632,7 @@ window.onload = function () {
   myChart.setOption(option)
 })()
 
-// ct7 容灾RPO
+// ct7 容灾RTO
 ;(function () {
     // 返回对象
     var myChart = echarts.init(document.querySelector('.ct7'), 'chalk')
@@ -637,7 +645,7 @@ window.onload = function () {
           trigger: 'axis',
         },
         legend: {
-          data: [{{range $k,$v := $.screen_db}}{{$v.Alias}},{{end}}],
+          data: [{{range $k,$v := $.dr}}{{$v.Name}},{{end}}],
         },
         grid: {
           left: '3%',
@@ -651,17 +659,17 @@ window.onload = function () {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: [{{range $k,$v := $.alert_x}}{{$v.Time}},{{end}}],
+          data: [{{range $k,$v := $.rto_x}}{{$v.Time}},{{end}}],
         },
         yAxis: {
           type: 'value',
         },
         series: [
-                {{range $k1,$v := .screen_db}}
+                {{range $k1,$v := .dr}}
                 {
-                  name: {{$v.Alias}},
+                  name: {{$v.Name}},
                   type: 'line',
-                  data: [{{range $k2,$a := $.alert_y}}{{if eq $v.Id $a.Db_Id}}{{$a.Value}},{{end}}{{end}}
+                  data: [{{range $k2,$a := $.rto_y}}{{if eq $v.Id $a.Db_Id}}{{$a.Value}},{{end}}{{end}}
                   ],
                 },
                 {{end}}
@@ -669,6 +677,7 @@ window.onload = function () {
       }
     myChart.setOption(option)
   })()
+
 </script>
 
 </html>

@@ -66,7 +66,7 @@
                           <th>类型</th>
                           <th>总大小(MB)</th>
                           <th>空闲大小(MB)</th>
-                          <th>使用率</th>
+                          <th>使用率 (%)</th>
                         </tr>
                       </thead>
                       <tbody>

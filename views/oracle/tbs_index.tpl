@@ -66,7 +66,7 @@
                           <th>管理方式</th>
                           <th>总大小(MB)</th>
                           <th>已使用大小(MB)</th>
-                          <th>使用率</th>
+                          <th>使用率 (%)</th>
                         </tr>
                       </thead>
                       <tbody>

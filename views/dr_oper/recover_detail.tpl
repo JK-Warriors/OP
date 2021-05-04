@@ -38,13 +38,13 @@
 			<div style='float:left; height:100px; width:280px;'>
 			<div><label name="pri_host" class="control-label" for="">IP：{{ .pri_config.Host }}</label></div>
 			<div><label name="pri_dbname" class="control-label" for="">数据库名：{{ .pri_config.Instance_name }}</label></div>
-			<div><label name="pri_dbstatus" class="control-label" for="">实例状态：{{ .pri_config.Open_Mode }}</label></div>
+			<div><label name="pri_dbstatus" class="control-label" for="">实例状态：{{getOraInstStatus .pri_config.Open_Mode }}</label></div>
 			<div><label name="pri_port" class="control-label" for="">监听端口：{{ .pri_config.Port }}</label></div>
 			</div>
 			<div style='float:right; height:100px; width:280px;'>
 			<div><label name="sta_host" class="control-label" for="">IP：{{ .sta_config.Host }}</label></div>
 			<div><label name="sta_dbname" class="control-label" for="">数据库名：{{ .sta_config.Instance_name }}</label></div>
-			<div><label name="sta_dbstatus" class="control-label" for="">实例状态：{{ .sta_config.Open_Mode }}</label></div>
+			<div><label name="sta_dbstatus" class="control-label" for="">实例状态：{{getOraInstStatus .sta_config.Open_Mode }}</label></div>
 			<div><label name="sta_port" class="control-label" for="">监听端口：{{ .sta_config.Port }}</label></div>
 			</div>
 		</div>

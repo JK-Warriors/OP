@@ -12,16 +12,18 @@ import (
 	"os/exec"
 	"strings"
 	"fmt"
+	"reflect"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/xormplus/xorm"
 	gs "github.com/soniah/gosnmp"
 	
 )
+var snmp *gs.GoSNMP
 
 func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string) {
 	//连接字符串
-    snmp := &gs.GoSNMP{
+    snmp = &gs.GoSNMP{
         Target:    host,
         Port:      uint16(port),
         Community: "public",
@@ -49,10 +51,13 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
 		log.Println("connect succeeded")
 		
 		//get os basic infomation
-		GatherLinuxDiskInfo(mysql , os_id, host, alias)
+		GatherLinuxDiskInfo(snmp, mysql , os_id, host, alias)
 		GatherLinuxDiskIOInfo(mysql , os_id, host, alias)
 		GatherLinuxNetInfo(snmp, mysql , os_id, host, alias)
-		GatherLinuxBasicInfo(snmp, mysql , os_id, host, alias)
+		GatherLinuxBasicInfo(snmp, mysql , os_id, host, alias, port)
+		
+		GatherOSStatus(mysql, os_id, host)
+
 		AlertConnect(mysql, os_id)
 		
 	}
@@ -61,19 +66,49 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
 
 }
 
-func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
+func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string, port int) error{
 
 	connect := 1
-	oids := []string{".1.3.6.1.2.1.1.5.0",			//SNMPv2-MIB::sysName.0		hostname
-					 ".1.3.6.1.2.1.1.1.0",			//SNMPv2-MIB::sysDescr.0	kernel
-					 ".1.3.6.1.2.1.25.1.2.0",		//HOST-RESOURCES-MIB::hrSystemDate.0	
-					 ".1.3.6.1.2.1.25.1.1.0",		//HOST-RESOURCES-MIB::hrSystemUptime.0	
-					 ".1.3.6.1.2.1.25.1.6.0",		//HOST-RESOURCES-MIB::hrSystemProcesses.0	
-					 ".1.3.6.1.4.1.2021.10.1.3.1",		//UCD-SNMP-MIB::laLoad.1	The 1,5 and 10 minute load averages (one per row).
-					 ".1.3.6.1.4.1.2021.10.1.3.2",		//UCD-SNMP-MIB::laLoad.2
-					 ".1.3.6.1.4.1.2021.10.1.3.3",		//UCD-SNMP-MIB::laLoad.3
-					 ".1.3.6.1.4.1.2021.11.9.0",		//UCD-SNMP-MIB::ssCpuUser.0
+	hostname, err := GetHostname(snmp)
+	kernel, err := GetKernel(snmp)
+	system_date, err := GetSystemDate(snmp)
+	system_uptime, err := GetUptime(snmp)
+	process, err := GetProcess(snmp)
+
+	var load_1 float64
+	var load_2 float64
+	var load_3 float64
+	oids := []string{".1.3.6.1.4.1.2021.10.1.3.1",			//UCD-SNMP-MIB::laLoad.1
+					".1.3.6.1.4.1.2021.10.1.3.2",		//UCD-SNMP-MIB::laLoad.2
+					".1.3.6.1.4.1.2021.10.1.3.3",		//UCD-SNMP-MIB::laLoad.3
+	}
+	result, err := GetSnmpStringByOids(snmp, oids) 
+	if err != nil{
+		utils.LogDebugf("GetSnmpStringByOids err: %s", err.Error())
+		return err
+	}else{
+		load_1_str := result[0]
+		load_1, err = strconv.ParseFloat(load_1_str, 64)
+		if err != nil{
+			load_1 = -1.0
+		}
+
+		load_2_str := result[1]
+		load_2, err = strconv.ParseFloat(load_2_str, 64)
+		if err != nil{
+			load_2 = -1.0
+		}
+
+		load_3_str := result[2]
+		load_3, err = strconv.ParseFloat(load_3_str, 64)
+		if err != nil{
+			load_3 = -1.0
+		}
+	}
+
+	oids = []string{".1.3.6.1.4.1.2021.11.9.0",		//UCD-SNMP-MIB::ssCpuUser.0
 					 ".1.3.6.1.4.1.2021.11.10.0",		//UCD-SNMP-MIB::ssCpuSystem.0
+					 ".1.3.6.1.4.1.2021.11.11.0",		//UCD-SNMP-MIB::ssCpuIdle
 					 ".1.3.6.1.4.1.2021.4.3.0",			//UCD-SNMP-MIB::memTotalSwap.0
 					 ".1.3.6.1.4.1.2021.4.4.0",			//UCD-SNMP-MIB::memAvailSwap.0
 					 ".1.3.6.1.4.1.2021.4.5.0",			//UCD-SNMP-MIB::memTotalReal.0
@@ -83,186 +118,170 @@ func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host s
 					 ".1.3.6.1.4.1.2021.4.14.0",		//UCD-SNMP-MIB::memBuffer.0
 					 ".1.3.6.1.4.1.2021.4.15.0",		//UCD-SNMP-MIB::memCached.0
 					}
-	
-    result, err := GetSnmpValueByOids(snmp, oids)
-    if err != nil {
-		utils.LogDebugf("GetSnmpValueByOids err: %s", err.Error())
+	var cpu_user_time int64 = -1	
+	var cpu_system_time int64 = -1	
+	var cpu_idle_time int64 = -1	
+	var swap_total int64 = -1	
+	var swap_avail int64 = -1	
+	var mem_total int64 = -1	
+	var mem_avail int64 = -1	
+	var mem_free int64 = -1	
+	var mem_shared int64 = -1	
+	var mem_buffered int64 = -1	
+	var mem_cached int64 = -1	
+
+	result2, err := GetSnmpInt64ByOids(snmp, oids) 
+	if err != nil{
+		utils.LogDebugf("GetSnmpInt64ByOids err: %s", err.Error())
 		return err
-    }else{
-		hostname := result[0]
-		kernel := result[1]
-		system_date, err := GetSystemDate(snmp)
-		system_uptime, err := GetUptime(snmp)
-
-		process, err := strconv.Atoi(result[4])
-		if err != nil {
-			process = -1
-		}
-
-		load_1, err := strconv.ParseFloat(result[5],64)
-		if err != nil {
-			load_1 = -1.00
-		}
-
-		load_5, err := strconv.ParseFloat(result[6],64)
-		if err != nil {
-			load_5 = -1.00
-		}
-
-		load_15, err := strconv.ParseFloat(result[7],64)
-		if err != nil {
-			load_15 = -1.00
-		}
-
-
-		cpu_user_time, err := strconv.Atoi(result[8])
-		if err != nil {
-			cpu_user_time = -1
-		}
-
-		cpu_system_time, err := strconv.Atoi(result[9])
-		if err != nil {
-			cpu_system_time = -1
-		}
-
-		cpu_idle_time := -1
-		if cpu_user_time != -1 && cpu_system_time == -1 {
-			cpu_idle_time = 100 - cpu_user_time - cpu_system_time
-		}
-
-		swap_total, err := strconv.Atoi(result[10])
-		if err != nil {
-			swap_total = -1
-		}
-		swap_avail, err := strconv.Atoi(result[11])
-		if err != nil {
-			swap_avail = -1
-		}
-		mem_total, err := strconv.Atoi(result[12])
-		if err != nil {
-			mem_total = -1
-		}
-		mem_avail, err := strconv.Atoi(result[13])
-		if err != nil {
-			mem_avail = -1
-		}
-		mem_free, err := strconv.Atoi(result[14])
-		if err != nil {
-			mem_free = -1
-		}
-		mem_shared, err := strconv.Atoi(result[15])
-		if err != nil {
-			mem_shared = -1
-		}
-		mem_buffered, err := strconv.Atoi(result[16])
-		if err != nil {
-			mem_buffered = -1
-		}
-		mem_cached, err := strconv.Atoi(result[17])
-		if err != nil {
-			mem_cached = -1
-		}
-
-		mem_available := -1
-		if mem_total != -1 && mem_free == -1 && swap_avail == -1 {
-			mem_available = mem_total - mem_free + swap_avail
-		}
-
-		mem_usage_rate := -1.00
-		if mem_available != -1 && mem_total == -1 {
-			mem_usage_rate = float64(mem_available)*100/float64(mem_total)
-		}
-		
-		disk_io_reads_total := GetDiskIOReadTotal(mysql, os_id)
-		disk_io_writes_total := GetDiskIOWriteTotal(mysql, os_id)
-		net_in_bytes_total := GetNetInBytesTotal(mysql, os_id)
-		net_out_bytes_total := GetNetOutBytesTotal(mysql, os_id)
-		//fmt.Printf("disk_io_reads_total: %d\n", disk_io_reads_total)
-		//fmt.Printf("disk_io_writes_total: %d\n", disk_io_writes_total)
-		//fmt.Printf("net_in_bytes_total: %d\n", net_in_bytes_total)
-		//fmt.Printf("net_out_bytes_total: %d\n", net_out_bytes_total)
-		
-
-		// storage result
-		session := mysql.NewSession()
-		defer session.Close()
-		// add Begin() before any action
-		err = session.Begin()
-	
-		//storage stats into pms_os_status
-		MoveToHistory(mysql, "pms_os_status", "os_id", os_id)
-	
-		sql := `insert into pms_os_status(os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_5, load_15, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, created) 
-							values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-		_, err = mysql.Exec(sql, os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_5, load_15, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, time.Now().Unix())
-		if err != nil {
-			log.Printf("%s: %s", sql, err.Error())
-			err = session.Rollback()
-			return err
-		}
-	
-		// add Commit() after all actions
-		err = session.Commit()
-		
-		return err
-
+	}else{
+		cpu_user_time = result2[0]
+		cpu_system_time = result2[1]
+		cpu_idle_time = result2[2]
+		swap_total = result2[3]
+		swap_avail = result2[4]
+		mem_total = result2[5]
+		mem_avail = result2[6]
+		mem_free = result2[7]
+		mem_shared = result2[8]
+		mem_buffered = result2[9]
+		mem_cached = result2[10]
 	}
 
-}
-
-func GatherLinuxDiskInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
-	s_cmd := `/usr/bin/snmpdf -v1 -c public ` + host + `|grep -E "/"|grep -vE "/boot"|grep -vE "DVD"`
-	//fmt.Println(s_cmd)
-	cmd := exec.Command("/bin/bash", "-c", s_cmd)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Printf("cmd StdoutPipe error: %s", err.Error())
-		return nil
+	var mem_available int64 = -1
+	if mem_total != -1 && mem_free != -1 && mem_buffered != -1 && mem_cached != -1 {
+		mem_available = mem_total - mem_free - mem_buffered - mem_cached
 	}
-	cmd.Start()
- 
+
+	var mem_usage_rate float64 = -1.00
+	if mem_available != -1 && mem_total != -1 {
+		mem_usage_rate = float64(mem_available)*100/float64(mem_total)
+	}
+	
+	disk_io_reads_total := GetDiskIOReadTotal(mysql, os_id)
+	disk_io_writes_total := GetDiskIOWriteTotal(mysql, os_id)
+	net_in_bytes_total := GetNetInBytesTotal(mysql, os_id)
+	net_out_bytes_total := GetNetOutBytesTotal(mysql, os_id)
+	//fmt.Printf("disk_io_reads_total: %d\n", disk_io_reads_total)
+	//fmt.Printf("disk_io_writes_total: %d\n", disk_io_writes_total)
+	//fmt.Printf("net_in_bytes_total: %d\n", net_in_bytes_total)
+	//fmt.Printf("net_out_bytes_total: %d\n", net_out_bytes_total)
+	
+
 	// storage result
 	session := mysql.NewSession()
 	defer session.Close()
 	// add Begin() before any action
 	err = session.Begin()
 
-	//storage stats into pms_os_disk
-	MoveToHistory(mysql, "pms_os_disk", "os_id", os_id)
+	//storage stats into pms_os_status
+	MoveToHistory(mysql, "pms_os_status", "os_id", os_id)
 
-	reader := bufio.NewReader(stdout)
-	for {
-		line, err2 := reader.ReadString('\n')
-		if err2 != nil || io.EOF == err2 {
-			break
-		}
-		
-		s := strings.Fields(line)
-		fmt.Println(s, len(s))
-		mounted :=s[0]
-		total_size :=s[1]
-		used_size :=s[2]
-		avail_size :=s[3]
-		used_rate :=s[4]
-
-		sql := `insert into pms_os_disk(os_id, host, alias, mounted, total_size, used_size, avail_size, used_rate, created) 
-				values(?,?,?,?,?,?,?,?,?)`
-		_, err = mysql.Exec(sql, os_id, host, alias, mounted, total_size, used_size, avail_size, used_rate, time.Now().Unix())
-		if err != nil {
-			log.Printf("%s: %s", sql, err.Error())
-			err = session.Rollback()
-			return err
-		}
+	sql := `insert into pms_os_status(os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_5, load_15, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, created) 
+						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+	_, err = mysql.Exec(sql, os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_2, load_3, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, time.Now().Unix())
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+		err = session.Rollback()
+		return err
 	}
 
 	// add Commit() after all actions
 	err = session.Commit()
+	
+	return err
+
+}
+
+func GatherLinuxDiskInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host string, alias string) error{
+	
+	oids := ".1.3.6.1.4.1.2021.9.1.1"
+	result, err := snmp.WalkAll(oids)
+	if err != nil {
+		fmt.Printf("Walk Error: %v\n", err)
+	}else {
+		
+		// storage result
+		session := mysql.NewSession()
+		defer session.Close()
+		// add Begin() before any action
+		err = session.Begin()
+
+		//storage stats into pms_os_disk
+		MoveToHistory(mysql, "pms_os_disk", "os_id", os_id)
+
+		for _, v := range result {
+			idx := v.Value.(int)
+			
+			oids := []string{fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.2.%d", idx),  //UCD-SNMP-MIB::dskPath
+							fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.3.%d", idx),		//UCD-SNMP-MIB::dskDevice
+			}
+			
+			var dskPath string
+			var dskDevice string
+    		result, err := GetSnmpStringByOids(snmp, oids)
+			if err != nil {
+				utils.LogDebugf("GetSnmpStringByOids err: %s", err.Error())
+				return err
+			}else{
+				dskPath = result[0]
+				dskDevice = result[1]
+				fmt.Println("dskPath: ", dskPath)
+				fmt.Println("dskDevice: ", dskDevice)
+			}
+
+			oids = []string{fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.6.%d", idx),   //UCD-SNMP-MIB::dskTotal
+							fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.7.%d", idx),   //UCD-SNMP-MIB::dskAvail
+							fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.8.%d", idx),   //UCD-SNMP-MIB::dskUsed
+							fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.9.%d", idx),   //UCD-SNMP-MIB::dskPercent
+							fmt.Sprintf(".1.3.6.1.4.1.2021.9.1.10.%d", idx),   //UCD-SNMP-MIB::dskPercentNode
+			}
+
+
+    		result2, err := GetSnmpInt64ByOids(snmp, oids)
+			if err != nil {
+				utils.LogDebugf("GetSnmpInt64ByOids err: %s", err.Error())
+				return err
+			}else{
+				dskTotal := result2[0]
+				dskAvail := result2[1]
+				dskUsed := result2[2]
+				dskPercent  := result2[3]
+				dskPercentNode  := result2[4]
+				
+				fmt.Println(reflect.TypeOf(dskPercent) )
+				
+				fmt.Println("dskTotal: ", dskTotal)
+				fmt.Println("dskAvail: ", dskAvail)
+				fmt.Println("dskUsed: ", dskUsed)
+				fmt.Println("dskPercent: ", dskPercent)
+				fmt.Println("dskPercentNode: ", dskPercentNode)
+				
+				
+				sql := `insert into pms_os_disk(os_id, host, alias, mounted, device, total_size, used_size, avail_size, used_rate, node_rate, created) 
+				values(?,?,?,?,?,?,?,?,?,?,?)`
+				_, err = mysql.Exec(sql, os_id, host, alias, dskPath, dskDevice, dskTotal, dskUsed, dskAvail, dskPercent, dskPercentNode, time.Now().Unix())
+				if err != nil {
+					log.Printf("%s: %s", sql, err.Error())
+					err = session.Rollback()
+					return err
+				}
+
+			}
+
+		}
+
+		// add Commit() after all actions
+		err = session.Commit()
+	}
 
 	return nil
 }
 
+
+
 func GatherLinuxDiskIOInfo(mysql *xorm.Engine, os_id int, host string, alias string) error{
-	s_cmd := `/usr/bin/snmptable -v1 -c public ` + host + ` diskIOTable |grep -ivE "ram|loop|md|SNMP table|diskIOIndex" | grep -v '^$'`
+	s_cmd := `/usr/bin/snmptable -v1 -c public ` + host + ` diskIOTable |grep -ivE "ram|loop|md|SNMP table|diskIOIndex|dm-|sr0" | grep -v '^$'`
 
 	cmd := exec.Command("/bin/bash", "-c", s_cmd)
 	stdout, err := cmd.StdoutPipe()

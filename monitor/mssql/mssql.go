@@ -55,6 +55,7 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 
 		//get sqlserver basic infomation
 		GatherBasicInfo(db, mysql, db_id, host, port, alias)
+		GatherDbStatus(mysql, db_id)
 		AlertConnect(mysql, db_id)
 
 		GatherMetricValue(db, mysql, db_id, host, port, alias)

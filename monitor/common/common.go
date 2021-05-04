@@ -47,9 +47,18 @@ type Trigger struct {
 
 
 func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string, tri Trigger){
+	//一小时前的重复告警迁移到历史表
+	sql := `insert into pms_alert_his 
+		   select * from pms_alerts where asset_id = ? and templateid = ? and created > UNIX_TIMESTAMP() - 3600
+			`
+	_, err := mysql.Exec(sql)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+
 	var count int
-	sql := `select count(1) from pms_alerts where asset_id = ? and templateid = ? and created > UNIX_TIMESTAMP() - 3600`
-	_, err := mysql.SQL(sql, db_id, tri.TemplateId).Get(&count)
+	sql = `select count(1) from pms_alerts where asset_id = ? and templateid = ? and created > UNIX_TIMESTAMP() - 3600`
+	_, err = mysql.SQL(sql, db_id, tri.TemplateId).Get(&count)
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}
@@ -68,10 +77,10 @@ func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string
 		description := strings.Replace(tri.Description, "{ItemName}", item_name, -1)
 		description = strings.Replace(description, "{ItemValue}", item_value, -1)
 
-		sql := `insert into pms_alerts(asset_id, name, severity, templateid, subject, message, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, created)
-				values(?,?,?,?,?,?,?,?,?,?,?,?)`
+		sql = `insert into pms_alerts(asset_id, name, severity, templateid, isr_recovery, subject, message, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, created)
+				values(?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	
-		_, err := mysql.Exec(sql, db_id, tri.Name, tri.Severity, tri.TemplateId, tri.Name, description, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, time.Now().Unix())
+		_, err := mysql.Exec(sql, db_id, tri.Name, tri.Severity, tri.TemplateId, 0, tri.Name, description, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, time.Now().Unix())
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
@@ -80,30 +89,29 @@ func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string
 }
 
 func AddRecoveryAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string, tri Trigger){
-	var created int64
 	var count int
-	sql := `select created from pms_alerts where asset_id = ? and templateid = ? order by id desc limit 1`
-	_, err := mysql.SQL(sql, db_id, tri.TemplateId).Get(&created)
+	sql := `select count(0) from pms_alerts where asset_id = ? and templateid = ? and is_recovery = 0`
+	_, err := mysql.SQL(sql, db_id, tri.TemplateId).Get(&count)
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 	}
 
-	if created > 0{
-		sql := `select count(1) from pms_alerts where asset_id = ? and templateid = ? and severity = 'Info' and created > ?`
-		_, err := mysql.SQL(sql, db_id, tri.TemplateId, created).Get(&count)
+	if count > 0{
+		sql := `select count(1) from pms_alerts where asset_id = ? and templateid = ? and is_recovery = 1`
+		_, err := mysql.SQL(sql, db_id, tri.TemplateId).Get(&count)
 		if err != nil {
 			log.Printf("%s: %s", sql, err.Error())
 		}
 
 		if count == 0 {
 			// no recovery
-			description := strings.Replace(tri.Recovery_Description, "{ItemName}", item_name, -1)
-			description = strings.Replace(description, "{ItemValue}", item_value, -1)
+			name := tri.Name + " is recovery."
+			description := tri.Name + " is recovery."
 	
-			sql := `insert into pms_alerts(asset_id, name, severity, templateid, message, created)
-					values(?,?,?,?,?,?)`
+			sql := `insert into pms_alerts(asset_id, name, severity, templateid, is_recovery, subject, message, created)
+					values(?,?,?,?,?,?,?,?)`
 		
-			_, err := mysql.Exec(sql, db_id, tri.Name, "Info", tri.TemplateId, description, time.Now().Unix())
+			_, err := mysql.Exec(sql, db_id, tri.Name, "Info", tri.TemplateId, 1, name, description, time.Now().Unix())
 			if err != nil {
 				log.Printf("%s: %s", sql, err.Error())
 			}
@@ -112,6 +120,7 @@ func AddRecoveryAlert(mysql *xorm.Engine, db_id int, item_name string, item_valu
 
 	}
 }
+
 
 
 func GetTriggers(mysql *xorm.Engine, db_id int, trigger_type string) (triconf []Trigger) {
@@ -125,4 +134,17 @@ func GetTriggers(mysql *xorm.Engine, db_id int, trigger_type string) (triconf []
 	}
 
 	return triconf
+}
+
+func GetTrigger(mysql *xorm.Engine, db_id int, trigger_type string, severity string) (triconf Trigger, err error) {
+	
+	sql := `select id, asset_id, asset_type, name, templateid,trigger_type,severity,expression,description,status,recovery_mode,recovery_expression,recovery_description, created 
+			from pms_triggers where asset_id = ? and trigger_type = ? and severity = ? limit 1`
+
+	err = mysql.SQL(sql, db_id, trigger_type, severity).Find(&triconf)
+	if err != nil {
+		log.Printf("%s: %s", sql, err.Error())
+	}
+
+	return triconf, err
 }

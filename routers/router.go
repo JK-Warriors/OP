@@ -6,6 +6,7 @@ import (
 	"opms/controllers/cfg_trigger"
 	"opms/controllers/config_global"
 	"opms/controllers/dbconfig"
+	"opms/controllers/cfg_os"
 	"opms/controllers/demo"
 	"opms/controllers/dr_business"
 	"opms/controllers/dr_config"
@@ -47,6 +48,7 @@ func init() {
 
 	//告警
 	beego.Router("/alarm/alarm/manage", &alarm.ManageAlarmController{})
+	beego.Router("/alarm/history/list", &alarm.AlarmHistoryListController{})
 
 	//消息
 	beego.Router("/system/message/manage", &messages.ManageMessageController{})
@@ -90,6 +92,14 @@ func init() {
 	beego.Router("/config/db/ajax/status", &dbconfig.AjaxStatusDBConfigController{})
 	beego.Router("/config/db/ajax/delete", &dbconfig.AjaxDeleteDBConfigController{})
 	beego.Router("/config/db/ajax/connect", &dbconfig.AjaxConnectDBConfigController{})
+
+	//操作系统配置
+	beego.Router("/config/os/manage", &cfg_os.ManageOSConfigController{})
+	beego.Router("/config/os/add", &cfg_os.AddOSConfigController{})
+	beego.Router("/config/os/edit/:id", &cfg_os.EditOSConfigController{})
+	beego.Router("/config/os/ajax/status", &cfg_os.AjaxStatusOSConfigController{})
+	beego.Router("/config/os/ajax/delete", &cfg_os.AjaxDeleteOSConfigController{})
+	beego.Router("/config/os/ajax/connect", &cfg_os.AjaxConnectOSConfigController{})
 
 	//容灾配置
 	beego.Router("/config/dr_config/manage", &dr_config.ManageDrController{})
@@ -146,8 +156,13 @@ func init() {
 	beego.Router("/operation/dr_recover/recover", &dr_oper.AjaxDrRecoverController{})
 
 	//巡检
+	beego.Router("/healthcheck/onduty/manage", &hc.ManageOndutyController{})
+	beego.Router("/healthcheck/offduty/manage", &hc.ManageOffdutyController{})
+	beego.Router("/healthcheck/manual/manage", &hc.ManageManualController{})
+	beego.Router("/healthcheck/history/manage", &hc.ManageHistoryController{})
 	beego.Router("/healthcheck/config/manage", &hc.ManageConfigController{})
 	beego.Router("/healthcheck/config/edit", &hc.EditConfigController{})
+	beego.Router("/healthcheck/template/manage", &hc.ManageTemplateController{})
 
 
 	//大屏

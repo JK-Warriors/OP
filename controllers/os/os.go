@@ -58,7 +58,7 @@ type ManageOSDiskController struct {
 
 func (this *ManageOSDiskController) Get() {
 	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "os-status-manage") {
+	if !strings.Contains(this.GetSession("userPermission").(string), "os-disk-manage") {
 		this.Abort("401")
 	}
 
@@ -97,7 +97,7 @@ type ManageOSDiskIOController struct {
 
 func (this *ManageOSDiskIOController) Get() {
 	//权限检测
-	if !strings.Contains(this.GetSession("userPermission").(string), "os-status-manage") {
+	if !strings.Contains(this.GetSession("userPermission").(string), "os-io-manage") {
 		this.Abort("401")
 	}
 

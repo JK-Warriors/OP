@@ -7,6 +7,7 @@ import (
 
 	. "opms/models/dbconfig"
 	. "opms/models/screen"
+	cfg_screen "opms/models/cfg_screen"
 )
 
 // 聚合大屏
@@ -58,28 +59,35 @@ func (this *ManageScreenController) Get() {
 	this.Data["dr_mssql_critical"] = dr_mssql_critical
 
 	this.Data["screen_db"] = ListScreenDBconfig()
+	
+	this.Data["dr"] = ListDrConfig()
 
-	this.Data["db_time"] = GetDBTime()
+	core_db := cfg_screen.GetCoreDb()
+	this.Data["core_db"] = core_db
+	this.Data["db_time"] = GetDBTime(core_db)
 
 	this.Data["tbs"] = GetTablespace()
 
-	this.Data["active_session_x"] = GetMetrixValueX("ActiveSessions")
-	this.Data["active_session_y"] = GetMetrixValueY("ActiveSessions")
+	this.Data["active_session_x"] = GetDBMetrixValueX("ActiveSessions")
+	this.Data["active_session_y"] = GetDBMetrixValueY("ActiveSessions")
 
-	this.Data["total_session_x"] = GetMetrixValueX("TotalSessions")
-	this.Data["total_session_y"] = GetMetrixValueY("TotalSessions")
+	this.Data["total_session_x"] = GetDBMetrixValueX("TotalSessions")
+	this.Data["total_session_y"] = GetDBMetrixValueY("TotalSessions")
 
-	this.Data["log_per_sec_x"] = GetMetrixValueX("Log Per Second")
-	this.Data["log_per_sec_y"] = GetMetrixValueY("Log Per Second")
+	this.Data["log_per_sec_x"] = GetDBMetrixValueX("Log Per Second")
+	this.Data["log_per_sec_y"] = GetDBMetrixValueY("Log Per Second")
 
-	this.Data["qps_x"] = GetMetrixValueX("Queries Per Second")
-	this.Data["qps_y"] = GetMetrixValueY("Queries Per Second")
+	this.Data["qps_x"] = GetDBMetrixValueX("Queries Per Second")
+	this.Data["qps_y"] = GetDBMetrixValueY("Queries Per Second")
 
-	this.Data["tps_x"] = GetMetrixValueX("Transactions Per Second")
-	this.Data["tps_y"] = GetMetrixValueY("Transactions Per Second")
+	this.Data["tps_x"] = GetDBMetrixValueX("Transactions Per Second")
+	this.Data["tps_y"] = GetDBMetrixValueY("Transactions Per Second")
 
-	this.Data["bch_x"] = GetMetrixValueX("Buffer Cache Hit")
-	this.Data["bch_y"] = GetMetrixValueY("Buffer Cache Hit")
+	this.Data["bch_x"] = GetDBMetrixValueX("Buffer Cache Hit")
+	this.Data["bch_y"] = GetDBMetrixValueY("Buffer Cache Hit")
+	
+	this.Data["rto_x"] = GetDrMetrixValueX("Recovery Time Objective")
+	this.Data["rto_y"] = GetDrMetrixValueY("Recovery Time Objective")
 
 	this.TplName = "screen/index.tpl"
 }

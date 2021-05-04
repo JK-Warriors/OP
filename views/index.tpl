@@ -73,10 +73,10 @@
                           <th>会话</th>
                           <th>活动</th>
                           <th>等待</th>
+                          <th>进程数</th>
                           <th>同步</th>
                           <th>延时</th>
                           <th>表空间</th>
-                          <th>进程数</th>
                           <th>负载</th>
                           <th>CPU</th>
                           <th>内存</th>
@@ -93,19 +93,19 @@
                           <td>{{$v.Host}}</td>
                           <td>{{ getDbRoleImage $v.Role | str2html}}</td>
                           <td>{{$v.Version}}</td>
-                          <td>{{checkDbStatusLevel $v.Connect "xxx" | str2html}}</td>
-                          <td>{{$v.Session_Total}}</td>
-                          <td>{{$v.Session_Total}}</td>
-                          <td>{{$v.Session_Total}}</td>
-                          <td>{{$v.Repl}}</td>
-                          <td>{{$v.Repl_Delay}}</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
+                          <td>{{checkDbStatusLevel $v.Connect $v.Connect_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Sess_Total $v.Sess_Total_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Sess_Actives $v.Sess_Actives_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Sess_Waits $v.Sess_Waits_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Process $v.Process_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Repl $v.Repl_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Repl_Delay $v.Repl_Delay_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Tablespace $v.Tablespace_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Load $v.Load_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Cpu $v.Cpu_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Memory $v.Memory_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.IO $v.IO_Tips | str2html}}</td>
+                          <td>{{checkDbStatusLevel $v.Net $v.Net_Tips | str2html}}</td>
                           <!--<td>-</td>-->
                         </tr>
                       {{end}}

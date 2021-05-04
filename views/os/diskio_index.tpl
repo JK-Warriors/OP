@@ -23,7 +23,7 @@
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
         <li><a href="/os/status/manage">OS</a></li>
-        <li class="active">状态列表</li>
+        <li class="active">磁盘IO列表</li>
       </ul>
     </div>
     <!-- page heading end-->
@@ -36,11 +36,11 @@
               <div class="search-form">
                 <div class="form-inline">
                   <div class="form-group">
-                    <form action="/mssql/status/manage" method="get">
+                    <form action="/os/io/manage" method="get">
                     <input type="text" name="alias" placeholder="请输入别名" class="form-control" value="{{.condArr.alias}}"/>
                     <input type="text" name="host" placeholder="请输入主机" class="form-control" value="{{.condArr.host}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/mssql/status/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/os/io/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>
@@ -48,7 +48,7 @@
             </div>
 
             <section class="panel">
-              <header class="panel-heading"> DiskIO列表 / 总数：{{.countDiskio}}
+              <header class="panel-heading"> 磁盘IO列表 / 总数：{{.countDiskio}}
                 <span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a>
                 <!--a href="javascript:;" class="fa fa-times"></a-->
                 </span> 
@@ -64,7 +64,6 @@
                           <th>磁盘</th>
                           <th>读IO</th>
                           <th>写IO</th>
-                          <th>操作</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -75,8 +74,6 @@
                           <td>{{$v.Fdisk}}</td>
                           <td>{{$v.Disk_IO_Reads}}</td>
                           <td>{{$v.Disk_IO_Writes}}</td>
-                          <td>
-                          </td>
                         </tr>
                       {{end}}
                       </tbody>

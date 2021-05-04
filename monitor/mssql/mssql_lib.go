@@ -28,6 +28,7 @@ func GetVersion(db *sql.DB) string {
 	return s_version
 }
 
+
 func GetUptime(db *sql.DB) string {
 	var uptime string
 	sql := `SELECT CONVERT(varchar, sqlserver_start_time, 120) as time_restart FROM sys.dm_os_sys_info`

@@ -44,11 +44,17 @@ func (this *ManageScreenController) Get() {
 
 	paginator := pagination.SetPaginator(this.Ctx, offset, countDBs)
 	_, _, dbs := ListDB(condArr, page, offset)
+	_, _, ora := ListOracle(condArr, page, offset)
+
+	
+	core_db := GetCoreDb()
 
 	this.Data["paginator"] = paginator
 	this.Data["condArr"] = condArr
 	this.Data["dbs"] = dbs
 	this.Data["countDBs"] = countDBs
+	this.Data["ora"] = ora
+	this.Data["core_db"] = core_db
 
 	this.TplName = "cfg_screen/index.tpl"
 }
@@ -64,12 +70,17 @@ func (this *AjaxSaveScreenController) Post() {
 	}
 
 	ids := this.GetString("ids")
+	core_db := this.GetString("core_db")
 	//utils.LogDebug(ids)
 	var err error
 	if "" == ids {
 		err = RemoveAllShowOnScreen(ids)
 	} else {
 		err = SaveShowOnScreen(ids)
+	}
+
+	if core_db != "" {
+		err = SaveCoreDbOnScreen(core_db)
 	}
 
 	if err == nil {

@@ -46,6 +46,29 @@ func GetSessionWait(db *sql.DB) int {
 	return count
 }
 
+func GetMaxProcesses(db *sql.DB) int {
+	var count int
+	sql := `select value from v$parameter where name = 'processes' `
+	err := db.QueryRow(sql).Scan(&count)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		count = 0
+	}
+	return count
+}
+
+
+func GetProcesses(db *sql.DB) int {
+	var count int
+	sql := `select count(1) from v$process`
+	err := db.QueryRow(sql).Scan(&count)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		count = 0
+	}
+	return count
+}
+
 func GetFlashbackUsage(db *sql.DB) string {
 	var flashback_usage string
 	sql := `select sum(nvl(percent_space_used,0)) from v$flash_recovery_area_usage`
@@ -77,6 +100,17 @@ func GetLastSnapId(db *sql.DB) int {
 		return 0
 	}
 	return snap_id
+}
+
+func Get_StartupTime(db *sql.DB) string {
+	var time string
+	sql := `select to_char(startup_time,'yyyy-mm-dd hh24:mi:ss') startup_time from v$instance`
+	err := db.QueryRow(sql).Scan(&time)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		return ""
+	}
+	return time
 }
 
 func Get_Instance(db *sql.DB, matrix_name string) string {
