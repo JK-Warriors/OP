@@ -9,7 +9,7 @@
 <link href="//at.alicdn.com/t/font_1736558_wcwn1dw6gci.css" rel="stylesheet">
 <link href="/static/css/newstyle.css" rel="stylesheet">
 <link href="/static/css/index.css" rel="stylesheet">
-<link href="/static/js/layui-v2.6.2/css/layui.css" rel="stylesheet">
+<link href="/static/js/layui-v2.6.6/css/layui.css" rel="stylesheet">
 <!--[if lt IE 9]>
     <script src="/static/js/html5shiv.js"></script>
     <script src="/static/js/respond.min.js"></script>
@@ -26,7 +26,7 @@
 <script src="/static/js/bootbox.js"></script>
 <script src="/static/js/md5.js"></script>
 <script src="/static/js/metisMenu.js"></script>
-<script src="/static/js/layui-v2.6.2/layui.js"></script>
+<script src="/static/js/layui-v2.6.6/layui.js"></script>
 <script src="/static/js/layer/layer.js"></script>
 
 <script type="text/javascript">
