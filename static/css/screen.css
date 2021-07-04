@@ -226,7 +226,7 @@ body {
   display: inline-block;
   width: 0.5rem;
   height: 0.5rem;
-  background: linear-gradient(140deg, #ec5695, #f59669);
+  background: linear-gradient(140deg, #ec5695, #ff0000);
   border-radius: 99px;
   vertical-align: middle;
   margin-top: -0.1rem;
@@ -234,7 +234,7 @@ body {
 }
 
 .pagemain .pt_4 .monitor .mbow li:nth-child(2) i {
-  background: linear-gradient(140deg, #3759ee, #4b1cac);
+  background: linear-gradient(140deg, #f66000, #fb8100);
 }
 
 .pagemain .pt_4 .monitor .mbow li:nth-child(3) i {
@@ -317,8 +317,19 @@ body {
 }
 
 .pagemain .pt_4 .monitor .row .span2 {
-  color: #9851f1;
+  color: #ff0000;
   margin-right: 0.6rem;
+}
+/* .pagemain .pt_4 .monitor .row .span2.colorred{
+  color: #f15181;
+} */
+.pagemain .pt_4 .monitor .row .span2.colororange{
+  color: #fa7c00;
+  
+}
+.pagemain .pt_4 .monitor .row .span2.colorblue{
+  color: #2898f7;
+  
 }
 
 .pagemain .pt_4 .monitor .row:hover {

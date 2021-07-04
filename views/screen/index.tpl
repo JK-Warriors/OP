@@ -25,10 +25,17 @@
         <div class="pt_1">
           <div class="inner">
             {{range $k,$v := .assets}}
-            <div class="item">
-              <img src="/static/img/icon-normal.png" alt="" />
-              <p>{{$v.Alias}}</p>
-            </div>
+              {{if eq 1 $v.Connect }}
+                <div class="item">
+                  <img src="/static/img/icon-normal.png" alt="" />
+                  <p>{{$v.Alias}}</p>
+                </div>
+              {{else}}
+                <div class="item">
+                  <img src="/static/img/icon-abnormal.png" alt="" />
+                  <p>{{$v.Alias}}</p>
+                </div>
+              {{end}}
             {{end}}
           </div>
         </div>
@@ -110,7 +117,7 @@
                 </li>
                 <li>
                   <i></i>
-                  二级：紫色
+                  二级：橙色
                 </li>
                 <li>
                   <i></i>
@@ -124,7 +131,7 @@
                       {{range $k,$v := .alerts}}
                       <div class="row">
                         <span class="span1">{{GetDateMHS $v.Created}}</span>
-                        <span class="span2">[{{$v.Severity}}] [{{ $v.Asset_Desc}}] {{$v.Message}}</span>
+                        <span class="span2 {{if eq "Warning" $v.Severity}}colororange{{else if eq "Info" $v.Severity}}colorblue{{end}}">[{{$v.Severity}}] [{{ $v.Asset_Desc}}] {{$v.Message}}</span>
                       </div>
                       {{end}}
                     </div>
@@ -138,7 +145,7 @@
           <div class="pt_5">
             <div class="c8" style="min-height:170px">
               <div class="tit">
-                <span>过去7天历史告警统计</span>
+                <span>过去5天历史告警统计</span>
               </div>
               <div class="c8line">
                 <table>
@@ -149,7 +156,7 @@
                   </colgroup>
                   {{range $k,$v := .alertgroup}}
                   <tr>
-                    <td>{{getDBAlias $v.Asset_Id}}</td>
+                    <td>{{$v.Date}}</td>
                     <td>
                       <div class="bar">
                         <div class="barline" style="width: {{$v.Rate}}%"></div>
@@ -246,10 +253,10 @@ setTimeout('refresh()',60000); //指定60秒刷新一次
 
 //圆环
 window.onload = function () {
-  new Progress().renderOne('canvas0', 100, 7, 60)
-  new Progress().renderOne('canvas1', 100, 7, 50)
-  new Progress().renderOne('canvas2', 100, 7, 80)
-  new Progress().renderOne('canvas3', 100, 7, 75)
+  new Progress().renderOne('canvas0', 100, 7, 100)
+  new Progress().renderOne('canvas1', 100, 7, 100)
+  new Progress().renderOne('canvas2', 100, 7, 100)
+  new Progress().renderOne('canvas3', 100, 7, 100)
 };
 
 
@@ -260,7 +267,7 @@ window.onload = function () {
   // 配置
   var option = {
     //backgroundColor: 'rgba(0,0,0,0)',
-    color: ['#af89d6', '#4ac7f5', '#0089ff', '#f36f8a', '#f5c847','#ff5800','#839557'],
+    //color: ['#af89d6', '#4ac7f5', '#0089ff', '#f36f8a', '#f5c847','#ff5800','#839557'],
     tooltip: {
       trigger: 'item',
       formatter: '{a} <br/>{b}: {c} ({d}%)',
@@ -290,6 +297,15 @@ window.onload = function () {
                 { value: {{$v.Db_Time}}, name: '{{$v.End_Time}}' },
               {{end}}
         ],
+           /*
+           data: [
+          { value: 335, name: '直接访问' },
+          { value: 310, name: '邮件营销' },
+          { value: 234, name: '联盟广告' },
+          { value: 135, name: '视频广告' },
+          { value: 1548, name: '搜索引擎' },
+        ],
+        */
         label: {
             normal: {
                 show: true,
@@ -379,7 +395,7 @@ window.onload = function () {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top:'6%',
+      top:'10%',
       containLabel: true,
     },
     toolbox: {
@@ -427,7 +443,7 @@ window.onload = function () {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top:'6%',
+      top:'10%',
       containLabel: true,
     },
     toolbox: {
@@ -474,7 +490,7 @@ window.onload = function () {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top:'6%',
+      top:'10%',
       containLabel: true,
     },
     toolbox: {
@@ -521,7 +537,7 @@ window.onload = function () {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top:'6%',
+      top:'10%',
       containLabel: true,
     },
     toolbox: {
@@ -568,7 +584,7 @@ window.onload = function () {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top:'6%',
+      top:'12%',
       containLabel: true,
     },
     toolbox: {
@@ -614,17 +630,40 @@ window.onload = function () {
   dataset: {
   },
   xAxis: {type: 'category',
-          data: [{{range $k,$v := $.tbs}}{{$v.Tbs_Name}},{{end}}]
+          data: [{{range $k,$v := $.tbs}}{{$v.Tbs_Name}},{{end}}],
+           axisLabel: {
+                             interval:0,
+                             rotate:40,
+                              formatter: function(value) {
+                                 var res = value;
+                                 if(res.length > 5) {
+                                     res = res.substring(0, 4) + "..";
+                                 }
+                                 return res;
+                             }
+                         }
   },
   yAxis: {
         type: 'value'
   },
+  visualMap: {
+        orient: 'horizontal',
+        left:-9999,
+        min: 0,
+        max: 10,
+        // Map the score column to color
+        dimension: 0,
+        inRange: {
+            color: ['#cb31b0', '#28b1ff']
+        }
+    },
   // Declare several bar series, each will be mapped
   // to a column of dataset.source by default.
   series: [
     {
         type: 'bar',
-        data: [{{range $k,$v := $.tbs}}{{$v.Rate}},{{end}}]
+        data: [{{range $k,$v := $.tbs}}{{$v.Rate}},{{end}}],
+       
         //data: [2,2,1,1,0,0,0,0]
     }
   ]

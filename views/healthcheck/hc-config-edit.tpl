@@ -17,6 +17,8 @@
           <div class="layui-form-item">
             <label class="layui-form-label"><span class="layui-btn layui-btn-primary">上下班巡检</span></label>
             <div class="layui-input-block">
+            
+		<input name="status" type="checkbox" data-size="small"> 
               <input type="checkbox" checked="" name="open" lay-skin="switch" lay-filter="switchTest" lay-text="ON|OFF">
             </div>
           </div>
@@ -48,6 +50,17 @@
               <input type="checkbox" checked="" name="day" lay-skin="primary" title="周五">
               <input type="checkbox" checked="" name="day" lay-skin="primary" title="周六">
               <input type="checkbox" checked="" name="day" lay-skin="primary" title="周日">
+
+          <div class="checkgroup">
+            <label>
+            <input type="checkbox" />
+            <span>周一</span>
+            </label>
+             <label>
+            <input type="checkbox" />
+            <span>周二</span>
+            </label></div>
+          
             </div>
             
             <div class="form-group">
@@ -81,6 +94,25 @@
 </section>
 
 <script>
+
+
+$('[name="status"]').bootstrapSwitch({  
+	        onText:"ON",  
+	        offText:"OFF",  
+	        onColor:"success",  
+	        offColor:"danger",  
+	        size:"small",  
+        	onSwitchChange:function(event,state){  
+	            if(state==true){  
+	               console.log('已打开');  
+	            }else{  
+	               console.log('已关闭');  
+	            }  
+	        }  
+		});
+
+
+    
 layui.use('element', function(){
   var $ = layui.jquery
   ,element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块

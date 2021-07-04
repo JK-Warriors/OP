@@ -139,14 +139,14 @@ func ListAllAlerts() (num int64, err error, alerts []Alert) {
 
 	sql := `select s.*, concat(host, ':', port, ' (' , alias, ')')  as asset_desc
 			from pms_alerts s, pms_asset_config c 
-			where s.asset_id = c.id and s.status = 1 and s.created > UNIX_TIMESTAMP() - 3600*24`
+			where s.asset_id = c.id and s.status = 1 and s.created > UNIX_TIMESTAMP() - 3600*24*7`
 	nums, errs := o.Raw(sql).QueryRows(&alerts)
 
 	return nums, errs, alerts
 }
 
 type AlertGroup struct {
-    Asset_Id 		int		    	`orm:"column(asset_id);"`
+    Date 			string		    `orm:"column(date);"`
     Count 			int				`orm:"column(alertcount);"`
     Rate 			int				`orm:"column(rate);"`
 }
@@ -157,13 +157,25 @@ func ListAlertGroup() (num int64, err error, alertgroup []AlertGroup) {
 	sql := `select count(1) from pms_alerts where status = 1 and created > UNIX_TIMESTAMP() - 3600*24*7`
 	errs := o.Raw(sql).QueryRow(&li_count)
 
-	sql = `select asset_id, count(1) alertcount, floor(count(1)*100/?) as rate
-			from pms_alerts 
-			where status = 1 
-			and created > UNIX_TIMESTAMP() - 3600*24*7 
-			group by asset_id 
-			order by 2 desc 
-			limit 5`
+	sql = `SELECT a.date,IFNULL(b.alertcount,0) AS alertcount, IFNULL(b.rate,0) as rate
+			FROM (SELECT CURDATE() AS date
+			UNION ALL
+			SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY) AS date
+			UNION ALL
+			SELECT DATE_SUB(CURDATE(), INTERVAL 2 DAY) AS date
+			UNION ALL
+			SELECT DATE_SUB(CURDATE(), INTERVAL 3 DAY) AS date
+			UNION ALL
+			SELECT DATE_SUB(CURDATE(), INTERVAL 4 DAY) AS date
+			) a LEFT JOIN 
+			(select FROM_UNIXTIME(created, '%Y-%m-%d') date, count(*) alertcount, floor(count(1)*100/?) as rate
+						from pms_alerts 
+						where status = 1
+						and created > UNIX_TIMESTAMP() - 3600*24*7 
+						group by FROM_UNIXTIME(created, '%Y-%m-%d')
+			) b ON a.date = b.date
+			order by 1 desc
+			`
 	nums, errs := o.Raw(sql,li_count).QueryRows(&alertgroup)
 
 	return nums, errs, alertgroup
@@ -173,7 +185,7 @@ func ListAlertGroup() (num int64, err error, alertgroup []AlertGroup) {
 func ListAlertHistory(condArr map[string]string, page int, offset int) (num int64, err error, alerts []Alert) {
 	o := orm.NewOrm()
 	o.Using("default")
-	qs := o.QueryTable("pms_alert_history")
+	qs := o.QueryTable("pms_alert_his")
 	cond := orm.NewCondition()
 
 	if condArr["search_name"] != "" {
@@ -193,7 +205,7 @@ func ListAlertHistory(condArr map[string]string, page int, offset int) (num int6
 	// nums, errs := qs.Limit(offset, start).All(&alerts)
 	
 	sql := `select s.*, concat(host, ':', port, ' (' , alias, ')')  as asset_desc
-			from pms_alert_history s, pms_asset_config c 
+			from pms_alert_his s, pms_asset_config c 
 			where s.asset_id = c.id 
 			and s.status = 1 
 			and c.is_delete = 0
@@ -210,7 +222,7 @@ func ListAlertHistory(condArr map[string]string, page int, offset int) (num int6
 //统计数量
 func CountAlertHistory(condArr map[string]string) int64 {
 	o := orm.NewOrm()
-	qs := o.QueryTable("pms_alert_history")
+	qs := o.QueryTable("pms_alert_his")
 	cond := orm.NewCondition()
 
 	if condArr["search_name"] != "" {

@@ -129,7 +129,7 @@ INSERT INTO `pms_permissions` VALUES ('9205', '10', '巡检模板', 'hc-template
 INSERT INTO `pms_permissions` VALUES ('9810', '98', '告警管理', 'alarm-manage', '/alarm/alarm/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9811', '98', '告警历史', 'alarm-history', '/alarm/history/list', '', '1', '1', '2');
 
-INSERT INTO `pms_permissions` VALUES ('9910', '99', '用户管理', 'user-manage', '/system/user/manage', 'fa-user', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9910', '99', '用户管理', 'user-manage', '/system/user/manage', '', '1', '1', '1');
 INSERT INTO `pms_permissions` VALUES ('9911', '99', '添加用户', 'user-add', '/system/user/add', null, '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('9912', '99', '编辑用户', 'user-edit', '/system/user/edit', null, '0', '0', '0');
 INSERT INTO `pms_permissions` VALUES ('9913', '99', '删除用户', 'user-delete', '/system/user/delete', '', '0', '0', '0');
@@ -1743,8 +1743,8 @@ CREATE INDEX `pms_alerts_4` ON `pms_alerts` (`status`);
 CREATE INDEX `pms_alerts_5` ON `pms_alerts` (`created`);
 
 
-DROP TABLE IF EXISTS `pms_alert_history`;
-CREATE TABLE `pms_alert_history` (
+DROP TABLE IF EXISTS `pms_alert_his`;
+CREATE TABLE `pms_alert_his` (
   `id`                     int(10)         AUTO_INCREMENT            NOT NULL ,
 	`asset_id`               int(10)         DEFAULT '0'               NOT NULL,
 	`name`                   varchar(200)    DEFAULT ''                NOT NULL,
@@ -1771,10 +1771,10 @@ CREATE TABLE `pms_alert_history` (
   `created`                int(10)         DEFAULT NULL COMMENT '操作时间',
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-CREATE INDEX `pms_alert_his_1` ON `pms_alert_history` (`id`);
-CREATE INDEX `pms_alert_his_2` ON `pms_alert_history` (`asset_id`);
-CREATE INDEX `pms_alert_his_4` ON `pms_alert_history` (`status`);
-CREATE INDEX `pms_alert_his_5` ON `pms_alert_history` (`created`);
+CREATE INDEX `pms_alert_his_1` ON `pms_alert_his` (`id`);
+CREATE INDEX `pms_alert_his_2` ON `pms_alert_his` (`asset_id`);
+CREATE INDEX `pms_alert_his_4` ON `pms_alert_his` (`status`);
+CREATE INDEX `pms_alert_his_5` ON `pms_alert_his` (`created`);
 -- ----------------------------
 -- Table structure for pms_global_options
 -- ----------------------------

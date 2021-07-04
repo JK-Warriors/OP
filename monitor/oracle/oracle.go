@@ -49,6 +49,11 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 			log.Printf("%s: %s", sql, err.Error())
 		}
 
+		//update mrp status to "unknown" if it's standby database
+		sql = `update pms_dr_sta_status set mrp_status = 'unKnown' where db_id = ?`
+		_, err = mysql.Exec(sql, db_id)
+		
+		//generate connect alerts
 		AlertConnect(mysql, db_id)
 	} else {
 		log.Println("ping succeeded")

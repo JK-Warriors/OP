@@ -42,11 +42,11 @@
   <ul class="nav" id="side-menu">
       <li>
         <a href="/" {{if eq $.current_url "/"}}class="active"{{end}}>
-          <i class="fa fa-home"></i> <b>首页 </b>
+          <i class=""></i> <b>首页 </b>
         </a>
       </li>
       <li>
-        <a href="/screen/manage"><i class="fa fa-home"></i> <b>大屏 </b>
+        <a href="/screen/manage"><i class=""></i> <b>大屏 </b>
         </a>
       </li>
       {{range $index, $elem := .leftNavLevel1}}

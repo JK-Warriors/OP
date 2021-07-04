@@ -48,7 +48,7 @@ func GetDBScore() (num int64, err error, dbscore []DBScore) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select asset_id, alias, 50 as score from pms_asset_status where connect > 0 limit 4`
+	sql := `select asset_id, alias, score as score from pms_asset_status where connect > 0 limit 4`
 	nums, errs := o.Raw(sql).QueryRows(&dbscore)
 
 	return nums, errs, dbscore
@@ -58,8 +58,18 @@ func GetDRNormal(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl > -1`
-	_ = o.Raw(sql, asset_type).QueryRow(&num)
+	sql := `select count(1) from pms_asset_status 
+			where asset_type = ? 
+			and asset_id in(
+				select db_id_s from pms_dr_config where asset_type = ? and is_shift = 0 and is_delete = 0
+				union
+				select db_id_p from pms_dr_config where asset_type = ? and is_shift = 1 and is_delete = 0
+				)
+			and connect = 1 
+			and repl = 1 
+			and repl_delay <= 600
+			`
+	_ = o.Raw(sql, asset_type, asset_type, asset_type).QueryRow(&num)
 	return num
 }
 
@@ -67,8 +77,19 @@ func GetDRWarning(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl > -1 and repl_delay > 600 and  repl_delay <= 3600`
-	_ = o.Raw(sql, asset_type).QueryRow(&num)
+	sql := `select count(1) from pms_asset_status 
+			where asset_type = ? 
+			and asset_id in(
+				select db_id_s from pms_dr_config where asset_type = ? and is_shift = 0 and is_delete = 0
+				union
+				select db_id_p from pms_dr_config where asset_type = ? and is_shift = 1 and is_delete = 0
+				)
+			and connect = 1 
+			and repl = 1 
+			and repl_delay > 600
+			and repl_delay < 3600
+			`
+	_ = o.Raw(sql, asset_type, asset_type, asset_type).QueryRow(&num)
 	return num
 }
 
@@ -76,8 +97,16 @@ func GetDRCritical(asset_type int) (num int) {
 	o := orm.NewOrm()
 	o.Using("default")
 
-	sql := `select count(1) from pms_asset_status where asset_type = ? and repl = -1 and repl_delay > 3600`
-	_ = o.Raw(sql, asset_type).QueryRow(&num)
+	sql := `select count(1) from pms_asset_status 
+			where asset_type = ? 
+			and asset_id in(
+				select db_id_s from pms_dr_config where asset_type = ? and is_shift = 0 and is_delete = 0
+				union
+				select db_id_p from pms_dr_config where asset_type = ? and is_shift = 1 and is_delete = 0
+				)
+			and (connect = -1 or (connect = 1 and repl = -1 and repl_delay > 3600))
+			`
+	_ = o.Raw(sql, asset_type, asset_type, asset_type).QueryRow(&num)
 	return num
 }
 
@@ -96,7 +125,7 @@ func GetDBTime(db_id int) (dbtime []DbTime) {
 			select db_id, substr(end_time, 1, 10) as end_time, sum(db_time) as db_time
 			from pms_oracle_db_time t 
 			where t.db_id = ?
-			group by db_id, end_time
+			group by db_id, substr(end_time, 1, 10)
 			order by end_time desc
 			limit 7) a
 			order by a.end_time `
@@ -140,7 +169,7 @@ func GetDBMetrixValueX(metric_name string) (metricvalue []MetricValue) {
 			from pms_metric_data m, (select * from pms_asset_config where status = 1 and is_delete = 0 and show_on_screen = 1 limit 1) c
 			where m.metric = ?
 			and m.db_id = c.id
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 
@@ -158,7 +187,7 @@ func GetDBMetrixValueY(metric_name string) (metricvalue []MetricValue) {
 			and c.status = 1
 			and c.is_delete = 0
 			and c.show_on_screen = 1
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 
@@ -173,7 +202,7 @@ func GetDrMetrixValueX(metric_name string) (metricvalue []MetricValue) {
 			from pms_metric_data m, (select * from pms_dr_config where status = 1 and is_delete = 0 limit 1) c
 			where m.metric = ?
 			and m.db_id = c.bs_id
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 
@@ -189,7 +218,7 @@ func GetDrMetrixValueY(metric_name string) (metricvalue []MetricValue) {
 			and m.db_id = c.bs_id
 			and c.status = 1
 			and c.is_delete = 0
-			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 60*24, '%Y-%m-%d %H:%i:%S')
+			and m.timestamp > FROM_UNIXTIME(UNIX_TIMESTAMP() - 3600*24*7, '%Y-%m-%d %H:%i:%S')
 			order by db_id, time`
 	_, _ = o.Raw(sql, metric_name).QueryRows(&metricvalue)
 

@@ -77,8 +77,8 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 							union 
 							select dr_id, db_id, '-', '-', '-' from pms_dr_mssql_s) ss on d.bs_id = ss.dr_id
 		where d.is_delete = 0
-		and d.asset_type = 1
-		and d.status = 1`
+		and d.status = 1
+		`
 
 	if condArr["search_name"] != "" {
 		sql = sql + " and (b.bs_name like '%" + condArr["search_name"] + "%')"
@@ -91,7 +91,7 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 		offset, _ = beego.AppConfig.Int("pageoffset")
 	}
 	start := (page - 1) * offset
-	sql = sql + " order by id"
+	sql = sql + " order by db_type_p, id"
 	sql = sql + " limit " + strconv.Itoa(offset) + " offset " + strconv.Itoa(start)
 	nums, err := o.Raw(sql).QueryRows(&dr)
 	if err != nil {

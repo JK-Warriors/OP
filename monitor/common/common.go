@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 	"strings"
+	"opms/monitor/utils"
 
 	"github.com/xormplus/xorm"
 )
@@ -53,14 +54,14 @@ func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string
 			`
 	_, err := mysql.Exec(sql)
 	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	var count int
 	sql = `select count(1) from pms_alerts where asset_id = ? and templateid = ? and created > UNIX_TIMESTAMP() - 3600`
 	_, err = mysql.SQL(sql, db_id, tri.TemplateId).Get(&count)
 	if err != nil {
-		log.Printf("%s: %s", sql, err.Error())
+		utils.LogDebugf("%s: %s", sql, err.Error())
 	}
 
 	send_mail, send_wechat, send_sms := 0, 0, 0
@@ -72,17 +73,17 @@ func AddAlert(mysql *xorm.Engine, db_id int, item_name string, item_value string
 	_, err = mysql.SQL(`select value from pms_global_options where id = 'send_mail_to_list'`).Get(&send_mail_list)
 	_, err = mysql.SQL(`select value from pms_global_options where id = 'send_sms_to_list'`).Get(&send_sms_list)
 
-
 	if count == 0 {
+		utils.LogDebugf("There is no same alerts in last 1 hour!")
 		description := strings.Replace(tri.Description, "{ItemName}", item_name, -1)
 		description = strings.Replace(description, "{ItemValue}", item_value, -1)
 
-		sql = `insert into pms_alerts(asset_id, name, severity, templateid, isr_recovery, subject, message, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, created)
+		sql = `insert into pms_alerts(asset_id, name, severity, templateid, is_recovery, subject, message, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, created)
 				values(?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	
 		_, err := mysql.Exec(sql, db_id, tri.Name, tri.Severity, tri.TemplateId, 0, tri.Name, description, send_mail, send_mail_list, send_wechat, send_sms, send_sms_list, time.Now().Unix())
 		if err != nil {
-			log.Printf("%s: %s", sql, err.Error())
+			utils.LogDebugf("%s: %s", sql, err.Error())
 		}
 	}
 

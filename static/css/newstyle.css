@@ -912,3 +912,98 @@ a:hover {
   color: #555;
   border-bottom: 3px solid #c5cbf0;
 }
+
+
+/* fix 2021/06/19 */
+.sticky-header .logo{
+  background: #23262e;
+}
+.sticky-header .logo a{
+  color: #fff;
+}
+.sticky-header .left-side{
+  background: #393d49;
+}
+.navbarstyle .nav > li > a{
+  border-left: 0;
+  color: #aaa;
+}
+.navbarstyle .nav > li > a i{
+  display: none !important;
+}
+.navbarstyle .nav > li > a.active{
+  
+  background: #009688;
+  color: #fff;
+  border:0px
+}
+.navbarstyle .nav > li > a:hover {
+  background: #393d49;
+  color: #fff;
+}
+
+.navbarstyle .nav > li > a.active:hover {
+ 
+  background: #009688;
+  color: #fff;
+  border:0px
+}
+.navbarstyle .nav > li.mm-active > a{
+  color:#fff;
+}
+.navbarstyle .nav > li.mm-active{
+  background: none;
+}
+.navbarstyle .nav > li.mm-active ul{
+  
+  background: #282b33;
+}
+.navbarstyle .nav > li.mm-active ul  a{
+  
+  border-left: 3px solid transparent;
+}
+.navbarstyle .nav > li.mm-active ul  a:hover{
+  background: none;
+  border-left: 3px solid #009688;
+}
+.navbarstyle .nav > li.mm-active ul a.active{
+  
+  background: #009688;
+  color: #fff;
+}
+
+
+.main-content .table.table-bordered > thead > tr > th{
+  text-align: center;
+}
+
+.sticky-header .main-content{
+  padding-bottom: 50px;
+  position: relative;
+}
+.sticky-header .main-content footer{
+  position: fixed;
+  bottom: 0px;
+  background: #fff;
+}
+
+.layui-input-block{
+  margin-left: 170px !important;
+}
+
+.checkgroup{
+  border:1px solid #ebeef5;
+  background:#edf2fc;
+  margin-right: 20px;
+  padding:10px;
+  border-radius: 5px;
+  
+}
+.checkgroup label{
+  margin-right: 10px;
+}
+.checkgroup label input{
+position: relative;
+top: 2px;
+}
+.checkgroup label span{font-size: 13px;font-weight: 500;}

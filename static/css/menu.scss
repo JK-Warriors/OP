@@ -4,14 +4,14 @@ $menu-border: #4d4efd;
 // menu
 .main-content {
   margin-left: 0;
-  padding-left: 170px;
+  padding-left: 220px;
 }
 .sticky-header .header-section {
-  left: 170px;
+  left: 220px;
   box-shadow: 4px 0 10px rgba(88, 94, 252, 0.2);
 }
 .sticky-header .menu-right {
-  margin-right: 170px;
+  margin-right: 220px;
 }
 .sticky-header.left-side-collapsed .menu-right {
   margin-right: 52px;
@@ -32,7 +32,7 @@ $menu-border: #4d4efd;
   }
 }
 .left-side {
-  width: 170px;
+  width: 220px;
 }
 .sticky-left-side {
   z-index: 999;

@@ -52,7 +52,7 @@
                   </form>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-success" id="add_db"><i class="fa fa-plus"></i> 新增</a>
+                  <a href="/config/db/add/?asset_type=1" class="btn btn-success" id="add_db"><i class="fa fa-plus"></i> 新增</a>
                 </div>
               </div>
             </div>
@@ -149,6 +149,7 @@
 {{template "inc/foot.tpl" .}}
 <script>
     //layer
+    /*
     $(function() {
       $('#add_db').click(function() {
         $("#asset_type").attr("value",'');
@@ -164,7 +165,7 @@
           content: $('#db_box')
         })
       })
-    })
+    })*/
 
 
     $('.js-dbconfig-single').on('click', function(){

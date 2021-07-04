@@ -112,7 +112,6 @@
                       </tbody>
                     </table>
                   </form>
-                  {{template "inc/page.tpl" .}}
                 </section>
               </div>
             </section>
@@ -121,6 +120,9 @@
       </div>
     </div>
     <!--body wrapper end-->
+    <!--footer section start-->
+    {{template "inc/foot-info.tpl" .}}
+    <!--footer section end-->
   </div>
   <!-- main content end-->
 </section>

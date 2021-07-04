@@ -143,7 +143,7 @@
           <div class="m">
             <div class="e1">
               <h4>日志量 (单位:M)</h4>
-              <div id="main" style="width: 100%; height: 100%; "></div>
+              <div id="main" style="width: 100%; height: 110%; "></div>
             </div>
             <div class="e2">
               <h4>关键指标</h4>
@@ -214,6 +214,10 @@
         xAxis: {
           type: 'category',
           boundaryGap: false,
+          axisLabel:{
+           textStyle: {
+                fontSize:'10',
+            }},
           axisTick: {
             alignWithLabel: true
           },
@@ -231,7 +235,11 @@
           data: [{{range $k,$a := .redo}}{{$a.Key_Time}},{{end}}]
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+           axisLabel:{
+           textStyle: {
+                fontSize:'8',
+            }},
         },
         series: [
           {

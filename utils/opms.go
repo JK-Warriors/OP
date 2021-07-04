@@ -75,7 +75,7 @@ func CheckDrStatusLevel(status string) string {
 	var level_img string
 	if (status == "ACTIVE"){
 		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + status + "'><img src='/static/img/ok.png' /></a>"
-	}else if(status == "INACTIVE"){
+	}else if(status == "INACTIVE" || status == "unKnown"){
 		level_img = "<a href='javascript::(0)' data-toggle='tooltip' data-placement='top' title='" + status + "'><img src='/static/img/critical.png' /></a>"
 	}else{
 		level_img = "<img src='/static/img/none.png' alt='none' title='no data' />"

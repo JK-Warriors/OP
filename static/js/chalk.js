@@ -21,8 +21,8 @@
     }
     echarts.registerTheme('chalk', {
         "color": [
-            "#f43ead",
             "#2396ff",
+            "#f43ead",
             "#7c43fc",
             "#ffda61"
         ],
@@ -190,8 +190,8 @@
             "symbol": "circle",
             "smooth": true,
             "color": [
-                "#f43ead",
                 "#2396ff",
+                "#f43ead",
                 "#7c43fc",
                 "#ffda61"
             ],
@@ -475,8 +475,8 @@
         },
         "visualMap": {
             "color": [
-                "#f43ead",
                 "#2396ff",
+                "#f43ead",
                 "#7c43fc",
                 "#ffda61"
             ]

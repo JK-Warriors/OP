@@ -6,7 +6,7 @@ import (
 	"strings"
 	//"time"
 	//"context"
-	//"opms/monitor/utils"
+	"opms/monitor/utils"
 	"opms/monitor/common"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -19,13 +19,13 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 
 	triconf := common.GetTriggers(mysql, db_id, trigger_type)
 	for _, tri := range triconf {
-		log.Printf("Alert status: %s", tri.Status)
+		utils.LogDebugf("Alert status: %s", tri.Status)
 		if tri.Status == 1 {
 			exp := strings.Replace(tri.Expression, "{ItemValue}", item_value, -1)
 			
 			expression, err := govaluate.NewEvaluableExpression(exp)
 			if err != nil {
-				log.Printf("govaluate: %s", err.Error())
+				utils.LogDebugf("govaluate: %s", err.Error())
 				return
 			}
 	
@@ -34,12 +34,13 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 	
 			result, err := expression.Evaluate(nil)
 			if err != nil {
-				log.Printf("Expression error: %s", err.Error())
+				utils.LogDebugf("Expression error: %s", err.Error())
 				return
 			}
 			
-			log.Printf("Expression result: %v", result)
+			utils.LogDebugf("Expression result: %v", result)
 			if result == true {
+				utils.LogDebugf("Add %s alert for db %d", trigger_type, db_id)
 				common.AddAlert(mysql, db_id, item_name, item_value, tri)
 			}else{
 				// recover
@@ -49,13 +50,13 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 			
 					expression, err = govaluate.NewEvaluableExpression(exp)
 					if err != nil {
-						log.Printf("govaluate: %s", err.Error())
+						utils.LogDebugf("govaluate: %s", err.Error())
 						return
 					}
 			
 					result, err := expression.Evaluate(nil)
 					if err != nil {
-						log.Printf("ExecTriggers: %s", err.Error())
+						utils.LogDebugf("ExecTriggers: %s", err.Error())
 						return
 					}
 
@@ -63,13 +64,13 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 						common.AddRecoveryAlert(mysql, db_id, item_name, item_value, tri)
 					}
 				}else{
-					log.Printf("there is no recovery mode for this trigger")
+					utils.LogDebugf("There is no recovery mode for this trigger")
 				}
 			}
 
 
 		}else{
-			log.Printf("Alert status is disable")
+			utils.LogDebugf("Alert status is disable")
 		}
 	}
 	
@@ -78,25 +79,25 @@ func ExecTriggers(mysql *xorm.Engine, db_id int, trigger_type string, item_name 
 
 func AlertBasicInfo(mysql *xorm.Engine, db_id int){
 	connect := GetConnect(mysql, db_id)
-	log.Printf("AlertConnect: %s", connect)
+	utils.LogDebugf("AlertConnect: %s", connect)
 	ExecTriggers(mysql, db_id, "connect", "", connect)
 
 	restart := GetRestart(mysql, db_id)
-	log.Printf("AlertRestart: %s", restart)
+	utils.LogDebugf("AlertRestart: %s", restart)
 	ExecTriggers(mysql, db_id, "restart", "", restart)
 
 	mrpstatus := GetMrpStatus(mysql, db_id)
-	log.Printf("Alert mrp status: %s", mrpstatus)
+	utils.LogDebugf("Alert mrp status: %s", mrpstatus)
 	ExecTriggers(mysql, db_id, "mrp_status", "", mrpstatus)
 
 	dgdelay := GetDgDelay(mysql, db_id)
-	log.Printf("Alert dg delay: %s", dgdelay)
+	utils.LogDebugf("Alert dg delay: %s", dgdelay)
 	ExecTriggers(mysql, db_id, "repli_delay", "", dgdelay)
 }
 
 func AlertConnect(mysql *xorm.Engine, db_id int){
 	connect := GetConnect(mysql, db_id)
-	log.Printf("AlertConnect: %d", connect)
+	utils.LogDebugf("AlertConnect: %s", connect)
 	ExecTriggers(mysql, db_id, "connect", "", connect)
 }
 
