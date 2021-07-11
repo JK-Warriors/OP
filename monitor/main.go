@@ -6,8 +6,8 @@ import (
 	oracle "opms/monitor/oracle"
 	mssql "opms/monitor/mssql"
 	mysql "opms/monitor/mysql"
-	mos "opms/monitor/os"
 	alert "opms/monitor/alert"
+	mos "opms/monitor/os"
 
 	"os"
 	"runtime"
@@ -115,36 +115,48 @@ type Asset struct {
     Os_Port 		int				`xorm:"int 'os_port'"`
     Os_Username 	string			`xorm:"varchar 'os_username'"`
     Os_Password 	string			`xorm:"varchar 'os_password'"`
+    Is_Alert 		int				`xorm:"int 'is_alert'"`
 }
 
 func GatherAssetStats(wg *sync.WaitGroup) int {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
+
 	var assets []Asset
 	sql := `select id, asset_type, host, protocol, port, alias, instance_name, db_name, username, password,
-			os_type, os_protocol, os_port, os_username, os_password
+			os_type, os_protocol, os_port, os_username, os_password, is_alert
 			from pms_asset_config where status = 1 and is_delete = 0`
 	err := db.SQL(sql).Find(&assets)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+
     //log.Print("Gather Asset Stats start.")
 	var wga sync.WaitGroup
 	for _, v := range assets {
 		if v.Asset_Type == 1{
 			wga.Add(1)
-			go oracle.GenerateOracleStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			go oracle.GenerateOracleStats(&wga, db, v.Id, v.Host, v.Port, v.Alias, v.Is_Alert)
 		}else if v.Asset_Type == 2{
 			wga.Add(1)
-			go mysql.GenerateMySQLStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			go mysql.GenerateMySQLStats(&wga, db, v.Id, v.Host, v.Port, v.Alias, v.Is_Alert)
 		}else if v.Asset_Type == 3{
 			wga.Add(1)
-			go mssql.GenerateMssqlStats(&wga, db, v.Id, v.Host, v.Port, v.Alias)
+			go mssql.GenerateMssqlStats(&wga, db, v.Id, v.Host, v.Port, v.Alias, v.Is_Alert)
 		}else if v.Asset_Type == 99{
 			wga.Add(1)
 			if v.Os_Protocol == "snmp" {		
-				go mos.GenerateLinuxStats(&wga, db, v.Id, v.Host, v.Os_Port, v.Alias)
+				go mos.GenerateLinuxStats(&wga, db, v.Id, v.Host, v.Os_Port, v.Alias, v.Is_Alert)
 			}else if v.Os_Protocol == "winrm" {
-				go mos.GenerateWinStats(&wga, db, v.Id, v.Host, v.Os_Port, v.Alias, v.Os_Username, v.Os_Password)
+				go mos.GenerateWinStats(&wga, db, v.Id, v.Host, v.Os_Port, v.Alias, v.Os_Username, v.Os_Password, v.Is_Alert)
 			}
 		}
 	}
@@ -159,6 +171,16 @@ func GatherAssetStats(wg *sync.WaitGroup) int {
 
 
 func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
+
 	var dr []common.Dr
 	sql := `select d.bs_id as id, 
 					d.bs_name,
@@ -174,7 +196,9 @@ func GatherDisasterRecoveryStats(wg *sync.WaitGroup) int {
 					ps.alias as alias_s, 
 					ps.instance_name as inst_name_s, 
 					d.db_name, 
-					d.is_shift
+					d.is_shift, 
+					d.is_switch,
+					d.is_alert
 				from pms_dr_config d
 				left join pms_asset_config pp on d.db_id_p = pp.id
 				left join pms_asset_config ps on d.db_id_s = ps.id
@@ -237,6 +261,16 @@ type Alert struct {
 }
 
 func AlertMedia(wg *sync.WaitGroup) int {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
+	
 	var alerts []Alert
 	sql := `select * from pms_alerts where status = 1`
 	err := db.SQL(sql).Find(&alerts)

@@ -72,7 +72,7 @@ func (this *Alert) TableName() string {
 }
 
 func (this *Alert_History) TableName() string {
-	return models.TableName("alert_history")
+	return models.TableName("alert_his")
 }
 
 func init() {
@@ -108,8 +108,8 @@ func ListAlerts(condArr map[string]string, page int, offset int) (num int64, err
 			from pms_alerts s, pms_asset_config c 
 			where s.asset_id = c.id 
 			and s.status = 1 
-			and s.created > UNIX_TIMESTAMP() - 3600*24*7
-			order by id
+			and s.created > UNIX_TIMESTAMP() - 3600*24*3
+			order by id desc
 			`
 	sql = sql + " limit "  + strconv.Itoa(start) + "," + strconv.Itoa(offset) 
 	nums, errs := o.Raw(sql).QueryRows(&alerts)
@@ -139,7 +139,7 @@ func ListAllAlerts() (num int64, err error, alerts []Alert) {
 
 	sql := `select s.*, concat(host, ':', port, ' (' , alias, ')')  as asset_desc
 			from pms_alerts s, pms_asset_config c 
-			where s.asset_id = c.id and s.status = 1 and s.created > UNIX_TIMESTAMP() - 3600*24*7`
+			where s.asset_id = c.id and s.status = 1 and s.created > UNIX_TIMESTAMP() - 3600*24*3`
 	nums, errs := o.Raw(sql).QueryRows(&alerts)
 
 	return nums, errs, alerts
@@ -210,7 +210,7 @@ func ListAlertHistory(condArr map[string]string, page int, offset int) (num int6
 			and s.status = 1 
 			and c.is_delete = 0
 			and c.status = 1
-			order by id
+			order by id desc
 			`
 	sql = sql + " limit "  + strconv.Itoa(start) + "," + strconv.Itoa(offset) 
 	nums, errs := o.Raw(sql).QueryRows(&alerts)

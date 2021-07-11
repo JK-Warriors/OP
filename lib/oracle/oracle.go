@@ -244,6 +244,24 @@ func GetDatabaseVersion(db *sql.DB) (int, error) {
 	return version, nil
 }
 
+func GetInstanceCount(db *sql.DB) (int, error) {
+	var count string
+	var err error
+	selectQry := "select count(1) from gv$instance"
+	count, err = GetSingleValue(db, selectQry)
+	if err != nil {
+		utils.LogDebug("Get instance count failed: " + err.Error())
+		return -1, err
+	}
+
+	inst_count, err := strconv.Atoi(count)
+	if err != nil {
+		return -1, err
+	}
+
+	return inst_count, nil
+}
+
 func GetGapCount(db *sql.DB) (int, error) {
 	var count string
 	var err error

@@ -79,6 +79,7 @@ func UpdateOSconfig(id int, upd Dbconfigs) error {
 		osconf.OsPort = upd.OsPort
 		osconf.OsUsername = upd.OsUsername
 		osconf.OsPassword = upd.OsPassword
+		osconf.Is_Alert = upd.Is_Alert
 		osconf.Alert_Mail = upd.Alert_Mail
 		osconf.Alert_WeChat = upd.Alert_WeChat
 		osconf.Alert_SMS = upd.Alert_SMS

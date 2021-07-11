@@ -101,6 +101,7 @@ func (this *AddOSConfigController) Post() {
 	os_password := this.GetString("os_password")
 	
 
+	is_alert,_ := this.GetInt("is_alert")
 	alert_mail,_ := this.GetInt("alert_mail")
 	alert_wechat,_  := this.GetInt("alert_wechat")
 	alert_sms,_  := this.GetInt("alert_sms")
@@ -115,6 +116,7 @@ func (this *AddOSConfigController) Post() {
 	osconf.OsPort = os_port
 	osconf.OsUsername = os_username
 	osconf.OsPassword = os_password
+	osconf.Is_Alert = is_alert
 	osconf.Alert_Mail = alert_mail
 	osconf.Alert_WeChat = alert_wechat
 	osconf.Alert_SMS = alert_sms
@@ -193,12 +195,14 @@ func (this *EditOSConfigController) Post() {
 	os_username := this.GetString("os_username")
 	os_password := this.GetString("os_password")
 
+	is_alert,_ := this.GetInt("is_alert")
 	alert_mail,_ := this.GetInt("alert_mail")
 	alert_wechat,_ := this.GetInt("alert_wechat")
 	alert_sms,_ := this.GetInt("alert_sms")
 
 	var osconf Dbconfigs
 
+	osconf.Id = id
 	osconf.Host = host
 	osconf.Alias = alias
 	osconf.Ostype = os_type
@@ -206,12 +210,13 @@ func (this *EditOSConfigController) Post() {
 	osconf.OsPort = os_port
 	osconf.OsUsername = os_username
 	osconf.OsPassword = os_password
+	osconf.Is_Alert = is_alert
 	osconf.Alert_Mail = alert_mail
 	osconf.Alert_WeChat = alert_wechat
 	osconf.Alert_SMS = alert_sms
 
 
-	count := CheckOsExists(osconf) 
+	count := CheckOsExists(osconf)
 	if count == 0{
 		err := UpdateOSconfig(id, osconf)
 		if err == nil {

@@ -15,6 +15,15 @@ import (
 )
 
 func AlertEMail(wg *sync.WaitGroup, mysql *xorm.Engine, alert_id int, retries int, sendto string, subject string, created int) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+	
 	//check golbal config
 	sendmail_global := GetSendMailGlobal(mysql)
 	if sendmail_global != "1" {

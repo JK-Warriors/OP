@@ -13,9 +13,18 @@ import (
 	"github.com/xormplus/xorm"
 )
 
-func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
-	//Get Dsn
+func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string, is_alert int) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
 
+
+	//Get Dsn
 	//连接字符串
 	//dsn := fmt.Sprintf("server=%s;port%d;database=%s;user id=%s;password=%s;;encrypt=disable", ip, port, database, user, password)
 	dsn, err := GetDsn(mysql, db_id, 3)
@@ -49,17 +58,21 @@ func GenerateMssqlStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host 
 			log.Printf("%s: %s", sql, err.Error())
 		}
 
-		AlertConnect(mysql, db_id)
+		if is_alert == 1 {
+			AlertConnect(mysql, db_id)
+		}
 	} else {
 		log.Println("ping succeeded")
 
 		//get sqlserver basic infomation
 		GatherBasicInfo(db, mysql, db_id, host, port, alias)
 		GatherDbStatus(mysql, db_id)
-		AlertConnect(mysql, db_id)
 
 		GatherMetricValue(db, mysql, db_id, host, port, alias)
 
+		if is_alert == 1 {
+			AlertConnect(mysql, db_id)
+		}
 	}
 
 	(*wg).Done()

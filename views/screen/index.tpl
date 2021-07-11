@@ -253,10 +253,10 @@ setTimeout('refresh()',60000); //指定60秒刷新一次
 
 //圆环
 window.onload = function () {
-  new Progress().renderOne('canvas0', 100, 7, 100)
-  new Progress().renderOne('canvas1', 100, 7, 100)
-  new Progress().renderOne('canvas2', 100, 7, 100)
-  new Progress().renderOne('canvas3', 100, 7, 100)
+  new Progress().renderOne('canvas0', 100, 7, 95)
+  new Progress().renderOne('canvas1', 100, 7, 90)
+  new Progress().renderOne('canvas2', 100, 7, 93)
+  new Progress().renderOne('canvas3', 100, 7, 88)
 };
 
 

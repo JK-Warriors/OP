@@ -190,3 +190,4 @@ func GetLogPerSecond(db *sql.DB) string {
 	}
 	return log_per_sec
 }
+

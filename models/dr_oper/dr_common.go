@@ -63,7 +63,14 @@ func ListDr(condArr map[string]string, page int, offset int) (num int64, err err
 			ss.mrp_status as repl_status,
 			ss.delay_mins as repl_delay,
 			d.is_shift
-		from pms_dr_config d
+		from (select bs_id, 
+					bs_name,
+					(CASE is_switch WHEN 1 THEN db_id_s ELSE db_id_p END) as db_id_p, 
+					(CASE is_switch WHEN 1 THEN db_id_p ELSE db_id_s END) as db_id_s, 
+					is_shift,
+					is_delete,
+					status
+				from pms_dr_config) d
 		left join pms_asset_config p on d.db_id_p = p.id
 		left join pms_asset_config s on d.db_id_s = s.id
 		left join (select dr_id, db_id, curr_db_time from pms_dr_pri_status
@@ -148,11 +155,19 @@ func ListOracleDr(condArr map[string]string, page int, offset int) (num int64, e
 				ss.mrp_status as repl_status,
 				ss.delay_mins as repl_delay,
 				d.is_shift
-			from pms_dr_config d
+			from (select bs_id, 
+					bs_name,
+					asset_type,
+					(CASE is_switch WHEN 1 THEN db_id_s ELSE db_id_p END) as db_id_p, 
+					(CASE is_switch WHEN 1 THEN db_id_p ELSE db_id_s END) as db_id_s, 
+					is_shift,
+					is_delete,
+					status
+				from pms_dr_config) d
 			left join pms_asset_config p on d.db_id_p = p.id
 			left join pms_asset_config s on d.db_id_s = s.id
-			left join pms_dr_pri_status ps on d.bs_id = ps.dr_id
-			left join pms_dr_sta_status ss on d.bs_id = ss.dr_id
+			left join (select distinct dr_id, db_id, curr_db_time from pms_dr_pri_status) ps on d.bs_id = ps.dr_id
+			left join (select distinct dr_id, db_id, curr_db_time,mrp_status,delay_mins from pms_dr_sta_status) ss on d.bs_id = ss.dr_id
 			where d.is_delete = 0
 			and d.asset_type = 1
 			and d.status = 1`
@@ -816,8 +831,6 @@ func GetMirrorDbname(dr_id int) (string, error) {
 
 
 
-
-
 //切换IP
 func SwitchIPs(op_id int64, dr_id int, asset_type int, pri_id int, sta_id int) int{
 	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "切换IP开始")
@@ -866,38 +879,38 @@ func SwitchIPs(op_id int64, dr_id int, asset_type int, pri_id int, sta_id int) i
 
 //切换IP
 func FailoverIPs(op_id int64, dr_id int, asset_type int, sta_id int) int{
-	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "绑定IP开始")
+	Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "绑定IP开始")
 
 	//Get switch ips
-	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取需要绑定的IP")
+	Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "开始获取需要绑定的IP")
 	ips,err := GetIps(dr_id)
 	if err != nil || ips == ""{
 		Update_OP_Reason(op_id, "获取需要绑定的IP失败")
-		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取需要绑定的IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "获取需要绑定的IP失败")
 		utils.LogDebug("GetIps failed: " + err.Error())
 		return -1
 	}
 
 	//get network card
-	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始获取绑定的目标端网卡")
+	Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "开始获取绑定的目标端网卡")
 	s_card,err := GetStaNetcard(dr_id)
 	if err != nil || s_card == ""{
 		Update_OP_Reason(op_id, "获取绑定的目标端网卡失败")
-		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "获取绑定的目标端网卡失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "获取绑定的目标端网卡失败")
 		utils.LogDebug("Get network card failed: " + err.Error())
 		return -1
 	}
 
-	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "开始目标端绑定IP")
+	Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "开始目标端绑定IP")
 	result := Bind_IPs(sta_id, ips, s_card)
 	if result == -1{
 		Update_OP_Reason(op_id, "目标端绑定IP失败")
-		Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "目标端绑定IP失败")
+		Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "目标端绑定IP失败")
 		utils.LogDebug("Bind ips failed")
 		return -1
 	}
 
-	Log_OP_Process(op_id, dr_id, asset_type, "SWITCHOVER", "绑定IP成功")
+	Log_OP_Process(op_id, dr_id, asset_type, "FAILOVER", "绑定IP成功")
 	return 1
 }
 

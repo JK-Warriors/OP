@@ -16,11 +16,20 @@ import (
 )
 
 func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
 	dr_id := dis.Id
 
 	var pri_id int
 	var sta_id int
-	if dis.Is_Shift == 0 {
+	if dis.Is_Switch == 0 {
 		pri_id = dis.Db_Id_P
 		sta_id = dis.Db_Id_S
 	} else {
@@ -43,6 +52,14 @@ func GenerateOracleDrStats(wg *sync.WaitGroup, mysql *xorm.Engine, dis common.Dr
 	pri_conn_str, _ := godror.ParseConnString(dsn_p)
 	sta_conn_str, _ := godror.ParseConnString(dsn_s)
 
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
 
 	GeneratePrimary(mysql, dr_id, pri_conn_str, pri_id)
 	GenerateStandby(mysql, dr_id, pri_conn_str, sta_conn_str, sta_id)
@@ -92,6 +109,30 @@ func GeneratePrimary(mysql *xorm.Engine, dr_id int, P godror.ConnectionParams, d
 	}
 	defer rows.Close()
 
+	
+	// storage result
+	session := mysql.NewSession()
+	defer session.Close()
+	// add Begin() before any action
+	err = session.Begin()
+	//move old data to history table
+	sql = `insert into pms_dr_pri_status_his select * from pms_dr_pri_status where dr_id = ?`
+	_, err = mysql.Exec(sql, dr_id)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		session.Rollback()
+		return
+	}
+
+	sql = `delete from pms_dr_pri_status where dr_id = ?`
+	_, err = mysql.Exec(sql, dr_id)
+	if err != nil {
+		log.Printf("%s: %w", sql, err)
+		session.Rollback()
+		return
+	}
+
+
 	for rows.Next() {
 		var dest_id, thread, sequence int
 		var transmit_mode, archived, applied, curr_db_time string
@@ -123,28 +164,6 @@ func GeneratePrimary(mysql *xorm.Engine, dr_id int, P godror.ConnectionParams, d
 		err = db.QueryRow(sql, dest_id, thread).Scan(&applied_delay)
 		if err != nil {
 			log.Printf("%s: %w", sql, err)
-		}
-
-		// storage result
-		session := mysql.NewSession()
-		defer session.Close()
-		// add Begin() before any action
-		err := session.Begin()
-		//move old data to history table
-		sql = `insert into pms_dr_pri_status_his select * from pms_dr_pri_status where db_id = ?`
-		_, err = mysql.Exec(sql, db_id)
-		if err != nil {
-			log.Printf("%s: %w", sql, err)
-			session.Rollback()
-			return
-		}
-
-		sql = `delete from pms_dr_pri_status where db_id = ?`
-		_, err = mysql.Exec(sql, db_id)
-		if err != nil {
-			log.Printf("%s: %w", sql, err)
-			session.Rollback()
-			return
 		}
 
 		sql = `insert into pms_dr_pri_status(dr_id, db_id, dest_id, transmit_mode, thread, sequence, curr_scn, curr_db_time, archived_delay, applied_delay, created) 
@@ -248,16 +267,16 @@ func GenerateStandby(mysql *xorm.Engine, dr_id int, p_pri godror.ConnectionParam
 	// add Begin() before any action
 	err = session.Begin()
 	//move old data to history table
-	sql = `insert into pms_dr_sta_status_his select * from pms_dr_sta_status where db_id = ?`
-	_, err = mysql.Exec(sql, db_id)
+	sql = `insert into pms_dr_sta_status_his select * from pms_dr_sta_status where dr_id = ?`
+	_, err = mysql.Exec(sql, dr_id)
 	if err != nil {
 		utils.LogDebugf("%s: %s", sql, err.Error())
 		session.Rollback()
 		return
 	}
 
-	sql = `delete from pms_dr_sta_status where db_id = ?`
-	_, err = mysql.Exec(sql, db_id)
+	sql = `delete from pms_dr_sta_status where dr_id = ?`
+	_, err = mysql.Exec(sql, dr_id)
 	if err != nil {
 		utils.LogDebugf("%s: %s", sql, err.Error())
 		session.Rollback()

@@ -15,7 +15,16 @@ import (
 	"github.com/xormplus/xorm"
 )
 
-func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string) {
+func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host string, port int, alias string, is_alert int) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
 	//Get Dsn
 	dsn, err := GetDsn(mysql, db_id, 1)
 	P, err := godror.ParseConnString(dsn)
@@ -24,7 +33,6 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 	defer db.Close()
 	if err != nil {
 		utils.LogDebugf("%s: %s", P.StringWithPassword(), err.Error())
-
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -54,7 +62,14 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		_, err = mysql.Exec(sql, db_id)
 		
 		//generate connect alerts
-		AlertConnect(mysql, db_id)
+		//check if it is on switchover
+		var on_switchover int
+		sql = `select count(1) from pms_dr_config where on_process = 1 and on_switchover = 1 and (db_id_p = ? or db_id_s = ?)`
+		_, _ = mysql.SQL(sql, db_id, db_id).Get(&on_switchover)
+		if on_switchover == 0 && is_alert ==1 {
+			AlertConnect(mysql, db_id)
+		}
+
 	} else {
 		log.Println("ping succeeded")
 		//if !ok {
@@ -63,7 +78,6 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 		//get oracle basic infomation
 		GatherBasicInfo(db, mysql, db_id, host, port, alias)
 		GatherDbStatus(mysql, db_id)
-		AlertBasicInfo(mysql, db_id)
 
 		GatherRedo(db, mysql, db_id, host, port, alias)
 		GatherDbTime(db, mysql, db_id, host, port, alias)
@@ -71,11 +85,15 @@ func GenerateOracleStats(wg *sync.WaitGroup, mysql *xorm.Engine, db_id int, host
 
 		//get tablespace
 		GatherTablespaces(db, mysql, db_id, host, port, alias)
-		AlertTablespaces(mysql, db_id)
 
 		//get asm diskgroup
 		GatherDiskgroups(db, mysql, db_id, host, port, alias)
-		AlertDiskgroups(mysql, db_id)
+
+		if is_alert == 1 {
+			AlertBasicInfo(mysql, db_id)
+			AlertTablespaces(mysql, db_id)
+			AlertDiskgroups(mysql, db_id)
+		}
 	}
 
 	(*wg).Done()

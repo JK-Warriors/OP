@@ -22,7 +22,7 @@
     <div class="page-heading">
       <!-- <h3> 日志管理 </h3>-->
       <ul class="breadcrumb pull-left">
-        <li><a href="/alarm/alarm/manage">告警管理</a></li>
+        <li><a href="/alarm/history/list">告警管理</a></li>
         <li class="active">告警列表</li>
       </ul>
     </div>
@@ -36,10 +36,10 @@
               <div class="search-form">
                 <div class="form-inline">
                   <div class="form-group">
-                    <form action="/alarm/alarm/manage" method="get">
+                    <form action="/alarm/history/list" method="get">
                     <input type="text" name="search_name" placeholder="请输入名称" class="form-control" value="{{.condArr.search_name}}"/>
                     <button class="btn btn-primary" type="submit"> <i class="fa fa-search"></i> 搜索 </button>
-                    <a href="/alarm/alarm/manage" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
+                    <a href="/alarm/history/list" class="btn btn-default" type="submit"> <i class="fa fa-reset"></i> 重置 </a>
                     </form>
                   </div>
                 </div>

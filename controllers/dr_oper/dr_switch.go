@@ -67,6 +67,7 @@ func (this *AjaxDrSwitchoverController) Post() {
 	utils.LogDebug(dsn_p)
 	utils.LogDebug(dsn_s)
 
+
 	on_process, err := GetOnProcess(bs_id)
 	if on_process == 1 {
 		utils.LogDebug("There is another opration on process.")
@@ -95,6 +96,7 @@ func (this *AjaxDrSwitchoverController) Post() {
 				if err != nil {
 					utils.LogDebugf("%s: %w", dsn_s, err)
 				}
+
 
 				utils.LogDebug("主库开始切换成备库...")
 				p_result := OraPrimaryToStandby(op_id, bs_id, p_pri)

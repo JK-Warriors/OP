@@ -16,14 +16,22 @@ import (
 
 )
 
-func GenerateWinStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string, username string, password string) {
+func GenerateWinStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string, username string, password string, is_alert int) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
 	//连接字符串
 	endpoint := winrm.NewEndpoint(host, port, false, false, nil, nil, nil, 0)
 	client, err := winrm.NewClient(endpoint, username, password)
 	if err != nil {
 		utils.LogDebugf("winrm.NewClient failed: %s", err.Error())
 	}
-
 	
 	var stdout, stderr bytes.Buffer
 	_, err = client.Run("ipconfig /all", &stdout, &stderr)
@@ -38,7 +46,9 @@ func GenerateWinStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host st
 			log.Printf("%s: %s", sql, err.Error())
 		}
 
-		AlertConnect(mysql, os_id)
+		if is_alert == 1 {
+			AlertConnect(mysql, os_id)
+		}
 	}else {
 		log.Println("connect succeeded")
 		//log.Printf("%s", stdout.String())
@@ -49,8 +59,10 @@ func GenerateWinStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host st
 		GatherWinDiskIOInfo(client, mysql, os_id, host, alias)
 		GatherWinNetInfo(client, mysql, os_id, host, alias)
 		GatherWinBasicInfo(client, mysql, os_id, host, alias)
-		AlertConnect(mysql, os_id)
 		
+		if is_alert == 1 {
+			AlertConnect(mysql, os_id)
+		}
 	}
 
 	(*wg).Done()

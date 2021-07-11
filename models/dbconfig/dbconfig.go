@@ -37,6 +37,7 @@ type Dbconfigs struct {
 	IsDelete       int    `orm:"column(is_delete);"`
 	Show_On_Screen int    `orm:"column(show_on_screen);"`
 	Retention      int    `orm:"column(retention);"`
+	Is_Alert       int    `orm:"column(is_alert);"`
 	Alert_Mail     int    `orm:"column(alert_mail);"`
 	Alert_WeChat   int    `orm:"column(alert_wechat);"`
 	Alert_SMS      int    `orm:"column(alert_sms);"`
@@ -73,6 +74,7 @@ func AddDBconfig(upd Dbconfigs) error {
 	dbconf.OsUsername = upd.OsUsername
 	dbconf.OsPassword = upd.OsPassword
 	dbconf.Display_Order = upd.Display_Order
+	dbconf.Is_Alert = upd.Is_Alert
 	dbconf.Alert_Mail = upd.Alert_Mail
 	dbconf.Alert_WeChat = upd.Alert_WeChat
 	dbconf.Alert_SMS = upd.Alert_SMS
@@ -109,6 +111,7 @@ func UpdateDBconfig(id int, upd Dbconfigs) error {
 		dbconf.OsUsername = upd.OsUsername
 		dbconf.OsPassword = upd.OsPassword
 		dbconf.Display_Order = upd.Display_Order
+		dbconf.Is_Alert = upd.Is_Alert
 		dbconf.Alert_Mail = upd.Alert_Mail
 		dbconf.Alert_WeChat = upd.Alert_WeChat
 		dbconf.Alert_SMS = upd.Alert_SMS
@@ -203,8 +206,11 @@ func GetDBDesc(id int) string {
 	o.Using("default")
 	var db_desc string
 
-	sql := `select concat(host, ':', port, ' (' , alias, ')') from pms_asset_config where id = ?`
-	err := o.Raw(sql, id).QueryRow(&db_desc)
+	sql := `select concat(host, ':', port, ' (' , alias, ')') from pms_asset_config where id = ? and asset_type < 99
+			union
+			select concat(host, ' (' , alias, ')') from pms_asset_config where id = ? and asset_type = 99
+			`
+	err := o.Raw(sql, id, id).QueryRow(&db_desc)
 	if err != nil {
 		utils.LogDebug("GetDBDesc failed: " + err.Error())
 		return ""

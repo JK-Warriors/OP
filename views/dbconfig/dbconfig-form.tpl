@@ -156,11 +156,18 @@
                 </div>
                 
                 <div id="div_alarm" class="form-group">
-                  <label class="col-sm-2 col-sm-2 control-label"><span></span>告警发送 </label>
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>是否发送告警 </label>
                   <div>
-                    <input type="checkbox" value="1" name="alert_mail" {{if eq 1 .dbconf.Alert_Mail}}checked="checked"{{end}}>邮件
-                    <input type="checkbox" value="1" name="alert_wechat" {{if eq 1 .dbconf.Alert_WeChat}}checked="checked"{{end}}>微信
-                    <input type="checkbox" value="1" name="alert_sms" {{if eq 1 .dbconf.Alert_SMS}}checked="checked"{{end}}>短信
+                    <input type="checkbox" id="is_alert" value="1" name="is_alert" {{if eq 1 .dbconf.Is_Alert}}checked="checked"{{end}}>发送
+                  </div>
+                </div>
+
+                <div id="div_alarm_media" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>发送媒介 </label>
+                  <div>
+                    <input type="checkbox" id="alert_mail" value="1" name="alert_mail" {{if eq 1 .dbconf.Alert_Mail}}checked="checked"{{end}}>邮件
+                    <input type="checkbox" id="alert_wechat" value="1" name="alert_wechat" {{if eq 1 .dbconf.Alert_WeChat}}checked="checked"{{end}}>微信
+                    <input type="checkbox" id="alert_sms" value="1" name="alert_sms" {{if eq 1 .dbconf.Alert_SMS}}checked="checked"{{end}}>短信
                   </div>
                 </div>
                 <div class="form-group">
@@ -261,6 +268,15 @@
           }else if($("#asset_type").val() == "3"){
             $("#port").attr("value","1433");
           }
+          
+          $("#is_alert").attr("checked",true);
+        }
+
+        
+        if($('#is_alert').prop('checked')){         
+            $("#div_alarm_media").show();
+        }else{
+            $("#div_alarm_media").hide();
         }
     });  
 
@@ -334,6 +350,17 @@
             $("#port").attr("value","161");
         }else if($("#protocol").val() == "winrm"){
             $("#port").attr("value","5985");
+        }
+    });
+    
+    $("#is_alert").change(function(){
+        if($('#is_alert').prop('checked')){         
+            $("#div_alarm_media").show();
+        }else{
+            $("#div_alarm_media").hide();
+            $("#alert_mail").attr("value","");
+            $("#alert_wechat").attr("value","");
+            $("#alert_sms").attr("value","");
         }
     });
     

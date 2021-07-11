@@ -28,6 +28,10 @@ type DrConfig struct {
 	Network_S    string `orm:"column(network_s);"`
 	Is_Switch    int    `orm:"column(is_switch);"`
 	Status    	 int    `orm:"column(status);"`
+	Is_Alert       int    `orm:"column(is_alert);"`
+	Alert_Mail     int    `orm:"column(alert_mail);"`
+	Alert_WeChat   int    `orm:"column(alert_wechat);"`
+	Alert_SMS      int    `orm:"column(alert_sms);"`
 	Is_Delete    int    `orm:"column(is_delete);"`
 	Created      int64  `orm:"column(created);"`
 	Updated      int64  `orm:"column(updated);"`
@@ -58,7 +62,12 @@ func AddDrConfig(dc DrConfig) error {
 	drconf.Shift_Vips = dc.Shift_Vips
 	drconf.Network_P = dc.Network_P
 	drconf.Network_S = dc.Network_S
+	drconf.Is_Alert = dc.Is_Alert
+	drconf.Alert_Mail = dc.Alert_Mail
+	drconf.Alert_WeChat = dc.Alert_WeChat
+	drconf.Alert_SMS = dc.Alert_SMS
 	drconf.Status = 1
+
 	drconf.Created = time.Now().Unix()
 	_, err := o.Insert(drconf)
 	return err
@@ -83,6 +92,10 @@ func UpdateDrConfig(id int, dc DrConfig) error {
 	drconf.Shift_Vips = dc.Shift_Vips
 	drconf.Network_P = dc.Network_P
 	drconf.Network_S = dc.Network_S
+	drconf.Is_Alert = dc.Is_Alert
+	drconf.Alert_Mail = dc.Alert_Mail
+	drconf.Alert_WeChat = dc.Alert_WeChat
+	drconf.Alert_SMS = dc.Alert_SMS
 	drconf.Updated = time.Now().Unix()
 
 	_, err := o.Update(&drconf)

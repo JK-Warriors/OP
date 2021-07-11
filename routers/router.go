@@ -156,9 +156,7 @@ func init() {
 	beego.Router("/operation/dr_recover/recover", &dr_oper.AjaxDrRecoverController{})
 
 	//巡检
-	beego.Router("/healthcheck/onduty/manage", &hc.ManageOndutyController{})
-	beego.Router("/healthcheck/offduty/manage", &hc.ManageOffdutyController{})
-	beego.Router("/healthcheck/manual/manage", &hc.ManageManualController{})
+	beego.Router("/healthcheck/task/manage", &hc.ManageTaskController{})
 	beego.Router("/healthcheck/history/manage", &hc.ManageHistoryController{})
 	beego.Router("/healthcheck/config/manage", &hc.ManageConfigController{})
 	beego.Router("/healthcheck/config/edit", &hc.EditConfigController{})

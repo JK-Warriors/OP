@@ -32,10 +32,8 @@
 // 告警信息滚动
 ;(function () {
   // 滚动复制一份
-  alert("ddd");
   $('.monitor .marquee').each(function () {
     // 拿到了marquee里面的所有row
-    alert($(this).children().length);
 
     var rows = $(this).children().clone()
     // 追加进去

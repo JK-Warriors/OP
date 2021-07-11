@@ -538,7 +538,7 @@ function dialogInfo(msg) {
     html += '<div class="modal-content">';
     html += '<div class="modal-header">';
     html += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-    html += '<h4 class="modal-title" id="dialogInfoTitle">OPMS提示</h4>';
+    html += '<h4 class="modal-title" id="dialogInfoTitle">磐石提示</h4>';
     html += ' </div>';
     html += '<div class="modal-body">';
     html += '<p>'+msg+'</p>';

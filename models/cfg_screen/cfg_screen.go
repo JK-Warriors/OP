@@ -19,6 +19,8 @@ func ListDB(condArr map[string]string, page int, offset int) (num int64, err err
 	if condArr["alias"] != "" {
 		cond = cond.And("alias__icontains", condArr["alias"])
 	}
+	
+	cond = cond.And("asset_type__lt", 99)
 
 	qs = qs.SetCond(cond)
 	if page < 1 {

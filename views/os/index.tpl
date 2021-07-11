@@ -66,7 +66,7 @@
                           <th>CPU空闲率</th>
                           <th>总内存</th>
                           <th>可用内存</th>
-                          <th>内存使用率</th>
+                          <th>内存使用率 (%)</th>
                           <th>读IO</th>
                           <th>写IO</th>
                           <th>网络进流量</th>

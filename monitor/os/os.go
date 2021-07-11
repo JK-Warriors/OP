@@ -21,7 +21,16 @@ import (
 )
 var snmp *gs.GoSNMP
 
-func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string) {
+func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host string, port int, alias string, is_alert int) {
+	//添加异常处理
+	defer func() {
+		if err := recover(); err != nil{
+		   // 出现异常，继续
+		   log.Printf("Error: %v", err)
+		   (*wg).Done()
+		}
+	}()
+
 	//连接字符串
     snmp = &gs.GoSNMP{
         Target:    host,
@@ -33,7 +42,8 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
     err := snmp.Connect()
 	defer snmp.Conn.Close()
 	//log.Printf("%v", snmp)
-	
+
+
 	_, err = GetSystemDate(snmp)
     if err != nil {
 		utils.LogDebugf("Connect %s failed: %s", alias, err.Error())
@@ -46,7 +56,9 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
 			log.Printf("%s: %s", sql, err.Error())
 		}
 
-		AlertConnect(mysql, os_id)
+		if is_alert == 1 {
+			AlertConnect(mysql, os_id)
+		}
     }else {
 		log.Println("connect succeeded")
 		
@@ -58,7 +70,9 @@ func GenerateLinuxStats(wg *sync.WaitGroup, mysql *xorm.Engine, os_id int, host 
 		
 		GatherOSStatus(mysql, os_id, host)
 
-		AlertConnect(mysql, os_id)
+		if is_alert == 1 {
+			AlertConnect(mysql, os_id)
+		}
 		
 	}
 
@@ -124,8 +138,8 @@ func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host s
 	var swap_total int64 = -1	
 	var swap_avail int64 = -1	
 	var mem_total int64 = -1	
-	var mem_avail int64 = -1	
 	var mem_free int64 = -1	
+	//var mem_total_free int64 = -1	
 	var mem_shared int64 = -1	
 	var mem_buffered int64 = -1	
 	var mem_cached int64 = -1	
@@ -141,8 +155,8 @@ func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host s
 		swap_total = result2[3]
 		swap_avail = result2[4]
 		mem_total = result2[5]
-		mem_avail = result2[6]
-		mem_free = result2[7]
+		mem_free = result2[6]
+		//mem_total_free = result2[7]
 		mem_shared = result2[8]
 		mem_buffered = result2[9]
 		mem_cached = result2[10]
@@ -150,12 +164,12 @@ func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host s
 
 	var mem_available int64 = -1
 	if mem_total != -1 && mem_free != -1 && mem_buffered != -1 && mem_cached != -1 {
-		mem_available = mem_total - mem_free - mem_buffered - mem_cached
+		mem_available = mem_free + mem_buffered + mem_cached
 	}
 
 	var mem_usage_rate float64 = -1.00
 	if mem_available != -1 && mem_total != -1 {
-		mem_usage_rate = float64(mem_available)*100/float64(mem_total)
+		mem_usage_rate = float64(mem_total - mem_available)*100/float64(mem_total)
 	}
 	
 	disk_io_reads_total := GetDiskIOReadTotal(mysql, os_id)
@@ -179,7 +193,7 @@ func GatherLinuxBasicInfo(snmp *gs.GoSNMP, mysql *xorm.Engine, os_id int, host s
 
 	sql := `insert into pms_os_status(os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_5, load_15, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, created) 
 						values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	_, err = mysql.Exec(sql, os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_2, load_3, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_avail,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, time.Now().Unix())
+	_, err = mysql.Exec(sql, os_id, host, alias, connect, hostname, kernel, system_date, system_uptime, process, load_1, load_2, load_3, cpu_user_time, cpu_system_time, cpu_idle_time, swap_total, swap_avail,mem_total,mem_available,mem_free,mem_shared, mem_buffered, mem_cached, mem_usage_rate, mem_available, disk_io_reads_total, disk_io_writes_total, net_in_bytes_total, net_out_bytes_total, time.Now().Unix())
 	if err != nil {
 		log.Printf("%s: %s", sql, err.Error())
 		err = session.Rollback()

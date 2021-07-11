@@ -17,6 +17,16 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 		utils.LogDebugf("%s: %w", P.StringWithPassword(), err)
 	}
 	defer db.Close()
+	
+	// 验证其他实例是否关闭
+	inst_count, _ := oracle.GetInstanceCount(db)
+	if inst_count > 1 {
+		utils.LogDebug("有多个实例存活，请先手工关闭其他实例！")
+		Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "有多个实例存活，请先手工关闭其他实例！")
+		Update_OP_Reason(op_id, "验证数据库实例个数失败，有多个实例存活，请先手工关闭其他实例！")
+		return -1
+	}
+
 	//get database role
 	role, _ := oracle.GetDatabaseRole(db)
 	Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "获取主库角色成功")
@@ -59,7 +69,18 @@ func OraPrimaryToStandby(op_id int64, bs_id int, P godror.ConnectionParams) int 
 			}
 			defer db2.Close()
 
-			if version > 10 {
+
+			//加一个判断，实例是否启动成功
+			status, _ := oracle.GetInstanceStatus(db2)
+			if status == ""{
+				//实例没启动成功
+				utils.LogDebug("数据库实例启动失败，请检查是否配置静态监听!")
+				Update_OP_Reason(op_id, "数据库实例启动失败，请检查是否配置静态监听！")
+				result = -1
+				return result
+			}
+
+			if version >= 11 {
 				utils.LogDebug("Alter standby database to open read only in progress...")
 				Log_OP_Process(op_id, bs_id, 1, "SWITCHOVER", "正在将当前数据库启动到只读状态...")
 

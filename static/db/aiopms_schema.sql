@@ -118,12 +118,10 @@ INSERT INTO `pms_permissions` VALUES ('9106', '9', '误删除恢复', 'oper-reco
 INSERT INTO `pms_permissions` VALUES ('9107', '9', '容灾切换', 'oper-screen-view', '/operation/screen/view', '', '0', '0', '1');
 
 
-INSERT INTO `pms_permissions` VALUES ('9200', '10', '上班巡检', 'hc-onduty-manage', '/healthcheck/onduty/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9201', '10', '下班巡检', 'hc-offduty-manage', '/healthcheck/offduty/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9202', '10', '全面巡检', 'hc-manual-manage', '/healthcheck/manual/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9203', '10', '巡检记录', 'hc-history-manage', '/healthcheck/history/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9204', '10', '巡检配置', 'hc-config-manage', '/healthcheck/config/manage', '', '1', '1', '1');
-INSERT INTO `pms_permissions` VALUES ('9205', '10', '巡检模板', 'hc-template-manage', '/healthcheck/template/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9200', '10', '健康巡检', 'hc-task-manage', '/healthcheck/task/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9201', '10', '巡检记录', 'hc-history-manage', '/healthcheck/history/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9202', '10', '巡检配置', 'hc-config-manage', '/healthcheck/config/manage', '', '1', '1', '1');
+INSERT INTO `pms_permissions` VALUES ('9203', '10', '巡检模板', 'hc-template-manage', '/healthcheck/template/manage', '', '1', '1', '1');
 
 
 INSERT INTO `pms_permissions` VALUES ('9810', '98', '告警管理', 'alarm-manage', '/alarm/alarm/manage', '', '1', '1', '1');
@@ -214,8 +212,6 @@ INSERT INTO `pms_role_permission` VALUES ('9200', '1', '9200');
 INSERT INTO `pms_role_permission` VALUES ('9201', '1', '9201');
 INSERT INTO `pms_role_permission` VALUES ('9202', '1', '9202');
 INSERT INTO `pms_role_permission` VALUES ('9203', '1', '9203');
-INSERT INTO `pms_role_permission` VALUES ('9204', '1', '9204');
-INSERT INTO `pms_role_permission` VALUES ('9205', '1', '9205');
 INSERT INTO `pms_role_permission` VALUES ('9810', '1', '9810');
 INSERT INTO `pms_role_permission` VALUES ('9811', '1', '9811');
 INSERT INTO `pms_role_permission` VALUES ('9910', '1', '9910');
@@ -378,6 +374,7 @@ CREATE TABLE `pms_asset_config` (
   `is_delete` tinyint(2) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
   `show_on_screen` tinyint(2) DEFAULT 0 COMMENT '0：不显示; 1: 显示',
   `retention` int(10) NOT NULL DEFAULT 0 COMMENT '保留时间，默认单位为天',
+  `is_alert` tinyint(1) DEFAULT 0 COMMENT '生成告警：0：不生成; 1: 生成',
   `alert_mail` tinyint(1) DEFAULT 0 COMMENT '告警发送到邮件：0：不发送; 1: 发送',
   `alert_wechat` tinyint(1) DEFAULT 0 COMMENT '告警发送到微信：0：不发送; 1: 发送',
   `alert_sms` tinyint(1) DEFAULT 0 COMMENT '告警发送到短信：0：不发送; 1: 发送',
@@ -425,6 +422,10 @@ CREATE TABLE `pms_dr_config` (
   `is_switch` tinyint(1) DEFAULT 0,
   `status` tinyint(1) DEFAULT 1 COMMENT '1: 激活；2：禁用',
   `is_delete` tinyint(1) DEFAULT 0 COMMENT '0：未删除; 1: 删除',
+  `is_alert` tinyint(1) DEFAULT 0 COMMENT '生成告警：0：不生成; 1: 生成',
+  `alert_mail` tinyint(1) DEFAULT 0 COMMENT '告警发送到邮件：0：不发送; 1: 发送',
+  `alert_wechat` tinyint(1) DEFAULT 0 COMMENT '告警发送到微信：0：不发送; 1: 发送',
+  `alert_sms` tinyint(1) DEFAULT 0 COMMENT '告警发送到短信：0：不发送; 1: 发送',
   `on_process` tinyint(1) DEFAULT 0,
   `on_switchover` tinyint(1) DEFAULT 0,
   `on_failover` tinyint(1) DEFAULT 0,

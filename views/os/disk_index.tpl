@@ -64,7 +64,7 @@
                           <th>挂载点</th>
                           <th>磁盘总量</th>
                           <th>剩余使用量</th>
-                          <th>使用率</th>
+                          <th>使用率 (%)</th>
                         </tr>
                       </thead>
                       <tbody>

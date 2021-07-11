@@ -13,7 +13,7 @@ import (
 type Dr struct {
 	Id          int    `xorm:"int 'id'"`
 	Bs_Name     string `xorm:"varchar(200) 'bs_name'"`
-	Asset_Type   	int    `xorm:"int 'asset_type'"`
+	Asset_Type  int    `xorm:"int 'asset_type'"`
 	Db_Id_P     int    `xorm:"int 'db_id_p'"`
 	Host_P      string `xorm:"varchar(20) 'host_p'"`
 	Port_P      int    `xorm:"int 'port_p'"`
@@ -26,6 +26,8 @@ type Dr struct {
 	Inst_Name_S string `xorm:"varchar(50) 'inst_name_s'"`
 	Db_Name   	string `xorm:"varchar(50) 'db_name'"`
 	Is_Shift    int    `xorm:"int 'is_shift'"`
+	Is_Switch   int    `xorm:"int 'is_switch'"`
+    Is_Alert 	int		`xorm:"int 'is_alert'"`
 }
 
 

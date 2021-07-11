@@ -120,6 +120,11 @@ func (this *AddDrController) Post() {
 	network_p := this.GetString("network_p")
 	network_s := this.GetString("network_s")
 
+	is_alert,_ := this.GetInt("is_alert")
+	alert_mail,_ := this.GetInt("alert_mail")
+	alert_wechat,_  := this.GetInt("alert_wechat")
+	alert_sms,_  := this.GetInt("alert_sms")
+
 	var drconf DrConfig
 
 	drconf.Bs_Name = bs_name
@@ -134,6 +139,11 @@ func (this *AddDrController) Post() {
 	drconf.Shift_Vips = shift_vips
 	drconf.Network_P = network_p
 	drconf.Network_S = network_s
+	
+	drconf.Is_Alert = is_alert
+	drconf.Alert_Mail = alert_mail
+	drconf.Alert_WeChat = alert_wechat
+	drconf.Alert_SMS = alert_sms
 
 	err = AddDrConfig(drconf)
 
@@ -225,8 +235,14 @@ func (this *EditDrController) Post() {
 	network_p := this.GetString("network_p")
 	network_s := this.GetString("network_s")
 
+	is_alert,_ := this.GetInt("is_alert")
+	alert_mail,_ := this.GetInt("alert_mail")
+	alert_wechat,_  := this.GetInt("alert_wechat")
+	alert_sms,_  := this.GetInt("alert_sms")
+	
 	var drconf DrConfig
 
+	drconf.Bs_Id = bs_id
 	drconf.Bs_Name = bs_name
 	drconf.Asset_Type = asset_type
 	drconf.Db_Id_P = db_id_p
@@ -239,6 +255,11 @@ func (this *EditDrController) Post() {
 	drconf.Shift_Vips = shift_vips
 	drconf.Network_P = network_p
 	drconf.Network_S = network_s
+	
+	drconf.Is_Alert = is_alert
+	drconf.Alert_Mail = alert_mail
+	drconf.Alert_WeChat = alert_wechat
+	drconf.Alert_SMS = alert_sms
 
 	//ldc, err := GetDrConfig(bs_id)
 	//utils.LogDebug(ldc.Db_Id_P)

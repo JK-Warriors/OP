@@ -101,7 +101,7 @@
     $("#btnConfig").click(function () {
         layer.open({
             type: 2,
-            title: '巡检计划',
+            title: '健康巡检',
             shadeClose: false,
             maxmin: false,
             area: ['800px', '500px'],

@@ -132,6 +132,23 @@
                     <input type="text" id="network_s" name="network_s"  class="form-control" placeholder="请填写备库网卡名">
                   </div>
                 </div>
+                
+                <div id="div_alarm" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>是否发送告警 </label>
+                  <div>
+                    <input type="checkbox" id="is_alert" value="1" name="is_alert" {{if eq 1 .drconf.Is_Alert}}checked="checked"{{end}}>发送
+                  </div>
+                </div>
+
+                <div id="div_alarm_media" class="form-group">
+                  <label class="col-sm-2 col-sm-2 control-label"><span></span>发送媒介 </label>
+                  <div>
+                    <input type="checkbox" id="alert_mail" value="1" name="alert_mail" {{if eq 1 .drconf.Alert_Mail}}checked="checked"{{end}}>邮件
+                    <input type="checkbox" id="alert_wechat" value="1" name="alert_wechat" {{if eq 1 .drconf.Alert_WeChat}}checked="checked"{{end}}>微信
+                    <input type="checkbox" id="alert_sms" value="1" name="alert_sms" {{if eq 1 .drconf.Alert_SMS}}checked="checked"{{end}}>短信
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <label class="col-lg-2 col-sm-2 control-label"></label>
                   <div class="col-lg-10">
@@ -196,6 +213,16 @@
             $("#div_fb_retention").hide();
         }
 
+        if (id && id > 0){
+        }else{
+          $("#is_alert").attr("checked",true);
+        }
+
+        if($('#is_alert').prop('checked')){         
+            $("#div_alarm_media").show();
+        }else{
+            $("#div_alarm_media").hide();
+        }
     });  
 
     $("#asset_type").change(function(){
@@ -231,6 +258,17 @@
             $("#shift_vips").attr("value","");
             $("#network_p").attr("value","");
             $("#network_s").attr("value","");
+        }
+    });
+    
+    $("#is_alert").change(function(){
+        if($('#is_alert').prop('checked')){         
+            $("#div_alarm_media").show();
+        }else{
+            $("#div_alarm_media").hide();
+            $("#alert_mail").attr("value","");
+            $("#alert_wechat").attr("value","");
+            $("#alert_sms").attr("value","");
         }
     });
        
