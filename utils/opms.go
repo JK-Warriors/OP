@@ -490,3 +490,7 @@ func GetMessageSubtype(subtype int) string {
 	}
 	return txt
 }
+
+func Mod(a int, b int) int {
+	return a%b
+}

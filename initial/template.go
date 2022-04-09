@@ -70,4 +70,7 @@ func InitTemplate() {
 
 	beego.AddFuncMap("getMessageType", utils.GetMessageType)
 	beego.AddFuncMap("getMessageSubtype", utils.GetMessageSubtype)
+
+	
+	beego.AddFuncMap("mod", utils.Mod)
 }

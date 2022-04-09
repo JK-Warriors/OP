@@ -286,10 +286,10 @@ func AlertMedia(wg *sync.WaitGroup) int {
 			go alert.AlertEMail(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
 		}else if v.Send_WeChat == 1 && v.Send_WeChat_Status == 0 {
 			wga.Add(1)
-			go alert.AlertWeChat(&wga, db, v.Id, v.Send_Mail_Retries, v.Subject, v.Created)
+			go alert.AlertWeChat(&wga, db, v.Id, v.Send_WeChat_Retries, v.Message, v.Created)
 		}else if v.Send_SMS == 1 && v.Send_SMS_Status == 0 {
 			wga.Add(1)
-			go alert.AlertSMS(&wga, db, v.Id, v.Send_Mail_Retries, v.Send_Mail_List, v.Subject, v.Created)
+			go alert.AlertSMS(&wga, db, v.Id, v.Send_SMS_Retries, v.Send_SMS_List, v.Message, v.Created)
 		}
 	}
 	wga.Wait()

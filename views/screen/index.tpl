@@ -23,22 +23,37 @@
 
       <div class="p_content cf">
         <div class="pt_1">
+        <div class="scrollDiv" id="s1">
           <div class="inner">
-            {{range $k,$v := .assets}}
-              {{if eq 1 $v.Connect }}
-                <div class="item">
-                  <img src="/static/img/icon-normal.png" alt="" />
-                  <p>{{$v.Alias}}</p>
-                </div>
-              {{else}}
-                <div class="item">
-                  <img src="/static/img/icon-abnormal.png" alt="" />
-                  <p>{{$v.Alias}}</p>
-                </div>
+          <ul>
+              {{range $k,$v := .assets}}
+                  {{if mod $k 10 | eq 0 }}
+                  <li>
+                  {{end}}
+
+                  {{if eq 1 $v.Connect }}
+                      <div class="item">
+                        <img src="/static/img/icon-normal.png" alt="" />
+                        <p>{{$v.Alias}}</p>
+                      </div>
+                  {{else}}
+                      <div class="item">
+                        <img src="/static/img/icon-abnormal.png" alt="" />
+                        <p>{{$v.Alias}}</p>
+                      </div>
+                  {{end}}
+                  
+                  {{if mod $k 10 | eq 9 }}
+                  </li>
+                  {{end}}
               {{end}}
-            {{end}}
+              </li>
+              
+          </ul>
           </div>
         </div>
+        </div>
+
         <div class="pt_left">
           <div class="pt_2">
             <div class="tit">
@@ -244,6 +259,44 @@
 
 
 <script type="text/javascript">
+  $(document).ready(function () {
+    aa();
+  });
+
+function aa() {
+    var timer = null;
+    var oDiv = document.getElementById('s1');
+    //注意：下面这步很容易出错！
+    var oUl = oDiv.getElementsByTagName('ul')[0];
+    var aLi = oUl.getElementsByTagName('li');
+    //				oUl.innerHTML = oUl.innerHTML + oUl.innerHTML;
+    oUl.innerHTML += oUl.innerHTML;
+    //ul的总宽度等于任何一个li的宽度乘以li的个数；
+    oUl.style.width = aLi[0].offsetWidth * aLi.length + 'px';
+    var speed = 2;
+    function move() {
+        /*向左滚动*/
+        //当oUl.offsetLeft走到oUl.offsetWidth的一半宽度的时候，
+        //将已经滚动过的另一半回滚到初始位置，即oUl.style.left = 0;
+        //由于offsetLeft的值有可能为负值，但是oUl.offsetWidth的宽度不能是负值；
+        //为了进行比较比较，给oUl.offsetWidth添加负号
+        if (oUl.offsetLeft < -oUl.offsetWidth / 2) {
+            oUl.style.left = 0;
+        }
+        /*想右滚动*/
+        //当oUl.offsetLeft>0的时候，后面就会出现空白；
+        //所以如上，将已经滚动过的另一半回滚到oUl.offsetWidth的宽度的一半；
+        //即oUl.style.left = -oUl.offsetWidth/2+'px';
+        if (oUl.offsetLeft > 0) {
+            oUl.style.left = -oUl.offsetWidth / 2 + 'px';
+        }
+        oUl.style.left = oUl.offsetLeft + speed + 'px';
+    }
+    timer = setInterval(move, 30);
+    
+}
+
+
 
 function refresh()
 {
@@ -718,6 +771,45 @@ window.onload = function () {
   })()
 
 </script>
+<!-- 滚动JS CSS开始 -->
+  <script type="text/javascript">
+    function AutoScroll(obj) {
+      $(obj).find("ul:first").animate({
+        marginTop: "-5.2rem"
+      }, 500, function () {
+        $(this).css({
+          marginTop: "0px"
+        }).find("li:first").appendTo(this);
+      });
+    }
+    $(document).ready(function () {
+      setInterval('AutoScroll("#s1")', 2500);
+    });
+  </script>
+  
+  <style>
+    .pagemain .pt_1 .inner {
+      position: relative;
+    }
+    .scrollDiv {
+      height: 5.2rem;
+      border: #ccc 0 solid;
+      overflow: hidden;
+      /* 必要元素 */
+    }
 
+    .scrollDiv ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scrollDiv li {
+      height: 5.2rem;
+      padding-left: 0;
+      list-style: none;
+      color: #fff;
+    }
+  </style>
+  <!-- 滚动JS CSS结束 -->
 </html>
 

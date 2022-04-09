@@ -112,6 +112,7 @@
                       </tbody>
                     </table>
                   </form>
+                  {{template "inc/page.tpl" .}}
                 </section>
               </div>
             </section>
